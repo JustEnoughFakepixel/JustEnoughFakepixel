@@ -3,6 +3,7 @@ package com.jef.justenoughfakepixel.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.jef.justenoughfakepixel.config.editors.GuiPositionEditor;
+import java.util.function.IntSupplier;
 import com.jef.justenoughfakepixel.features.dungeons.DungeonStats;
 import com.jef.justenoughfakepixel.features.PerformanceHUD;
 import com.jef.justenoughfakepixel.features.waypoints.WaypointGroupGui;
@@ -20,18 +21,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-/**
- * Central config class. Handles:
- * <ul>
- *   <li>Loading / saving {@link JefTemplateConfig} to disk (Gson, {@code config/JustEnoughFakepixel/config.json})</li>
- *   <li>The keybind ({@code P} by default) that opens the GUI</li>
- *   <li>Deferred screen opening (5-tick delay to avoid rendering conflicts)</li>
- *   <li>Bootstrap registration via {@link #register()}</li>
- *   <li>Convenience helpers {@link #openGui()}, {@link #openCategory(String)}, and {@link #openWaypointGroupGui()}</li>
- * </ul>
- *
- * <p><b>Usage:</b> call {@code JefConfig.register()} once from your mod's client init.
- */
+
 public class JefConfig {
 
     // Static state
@@ -51,7 +41,6 @@ public class JefConfig {
             "JustEnoughFakepixel"
     );
 
-    /** Set this to open a screen on the next client tick (5-tick delay). */
     public static GuiScreen screenToOpen = null;
     private static int screenTicks = 0;
     private static boolean waypointManagerKeyWasDown = false;
@@ -60,11 +49,7 @@ public class JefConfig {
 
     // Bootstrap
 
-    /**
-     * Call once from your mod's client init. Idempotent.
-     *
-     * <p>Registers the tick event listener, keybind, and /jef command.
-     */
+
     public static void register() {
         if (registered) return;
 
@@ -144,12 +129,12 @@ public class JefConfig {
         if (feature == null) return;
         screenToOpen = new GuiPositionEditor(
                 feature.dungeons.statsPos,
-                DungeonStats.OVERLAY_WIDTH,
-                DungeonStats.OVERLAY_HEIGHT,
+                (IntSupplier) DungeonStats::getOverlayWidth,
+                (IntSupplier) DungeonStats::getOverlayHeight,
                 () -> DungeonStats.renderOverlay(true),
                 JefConfig::saveConfig,
                 JefConfig::saveConfig
-        );
+        ).withOverlayScale(feature.dungeons.statsScale);
     }
 
     /** Opens the performance HUD position editor on the next tick. */
@@ -157,12 +142,12 @@ public class JefConfig {
         if (feature == null) return;
         screenToOpen = new GuiPositionEditor(
                 feature.misc.hudPos,
-                PerformanceHUD.OVERLAY_WIDTH,
-                PerformanceHUD.OVERLAY_HEIGHT,
+                (IntSupplier) PerformanceHUD::getOverlayWidth,
+                (IntSupplier) PerformanceHUD::getOverlayHeight,
                 () -> PerformanceHUD.renderOverlay(true),
                 JefConfig::saveConfig,
                 JefConfig::saveConfig
-        );
+        ).withOverlayScale(feature.misc.hudScale);
     }
 
     // Tick event

@@ -10,13 +10,14 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import java.io.IOException;
+import java.util.function.IntSupplier;
 
 public class GuiPositionEditor extends GuiScreen {
 
     private final Position position;
     private final Position originalPosition;
-    private final int elementWidth;
-    private final int elementHeight;
+    private final IntSupplier elementWidth;
+    private final IntSupplier elementHeight;
     private final Runnable renderCallback;
     private final Runnable positionChangedCallback;
     private final Runnable closedCallback;
@@ -25,8 +26,9 @@ public class GuiPositionEditor extends GuiScreen {
     private int grabbedY = 0;
 
     private int guiScaleOverride = -1;
+    private float overlayScale = 1f;
 
-    public GuiPositionEditor(Position position, int elementWidth, int elementHeight, Runnable renderCallback, Runnable positionChangedCallback, Runnable closedCallback) {
+    public GuiPositionEditor(Position position, IntSupplier elementWidth, IntSupplier elementHeight, Runnable renderCallback, Runnable positionChangedCallback, Runnable closedCallback) {
         this.position = position;
         this.originalPosition = position.clone();
         this.elementWidth = elementWidth;
@@ -36,10 +38,23 @@ public class GuiPositionEditor extends GuiScreen {
         this.closedCallback = closedCallback;
     }
 
+    public GuiPositionEditor(Position position, int elementWidth, int elementHeight, Runnable renderCallback, Runnable positionChangedCallback, Runnable closedCallback) {
+        this(position, () -> elementWidth, () -> elementHeight, renderCallback, positionChangedCallback, closedCallback);
+    }
+
     public GuiPositionEditor withScale(int scale) {
         this.guiScaleOverride = scale;
         return this;
     }
+
+    public GuiPositionEditor withOverlayScale(float scale) {
+        this.overlayScale = scale;
+        return this;
+    }
+
+
+    private int scaledW() { return (int)(elementWidth.getAsInt()  * overlayScale); }
+    private int scaledH() { return (int)(elementHeight.getAsInt() * overlayScale); }
 
     @Override
     public void onGuiClosed() {
@@ -65,18 +80,18 @@ public class GuiPositionEditor extends GuiScreen {
         drawDefaultBackground();
 
         if (clicked) {
-            grabbedX += position.moveX(mouseX - grabbedX, elementWidth, scaledResolution);
-            grabbedY += position.moveY(mouseY - grabbedY, elementHeight, scaledResolution);
+            grabbedX += position.moveX(mouseX - grabbedX, scaledW(), scaledResolution);
+            grabbedY += position.moveY(mouseY - grabbedY, scaledH(), scaledResolution);
         }
 
         renderCallback.run();
 
-        int x = position.getAbsX(scaledResolution, elementWidth);
-        int y = position.getAbsY(scaledResolution, elementHeight);
+        int x = position.getAbsX(scaledResolution, scaledW());
+        int y = position.getAbsY(scaledResolution, scaledH());
 
-        if (position.isCenterX()) x -= elementWidth / 2;
-        if (position.isCenterY()) y -= elementHeight / 2;
-        Gui.drawRect(x, y, x + elementWidth, y + elementHeight, 0x80404040);
+        if (position.isCenterX()) x -= scaledW() / 2;
+        if (position.isCenterY()) y -= scaledH() / 2;
+        Gui.drawRect(x, y, x + scaledW(), y + scaledH(), 0x80404040);
 
         if (guiScaleOverride >= 0) {
             Utils.pushGuiScale(-1);
@@ -101,12 +116,12 @@ public class GuiPositionEditor extends GuiScreen {
             mouseX = Mouse.getX() * width / Minecraft.getMinecraft().displayWidth;
             mouseY = height - Mouse.getY() * height / Minecraft.getMinecraft().displayHeight - 1;
 
-            int x = position.getAbsX(scaledResolution, elementWidth);
-            int y = position.getAbsY(scaledResolution, elementHeight);
-            if (position.isCenterX()) x -= elementWidth / 2;
-            if (position.isCenterY()) y -= elementHeight / 2;
+            int x = position.getAbsX(scaledResolution, scaledW());
+            int y = position.getAbsY(scaledResolution, scaledH());
+            if (position.isCenterX()) x -= scaledW() / 2;
+            if (position.isCenterY()) y -= scaledH() / 2;
 
-            if (mouseX >= x && mouseY >= y && mouseX <= x + elementWidth && mouseY <= y + elementHeight) {
+            if (mouseX >= x && mouseY >= y && mouseX <= x + scaledW() && mouseY <= y + scaledH()) {
                 clicked = true;
                 grabbedX = mouseX;
                 grabbedY = mouseY;
@@ -128,13 +143,13 @@ public class GuiPositionEditor extends GuiScreen {
             boolean shiftHeld = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
             int dist = shiftHeld ? 10 : 1;
             if (keyCode == Keyboard.KEY_DOWN) {
-                position.moveY(dist, elementHeight, new ScaledResolution(Minecraft.getMinecraft()));
+                position.moveY(dist, scaledH(), new ScaledResolution(Minecraft.getMinecraft()));
             } else if (keyCode == Keyboard.KEY_UP) {
-                position.moveY(-dist, elementHeight, new ScaledResolution(Minecraft.getMinecraft()));
+                position.moveY(-dist, scaledH(), new ScaledResolution(Minecraft.getMinecraft()));
             } else if (keyCode == Keyboard.KEY_LEFT) {
-                position.moveX(-dist, elementWidth, new ScaledResolution(Minecraft.getMinecraft()));
+                position.moveX(-dist, scaledW(), new ScaledResolution(Minecraft.getMinecraft()));
             } else if (keyCode == Keyboard.KEY_RIGHT) {
-                position.moveX(dist, elementWidth, new ScaledResolution(Minecraft.getMinecraft()));
+                position.moveX(dist, scaledW(), new ScaledResolution(Minecraft.getMinecraft()));
             }
         }
         super.keyTyped(typedChar, keyCode);
@@ -160,8 +175,8 @@ public class GuiPositionEditor extends GuiScreen {
             mouseX = Mouse.getX() * width / Minecraft.getMinecraft().displayWidth;
             mouseY = height - Mouse.getY() * height / Minecraft.getMinecraft().displayHeight - 1;
 
-            grabbedX += position.moveX(mouseX - grabbedX, elementWidth, scaledResolution);
-            grabbedY += position.moveY(mouseY - grabbedY, elementHeight, scaledResolution);
+            grabbedX += position.moveX(mouseX - grabbedX, scaledW(), scaledResolution);
+            grabbedY += position.moveY(mouseY - grabbedY, scaledH(), scaledResolution);
             positionChangedCallback.run();
 
             if (guiScaleOverride >= 0) {

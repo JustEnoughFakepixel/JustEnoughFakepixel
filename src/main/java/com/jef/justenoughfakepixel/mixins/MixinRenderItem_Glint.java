@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(RenderItem.class)
-public class MixinRenderItem {
+public class MixinRenderItem_Glint {
 
     @Inject(method = "renderEffect", at = @At("HEAD"), cancellable = true)
     private void jef$disableEnchantGlint(CallbackInfo ci) {

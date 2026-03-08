@@ -38,7 +38,7 @@ public class ConfigEditor extends GuiElement {
     };
     private static final String[] socialsLink = new String[]{
             "",
-            "https://github.com/bighidkxd/JustEnoughFakepixel"
+            "https://github.com/hamlook/JustEnoughFakepixel"
     };
     private static final ResourceLocation SEARCH_ICON = new ResourceLocation("justenoughfakepixel:search.png");
     public static ConfigEditor editor = new ConfigEditor(JefConfig.feature);

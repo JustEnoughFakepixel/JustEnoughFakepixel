@@ -46,11 +46,9 @@ public class DungeonStats {
     // Chat patterns (all matched on stripped clean text)
     private static final Pattern BLOOD_DOOR   = Pattern.compile("The BLOOD DOOR has been opened!");
     private static final Pattern RUN_FAILED   = Pattern.compile("Warning! This dungeon will close in 10s");
-    private static final Pattern EXTRA_STATS  = Pattern.compile("> EXTRA STATS <");
     private static final Pattern BOSS_SLAIN   = Pattern.compile("Defeated (.+) in \\d");
     private static final Pattern SCORE_LINE   = Pattern.compile("Team Score: (\\d+) \\((.{1,2})\\) *(\\(NEW RECORD!\\))?");
     private static final Pattern XP_LINE      = Pattern.compile("(\\+[\\d,.]+\\s?\\w+ Experience)(?:\\(.+\\))?");
-    private static final Pattern BITS_LINE    = Pattern.compile("(\\+\\d+ Bits)");
     private static final Pattern FLOOR_PAT    = Pattern.compile("\\(([EFM][\\d])\\)");
     private static final Pattern TIME_ELAPSED = Pattern.compile("Time Elapsed: (\\d+)");
 
@@ -68,6 +66,12 @@ public class DungeonStats {
     private static final Pattern WITHER_START  = Pattern.compile("BOSS.*(?:WITHER KING.*You\\.\\. again|The Wither King.*Ohh)");
     private static final Pattern WITHER_END    = Pattern.compile("BOSS.*WITHER KING.*My strengths are depleting");
 
+    // F6/M6 Sadan phase dialogue
+    private static final Pattern TERRA_START = Pattern.compile("BOSS.*Sadan.*I am the bridge between this realm");
+    private static final Pattern TERRA_END   = Pattern.compile("BOSS.*Sadan.*ENOUGH!");
+    private static final Pattern GIANTS_END  = Pattern.compile("BOSS.*Sadan.*I.m sorry but I need to concentrate");
+    private static final Pattern SADAN_END   = Pattern.compile("BOSS.*Sadan.*FATHER, FORGIVE ME");
+
     // Colors for overlay labels
     private static final String C_FLOOR_NM = EnumChatFormatting.GREEN.toString();        // normal floor
     private static final String C_FLOOR_MM = EnumChatFormatting.RED.toString();          // master mode
@@ -81,6 +85,9 @@ public class DungeonStats {
     private static final String C_GOLDOR   = EnumChatFormatting.GOLD.toString();         // goldor
     private static final String C_NECRON   = EnumChatFormatting.DARK_PURPLE.toString();  // necron
     private static final String C_WITHER   = EnumChatFormatting.DARK_GRAY.toString();    // wither king
+    private static final String C_TERRA    = EnumChatFormatting.GOLD.toString();          // terracotta
+    private static final String C_GIANTS   = EnumChatFormatting.RED.toString();           // giants
+    private static final String C_SADAN    = EnumChatFormatting.DARK_RED.toString();      // sadan
     private static final String C_VAL      = EnumChatFormatting.WHITE.toString();
     private static final String C_PB       = EnumChatFormatting.DARK_GRAY.toString();
     private static final String C_NEWPB    = EnumChatFormatting.LIGHT_PURPLE.toString();
@@ -93,10 +100,10 @@ public class DungeonStats {
     private long    runStart   = 0;
 
     // Timers — ms since runStart, 0 = not reached
-    private long clearedTime  = 0; // run start → 100% cleared (or boss entry if not yet 100%)
-    private long bloodTime    = 0; // run start → blood door opened
-    private long bossTime     = 0; // run start → entered boss room
-    private long bossDeadTime = 0; // run start → boss dead
+    private long clearedTime  = 0;
+    private long bloodTime    = 0;
+    private long bossTime     = 0;
+    private long bossDeadTime = 0;
 
     // F7/M7 phase times
     private long maxorStart    = 0, maxorEnd    = 0;
@@ -105,9 +112,13 @@ public class DungeonStats {
     private long necronStart   = 0, necronEnd   = 0;
     private long witherStart   = 0, witherEnd   = 0;
 
+    // F6/M6 phase times
+    private long terraStart    = 0, terraEnd    = 0;
+    private long giantsStart   = 0, giantsEnd   = 0;
+    private long sadanStart    = 0, sadanEnd    = 0;
+
     private int     lastClearedPct  = 0;
     private int     tickCounter     = 0;
-    private boolean collectingStats = false;
     private final EndStats endStats = new EndStats();
 
     // Tick
@@ -150,7 +161,7 @@ public class DungeonStats {
             }
         }
 
-        // Boss entry: within 30 blocks of boss room center
+        // Boss entry: within 30 blocks of boss room spawn
         if (bossTime == 0 && currentFloor != DungeonFloor.NONE) {
             int[] c = getBossCoords(currentFloor);
             if (c != null) {
@@ -173,7 +184,7 @@ public class DungeonStats {
         String clean = net.minecraft.util.StringUtils.stripControlCodes(
                 event.message.getFormattedText()).trim();
 
-        if (!inDungeon && !collectingStats) return;
+        if (!inDungeon) return;
 
         if (!runEnded) {
             if (bloodTime == 0 && BLOOD_DOOR.matcher(clean).find()) {
@@ -189,6 +200,30 @@ public class DungeonStats {
                 freezeOpenPhases();
                 printEndStats();
                 return;
+            }
+
+            // F6/M6 phases
+            if (currentFloor.isF6orM6()) {
+                if (TERRA_START.matcher(clean).find()  && terraStart  == 0) terraStart  = elapsed();
+                if (TERRA_END.matcher(clean).find()    && terraEnd    == 0) {
+                    terraEnd    = elapsed();
+                    giantsStart = terraEnd;
+                    checkPhasePb(currentFloor.name() + "_terra", terraEnd - terraStart, "Terracotta");
+                }
+                if (GIANTS_END.matcher(clean).find()   && giantsEnd   == 0) {
+                    giantsEnd  = elapsed();
+                    sadanStart = giantsEnd;
+                    checkPhasePb(currentFloor.name() + "_giants", giantsEnd - giantsStart, "Giants");
+                }
+                if (SADAN_END.matcher(clean).find()    && sadanEnd    == 0) {
+                    sadanEnd          = elapsed();
+                    bossDeadTime      = sadanEnd;
+                    runEnded          = true;
+                    endStats.bossName = "Sadan";
+                    freezeOpenPhases();
+                    checkPhasePb(currentFloor.name() + "_sadan", sadanEnd - sadanStart, "Sadan");
+                    checkAndSaveRunPb();
+                }
             }
 
             // F7/M7 phases
@@ -240,16 +275,15 @@ public class DungeonStats {
                 endStats.bossName = m.group(1).trim();
                 freezeOpenPhases();
                 checkAndSaveRunPb();
+                printEndStats();
             }
         }
 
-        if (EXTRA_STATS.matcher(clean).find()) { collectingStats = true; return; }
 
         // End-of-run stat lines
         Matcher m;
         m = SCORE_LINE.matcher(clean); if (m.find()) { endStats.score = m.group(1); endStats.grade = m.group(2); endStats.scorePB = m.group(3) != null && !m.group(3).isEmpty(); }
         m = XP_LINE.matcher(clean);    if (m.find()) endStats.xp.add(m.group(1).replace("Experience", "EXP").replace("Catacombs", "Cata"));
-        m = BITS_LINE.matcher(clean);  if (m.find()) { endStats.bits = m.group(1); if (collectingStats) { printEndStats(); collectingStats = false; } }
     }
 
     // Overlay
@@ -261,30 +295,47 @@ public class DungeonStats {
         renderOverlay(false);
     }
 
+    private static int lastW = OVERLAY_WIDTH;
+    private static int lastH = OVERLAY_HEIGHT;
+    public static int getOverlayWidth()  { return lastW; }
+    public static int getOverlayHeight() { return lastH; }
+
     public static void renderOverlay(boolean preview) {
         if (JefConfig.feature == null) return;
         List<String> lines = buildLines(preview);
         if (lines.isEmpty()) return;
 
+        float scale = JefConfig.feature.dungeons.statsScale;
+        int w = 0;
+        for (String l : lines) w = Math.max(w, Minecraft.getMinecraft().fontRendererObj.getStringWidth(l));
+        w = Math.max(w + PADDING * 2, 60);
+        int h = lines.size() * LINE_HEIGHT + PADDING * 2;
+        lastW = w; lastH = h;
+
         ScaledResolution sr = new ScaledResolution(mc);
         Position pos        = JefConfig.feature.dungeons.statsPos;
-        int x               = pos.getAbsX(sr, OVERLAY_WIDTH);
-        int y               = pos.getAbsY(sr, OVERLAY_HEIGHT);
-        if (pos.isCenterX()) x -= OVERLAY_WIDTH / 2;
-        if (pos.isCenterY()) y -= OVERLAY_HEIGHT / 2;
+        int x               = pos.getAbsX(sr, (int)(w * scale));
+        int y               = pos.getAbsY(sr, (int)(h * scale));
+        if (pos.isCenterX()) x -= (int)(w * scale / 2);
+        if (pos.isCenterY()) y -= (int)(h * scale / 2);
+
+        org.lwjgl.opengl.GL11.glPushMatrix();
+        org.lwjgl.opengl.GL11.glTranslatef(x, y, 0);
+        org.lwjgl.opengl.GL11.glScalef(scale, scale, 1f);
 
         if (JefConfig.feature.dungeons.statsBackground)
-            Gui.drawRect(x - PADDING, y - PADDING,
-                    x + OVERLAY_WIDTH, y + lines.size() * LINE_HEIGHT + PADDING,
-                    0x88000000);
+            Gui.drawRect(-PADDING, -PADDING, w, h - PADDING, 0x88000000);
 
+        int dy = 0;
         for (String line : lines) {
-            mc.fontRendererObj.drawStringWithShadow(line, x, y, 0xFFFFFF);
-            y += LINE_HEIGHT;
+            mc.fontRendererObj.drawStringWithShadow(line, 0, dy, 0xFFFFFF);
+            dy += LINE_HEIGHT;
         }
+
+        org.lwjgl.opengl.GL11.glPopMatrix();
     }
 
-    private static List<String> buildLines(boolean preview) {
+    static List<String> buildLines(boolean preview) {
         DungeonStats s   = getInstance();
         boolean ended    = s != null && s.runEnded;
         long now         = ended ? (s.bossDeadTime > 0 ? s.bossDeadTime : s.elapsed()) : (s != null ? s.elapsed() : 0);
@@ -331,11 +382,17 @@ public class DungeonStats {
                 addPhase(out, C_WITHER, "Wither King", s != null ? s.witherStart  : 0, s != null ? s.witherEnd   : 0, now, preview, "0:04.000");
         }
 
+        // F6/M6 phases
+        if (preview || f.isF6orM6()) {
+            addPhase(out, C_TERRA,  "Terracotta", s != null ? s.terraStart  : 0, s != null ? s.terraEnd  : 0, now, preview, "0:45.000");
+            addPhase(out, C_GIANTS, "Giants",     s != null ? s.giantsStart : 0, s != null ? s.giantsEnd : 0, now, preview, "0:30.000");
+            addPhase(out, C_SADAN,  "Sadan",      s != null ? s.sadanStart  : 0, s != null ? s.sadanEnd  : 0, now, preview, "0:20.000");
+        }
+
         out.removeIf(l -> l == null);
         return out;
     }
 
-    // "X took: Y" when done, "X: Y" while counting
     private static String line(String color, String label, long locked, long now, boolean preview, String previewVal) {
         if (preview)    return color + label + " took: " + C_VAL + previewVal;
         if (locked > 0) return color + label + " took: " + C_VAL + fmt(locked);
@@ -349,7 +406,6 @@ public class DungeonStats {
         else            out.add(color + name + ": "      + C_VAL + fmt(now - start));
     }
 
-    // End stats chat print
     private void printEndStats() {
         String floor = currentFloor == DungeonFloor.NONE ? "?" : currentFloor.name();
         String sep   = EnumChatFormatting.DARK_GRAY + "――――――――――――――――――――";
@@ -366,13 +422,18 @@ public class DungeonStats {
                     + (endStats.scorePB ? EnumChatFormatting.LIGHT_PURPLE + " (PB!)" : ""));
 
         for (String xp : endStats.xp) send(EnumChatFormatting.DARK_AQUA + xp);
-        if (endStats.bits != null) send(EnumChatFormatting.AQUA + endStats.bits);
 
         if (clearedTime  > 0) send(C_CLEAR + "Clear took: "  + C_VAL + fmt(clearedTime)             + pbTag(floor + "_clear"));
         if (bloodTime    > 0) send(C_BLOOD + "Blood Rush: "  + C_VAL + fmt(bloodTime)               + pbTag(floor + "_blood"));
         if (bossTime     > 0) send(C_ENTRY + "Boss Entry: "  + C_VAL + fmt(bossTime)                + pbTag(floor + "_entry"));
         if (bossDeadTime > 0 && bossTime > 0)
             send(C_BOSS  + "Boss took: "   + C_VAL + fmt(bossDeadTime - bossTime) + pbTag(floor + "_boss"));
+
+        if (currentFloor.isF6orM6()) {
+            if (terraEnd  > 0) send(C_TERRA  + "Terracotta took: " + C_VAL + fmt(terraEnd  - terraStart)  + pbTag(floor + "_terra"));
+            if (giantsEnd > 0) send(C_GIANTS + "Giants took: "     + C_VAL + fmt(giantsEnd - giantsStart) + pbTag(floor + "_giants"));
+            if (sadanEnd  > 0) send(C_SADAN  + "Sadan took: "      + C_VAL + fmt(sadanEnd  - sadanStart)  + pbTag(floor + "_sadan"));
+        }
 
         if (currentFloor.isF7orM7()) {
             if (maxorEnd     > 0) send(C_MAXOR  + "Maxor took: "               + C_VAL + fmt(maxorEnd     - maxorStart)    + pbTag(floor + "_p1"));
@@ -387,11 +448,14 @@ public class DungeonStats {
         send(sep);
     }
 
-    // Freeze any still-running phase timers to now when run ends
     private void freezeOpenPhases() {
         long now = elapsed();
+        if (currentFloor.isF6orM6()) {
+            if (terraStart  > 0 && terraEnd  == 0) terraEnd  = now;
+            if (giantsStart > 0 && giantsEnd == 0) giantsEnd = now;
+            if (sadanStart  > 0 && sadanEnd  == 0) sadanEnd  = now;
+        }
         if (currentFloor.isF7orM7()) {
-            if (maxorStart    > 0 && maxorEnd    == 0) maxorEnd    = now;
             if (stormStart    > 0 && stormEnd    == 0) stormEnd    = now;
             if (terminalStart > 0 && goldorFight == 0) goldorFight = now;
             if (goldorFight   > 0 && goldorEnd   == 0) goldorEnd   = now;
@@ -437,26 +501,22 @@ public class DungeonStats {
         return p > 0 ? C_PB + " (PB: " + fmt(p) + ")" : "";
     }
 
-    // Used by PartyCommands to respond to !pb requests
     public static String getFormattedPb(String arg1, String arg2) {
         if (JefConfig.feature == null) return "No data";
 
         DungeonFloor floor = DungeonFloor.fromString(arg1.toUpperCase());
         if (floor == DungeonFloor.NONE) return "Unknown floor: " + arg1;
 
-        // !pb <floor> — run boss PB
         if (arg2 == null) {
             long pb = JefConfig.feature.dungeons.getPb(floor.name() + "_boss");
             return pb > 0 ? floor.name() + " PB: " + fmtPlain(pb) : floor.name() + ": No PB";
         }
 
-        // !pb <floor> br — blood rush PB
         if (arg2.equalsIgnoreCase("br")) {
             long pb = JefConfig.feature.dungeons.getPb(floor.name() + "_blood");
             return pb > 0 ? floor.name() + " blood rush PB: " + fmtPlain(pb) : floor.name() + " blood rush: No PB";
         }
 
-        // !pb <floor> p1-p5 — individual phase PBs (F7/M7 only)
         if (arg2.toLowerCase().startsWith("p")) {
             String phase = arg2.toLowerCase();
             String key   = floor.name() + "_" + phase;
@@ -490,7 +550,8 @@ public class DungeonStats {
         maxorStart = maxorEnd = stormStart = stormEnd = 0;
         terminalStart = goldorFight = goldorEnd = necronStart = necronEnd = 0;
         witherStart = witherEnd = 0;
-        lastClearedPct = 0; collectingStats = false; endStats.reset();
+        terraStart = terraEnd = giantsStart = giantsEnd = sadanStart = sadanEnd = 0;
+        lastClearedPct = 0; endStats.reset();
     }
 
     // Helpers
@@ -533,11 +594,11 @@ public class DungeonStats {
 
 
     private static class EndStats {
-        String bossName, score, grade, bits;
+        String bossName, score, grade;
         boolean scorePB;
         final List<String> xp = new ArrayList<>();
         void reset() {
-            bossName = score = grade = bits = null; scorePB = false;
+            bossName = score = grade = null; scorePB = false;
             xp.clear();
         }
     }

@@ -1,20 +1,25 @@
 package com.jef.justenoughfakepixel.features;
 
+// Ported from https://github.com/odtheking/OdinLegacy/blob/main/src/main/kotlin/me/odinmain/features/impl/render/PerformanceHUD.kt
+// Ping method ported from https://github.com/Skytils/SkytilsMod (AGPLv3)
+
 import com.jef.justenoughfakepixel.config.JefConfig;
 import com.jef.justenoughfakepixel.config.Position;
+import com.jef.justenoughfakepixel.events.PacketReceiveStatsEvent;
 import com.jef.justenoughfakepixel.events.PacketReceiveTimeUpdateEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.network.play.client.C16PacketClientStatus;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
-
-// Ported from https://github.com/odtheking/OdinLegacy/blob/main/src/main/kotlin/me/odinmain/features/impl/render/PerformanceHUD.kt
 
 public class PerformanceHUD {
 
@@ -25,32 +30,71 @@ public class PerformanceHUD {
     private static final int LINE_HEIGHT   = 10;
     private static final int PADDING       = 3;
 
-    // Colors
     private static final String C_LABEL = EnumChatFormatting.AQUA.toString();
     private static final String C_VAL   = EnumChatFormatting.WHITE.toString();
 
-    // TPS tracking
-    private static long prevTpsTime = 0;
+    // TPS — rolling average over last 5 S03 packets
+    private static final int TPS_SAMPLES = 5;
+    private static final long[] tpsTimes = new long[TPS_SAMPLES];
+    private static int tpsHead = 0;
+    private static int tpsCount = 0;
     private static float currentTps = 20f;
 
-    // TPS packet event — fired by mixin on every S03PacketTimeUpdate
+    // Ping — Skytils stats-packet method
+    private static long pingSentAt = -1L;
+    private static double pingMs = -1;
+    private static int ticksSincePing = 0;
+    private static final int PING_INTERVAL_TICKS = 100; // ~5 seconds
+
     @SubscribeEvent
     public void onTimeUpdate(PacketReceiveTimeUpdateEvent event) {
         long now = System.currentTimeMillis();
-        if (prevTpsTime != 0) {
-            float tps = 20_000f / Math.max(1, now - prevTpsTime);
-            currentTps = Math.max(0f, Math.min(20f, tps));
+        if (tpsCount > 0) {
+            int prev = (tpsHead - 1 + TPS_SAMPLES) % TPS_SAMPLES;
+            long delta = now - tpsTimes[prev];
+            if (delta > 0) {
+                float sample = 20_000f / delta;
+                currentTps = Math.max(0f, Math.min(20f, sample));
+            }
         }
-        prevTpsTime = now;
+        tpsTimes[tpsHead] = now;
+        tpsHead = (tpsHead + 1) % TPS_SAMPLES;
+        if (tpsCount < TPS_SAMPLES) tpsCount++;
+    }
+
+    @SubscribeEvent
+    public void onStats(PacketReceiveStatsEvent event) {
+        if (pingSentAt < 0) return;
+        pingMs = Math.abs(System.nanoTime() - pingSentAt) / 1_000_000.0;
+        pingSentAt = -1L;
+    }
+
+    @SubscribeEvent
+    public void onTick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
+        if (mc.thePlayer == null || mc.thePlayer.sendQueue == null) return;
+        if (pingSentAt >= 0) return; // already waiting for reply
+
+        ticksSincePing++;
+        if (ticksSincePing < PING_INTERVAL_TICKS) return;
+        ticksSincePing = 0;
+
+        pingSentAt = System.nanoTime();
+        mc.thePlayer.sendQueue.getNetworkManager().sendPacket(
+                new C16PacketClientStatus(C16PacketClientStatus.EnumState.REQUEST_STATS)
+        );
     }
 
     @SubscribeEvent
     public void onWorldUnload(WorldEvent.Unload event) {
-        prevTpsTime = 0;
-        currentTps  = 20f;
+        tpsCount = 0;
+        tpsHead  = 0;
+        currentTps = 20f;
+        pingSentAt = -1L;
+        pingMs = -1;
+        ticksSincePing = 0;
     }
 
-    // Overlay
     @SubscribeEvent
     public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
         if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
@@ -58,57 +102,68 @@ public class PerformanceHUD {
         renderOverlay(false);
     }
 
+    private static int lastW = OVERLAY_WIDTH;
+    private static int lastH = OVERLAY_HEIGHT;
+    public static int getOverlayWidth()  { return lastW; }
+    public static int getOverlayHeight() { return lastH; }
+
     public static void renderOverlay(boolean preview) {
         if (JefConfig.feature == null) return;
         List<String> lines = buildLines(preview);
         if (lines.isEmpty()) return;
 
+        float scale = JefConfig.feature.misc.hudScale;
         boolean vertical = JefConfig.feature.misc.hudVertical;
         int w = estimateWidth(lines, vertical);
         int h = vertical ? lines.size() * LINE_HEIGHT + PADDING * 2 : LINE_HEIGHT + PADDING * 2;
+        lastW = w; lastH = h;
 
         ScaledResolution sr = new ScaledResolution(mc);
         Position pos = JefConfig.feature.misc.hudPos;
-        int x = pos.getAbsX(sr, w);
-        int y = pos.getAbsY(sr, h);
-        if (pos.isCenterX()) x -= w / 2;
-        if (pos.isCenterY()) y -= h / 2;
+        int x = pos.getAbsX(sr, (int)(w * scale));
+        int y = pos.getAbsY(sr, (int)(h * scale));
+        if (pos.isCenterX()) x -= (int)(w * scale / 2);
+        if (pos.isCenterY()) y -= (int)(h * scale / 2);
+
+        GL11.glPushMatrix();
+        GL11.glTranslatef(x, y, 0);
+        GL11.glScalef(scale, scale, 1f);
 
         if (JefConfig.feature.misc.hudBackground)
-            Gui.drawRect(x - PADDING, y - PADDING, x + w, y + h - PADDING, 0x88000000);
+            Gui.drawRect(-PADDING, -PADDING, w, h - PADDING, 0x88000000);
 
         if (vertical) {
+            int dy = 0;
             for (String line : lines) {
-                mc.fontRendererObj.drawStringWithShadow(line, x, y, 0xFFFFFF);
-                y += LINE_HEIGHT;
+                mc.fontRendererObj.drawStringWithShadow(line, 0, dy, 0xFFFFFF);
+                dy += LINE_HEIGHT;
             }
         } else {
-            int cx = x;
+            int cx = 0;
             for (String line : lines) {
-                mc.fontRendererObj.drawStringWithShadow(line, cx, y, 0xFFFFFF);
+                mc.fontRendererObj.drawStringWithShadow(line, cx, 0, 0xFFFFFF);
                 cx += mc.fontRendererObj.getStringWidth(line) + 6;
             }
         }
+
+        GL11.glPopMatrix();
     }
 
-    private static List<String> buildLines(boolean preview) {
+    static List<String> buildLines(boolean preview) {
         if (JefConfig.feature == null) return new ArrayList<>();
         List<String> out = new ArrayList<>();
-
-        if (JefConfig.feature.misc.hudShowFps) {
-            int fps = preview ? 60 : getFps();
-            out.add(C_LABEL + "FPS: " + C_VAL + fps);
-        }
-        if (JefConfig.feature.misc.hudShowTps) {
-            String tps = preview ? "20.0" : String.format("%.1f", currentTps);
-            out.add(C_LABEL + "TPS: " + C_VAL + tps);
-        }
-        if (JefConfig.feature.misc.hudShowPing) {
-            int ping = preview ? 42 : getPing();
-            out.add(C_LABEL + "Ping: " + C_VAL + ping + "ms");
-        }
-
+        if (JefConfig.feature.misc.hudShowFps)
+            out.add(C_LABEL + "FPS: " + C_VAL + (preview ? 60 : Minecraft.getDebugFPS()));
+        if (JefConfig.feature.misc.hudShowTps)
+            out.add(C_LABEL + "TPS: " + C_VAL + (preview ? "20.0" : String.format("%.1f", currentTps)));
+        if (JefConfig.feature.misc.hudShowPing)
+            out.add(C_LABEL + "Ping: " + C_VAL + (preview ? "42ms" : formatPing()));
         return out;
+    }
+
+    private static String formatPing() {
+        if (pingMs < 0) return "...";
+        return String.format("%.0fms", pingMs);
     }
 
     private static int estimateWidth(List<String> lines, boolean vertical) {
@@ -122,18 +177,6 @@ public class PerformanceHUD {
         return Math.max(total, OVERLAY_WIDTH);
     }
 
-    private static int getFps() {
-        return Minecraft.getDebugFPS();
-    }
-
-    private static int getPing() {
-        if (mc.thePlayer == null || mc.getNetHandler() == null) return 0;
-        net.minecraft.client.network.NetworkPlayerInfo info =
-                mc.getNetHandler().getPlayerInfo(mc.thePlayer.getGameProfile().getId());
-        return info != null ? info.getResponseTime() : 0;
-    }
-
-    // Singleton for static renderOverlay
     private static PerformanceHUD instance;
     public PerformanceHUD() { instance = this; }
     public static PerformanceHUD getInstance() { return instance; }

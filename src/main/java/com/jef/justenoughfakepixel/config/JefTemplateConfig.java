@@ -47,6 +47,11 @@ public class JefTemplateConfig {
         @ConfigEditorBoolean
         public boolean disableEnchantGlint = false;
 
+        @Expose
+        @ConfigOption(name = "Brewing helper", desc = "Highlights brewing stands when done brewing")
+        @ConfigEditorBoolean
+        public boolean colorBrewingStands = true;
+
     }
 
     @Expose
@@ -103,10 +108,22 @@ public class JefTemplateConfig {
         public boolean editHudPosDummy = false;
 
         @Expose
+        @ConfigOption(name = "HUD Scale", desc = "Size of the performance HUD")
+        @ConfigEditorSliderAnnotation(minValue = 0.5f, maxValue = 3f, minStep = 0.1f)
+        @ConfigAccordionId(id = 3)
+        public float hudScale = 1f;
+
+        @Expose
         public Position hudPos = new Position(2, 2);
 
         @Expose
-        @ConfigOption(name = "Display skill XP", desc = "Display skill XP required to reach max level from current xp on shift")
+        @ConfigOption(name = "Item Stack Tips", desc = "Shows enchant levels on books and floor numbers on Catacombs passes")
+        @ConfigEditorBoolean
+        public boolean itemStackTips = true;
+
+
+        @Expose
+        @ConfigOption(name = "Skill XP Display", desc = "Hold SHIFT on a skill item to see XP remaining to max level")
         @ConfigEditorBoolean
         public boolean skillXpDisplay = true;
 
@@ -235,6 +252,11 @@ public class JefTemplateConfig {
         @ConfigOption(name = "Edit Dungeon overlay position", desc = "Drag the overlay to reposition it")
         @ConfigEditorButton(runnableId = "openStatsEditor", buttonText = "Edit")
         public boolean editStatsPosDummy = false;
+
+        @Expose
+        @ConfigOption(name = "Overlay Scale", desc = "Size of the dungeon stats overlay")
+        @ConfigEditorSliderAnnotation(minValue = 0.5f, maxValue = 3f, minStep = 0.1f)
+        public float statsScale = 1f;
 
         @Expose
         public Position statsPos = new Position(4, 100);
