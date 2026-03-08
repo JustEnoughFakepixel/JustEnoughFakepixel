@@ -18,5 +18,8 @@ public class MixinRenderPlayer {
     private void jef$tinyKebap(AbstractClientPlayer player, float partialTicks, CallbackInfo ci) {
         if (!"TURKISHKEBAP".equals(player.getName())) return;
         GlStateManager.scale(SCALE, SCALE, SCALE);
+    private void jef$tinysoup(AbstractClientPlayer player, float partialTicks, CallbackInfo ci) {
+        if (!"mansoob201".equals(player.getName())) return;
+        GlStateManager.scale(SCALE, SCALE, SCALE);
     }
 }
