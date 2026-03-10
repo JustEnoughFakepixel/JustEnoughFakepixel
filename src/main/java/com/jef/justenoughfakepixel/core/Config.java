@@ -39,6 +39,11 @@ public class Config {
         public boolean romanNumerals = true;
 
         @Expose
+        @ConfigOption(name = "Prevent Cursor Reset", desc = "Prevents the mouse cursor from resetting when opening GUIs")
+        @ConfigEditorBoolean
+        public boolean preventCursorReset = true;
+
+        @Expose
         @ConfigOption(name = "Skyblock ID", desc = "Shows the skyblock item ID at the bottom of item tooltips")
         @ConfigEditorBoolean
         public boolean showSkyblockId = true;
