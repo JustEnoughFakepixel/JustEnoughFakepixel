@@ -1,6 +1,7 @@
 package com.jef.justenoughfakepixel.features.misc;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
+import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
@@ -160,8 +161,10 @@ public class SearchBar {
             int x = guiLeft + slot.xDisplayPosition;
             int y = guiTop + slot.yDisplayPosition;
 
-            // Fixed old highlight color (semi-transparent red)
-            Gui.drawRect(x, y, x + 16, y + 16, 0x66FF0000);
+            // Use configured highlight color (supports chroma)
+            String colorStr = JefConfig.feature.misc.searchBarHighlightColor;
+            int highlightColor = ChromaColour.specialToChromaRGB(colorStr);
+            Gui.drawRect(x, y, x + 16, y + 16, highlightColor);
         }
 
         GlStateManager.enableTexture2D();
