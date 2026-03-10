@@ -114,11 +114,8 @@ public class SearchBar {
         if (!(event.gui instanceof GuiInventory) && !(event.gui instanceof GuiChest)) return;
         if (searchBar == null) return;
 
-        GuiContainer gui = (GuiContainer) event.gui;
         String text = searchBar.getText();
-
         drawSearchBar(searchBar, text);
-        highlightMatchingSlots(gui, text);
     }
 
     private static String calcSuffix(String text) {
@@ -136,41 +133,26 @@ public class SearchBar {
         return lastCalcResult == null ? null : "§e= §a" + lastCalcResult;
     }
 
+    public static void renderHighlightForItem(ItemStack itemStack, int x, int y) {
+        if (JefConfig.feature == null || !JefConfig.feature.misc.searchBar) return;
+        if (searchText == null || searchText.trim().isEmpty()) return;
+        if (!matches(itemStack, searchText.trim().toLowerCase(Locale.ROOT))) return;
 
-
-
-    private static void highlightMatchingSlots(GuiContainer gui, String query) {
-        if (query == null || query.trim().isEmpty()) return;
-
-        String normalized = query.trim().toLowerCase(Locale.ROOT);
-        List<Slot> slots = gui.inventorySlots.inventorySlots;
-        int guiLeft = gui.guiLeft;
-        int guiTop = gui.guiTop;
-
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(0F, 0F, 200F);
+        String colorStr = JefConfig.feature.misc.searchBarHighlightColor;
+        int highlightColor = ChromaColour.specialToChromaRGB(colorStr);
 
         GlStateManager.disableLighting();
         GlStateManager.disableDepth();
         GlStateManager.disableTexture2D();
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
 
-        for (Slot slot : slots) {
-            if (slot == null || !slot.getHasStack()) continue;
-            if (!matches(slot.getStack(), normalized)) continue;
+        Gui.drawRect(x, y, x + 16, y + 16, highlightColor);
 
-            int x = guiLeft + slot.xDisplayPosition;
-            int y = guiTop + slot.yDisplayPosition;
-
-            // Use configured highlight color (supports chroma)
-            String colorStr = JefConfig.feature.misc.searchBarHighlightColor;
-            int highlightColor = ChromaColour.specialToChromaRGB(colorStr);
-            Gui.drawRect(x, y, x + 16, y + 16, highlightColor);
-        }
-
+        GlStateManager.disableBlend();
         GlStateManager.enableTexture2D();
         GlStateManager.enableDepth();
         GlStateManager.enableLighting();
-        GlStateManager.popMatrix();
     }
 
     private static boolean matches(ItemStack stack, String query) {
