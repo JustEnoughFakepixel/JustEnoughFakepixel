@@ -134,7 +134,8 @@ public class SearchBar {
     }
 
     public static void renderHighlightForItem(ItemStack itemStack, int x, int y) {
-        if (JefConfig.feature == null || !JefConfig.feature.misc.searchBar) return;
+       if (JefConfig.feature == null || !JefConfig.feature.misc.searchBar) return;
+        if (!(MC.currentScreen instanceof GuiContainer)) return;
         if (searchText == null || searchText.trim().isEmpty()) return;
         if (!matches(itemStack, searchText.trim().toLowerCase(Locale.ROOT))) return;
 
