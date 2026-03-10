@@ -1,6 +1,6 @@
 [
     { "name": "TURKISHKEBAP", "scale": 0.556 },
       { "name": "Kanishka007", "scale": 0.556 },
-    { "HeadLessMate", "scaleX": 0.5, "scaleY": 1, "scaleZ": 0.5 },
+   { "name": "HeadLessMate", "scaleX": 0.5, "scaleY": 1, "scaleZ": 0.5 },
      { "name": "Real_King4Life", "scale": 0.1 }
 ]
