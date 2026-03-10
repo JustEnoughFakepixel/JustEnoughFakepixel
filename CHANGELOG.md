@@ -1,9 +1,20 @@
-# JEF 1.1.8 - 1.1.9 Changelog
 
-# Bug fixes
-* Fixed jw conflicting with NEF's island waypoints.
-* Fixed random crashes caused by i forgor
+# JEF 1.1.9 - 1.2.0 Changelog
 
-# Additions
+## Bug fixes
+
+* Fixed overlay position editor GUIs not respecting the size of overlays
+
+## Additions
+
 * Better GUI for waypoints
-* Tiny kebab.
+* Tiny kebab
+* Added repository fetching
+  Update checker, and funny stuff
+* Added ItemStack utils
+  Shows enchant levels on books and floor numbers on Catacombs passes
+* Added Sadan phase timers
+  Timers for terracotta, giant, sadan fight phases (beta)
+* Made overlays resizable
+* Added Brewing Helper
+  Highlights brewing stands while brewing
