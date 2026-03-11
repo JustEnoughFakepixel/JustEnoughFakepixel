@@ -12,7 +12,6 @@ import org.lwjgl.opengl.GL11;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class DianaOverlay {
 
     private static final Minecraft mc = Minecraft.getMinecraft();
@@ -21,15 +20,11 @@ public class DianaOverlay {
     private static final int PADDING     = 3;
     private static final int BASE_WIDTH  = 160;
 
-    // Dimensions (read by GuiPositionEditor)
-
     private static int lastW = BASE_WIDTH;
     private static int lastH = LINE_HEIGHT * 10 + PADDING * 2;
 
     public static int getOverlayWidth()  { return lastW; }
     public static int getOverlayHeight() { return lastH; }
-
-    // Render
 
     @SubscribeEvent
     public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
@@ -47,7 +42,6 @@ public class DianaOverlay {
 
         float scale = JefConfig.feature.diana.overlayScale;
 
-        // Measure widest line
         int w = BASE_WIDTH;
         for (String line : lines)
             w = Math.max(w, mc.fontRendererObj.getStringWidth(line) + PADDING * 2);
@@ -78,8 +72,6 @@ public class DianaOverlay {
         GL11.glPopMatrix();
     }
 
-    // build lines
-
     static List<String> buildLines(boolean preview) {
         List<String> lines = new ArrayList<>();
 
@@ -87,7 +79,7 @@ public class DianaOverlay {
             lines.add("\u00a76\u00a7lDiana Tracker");
             lines.add("\u00a7eBurrows: \u00a7f42  \u00a77(\u00a7a120.0\u00a77/hr)");
             lines.add("\u00a7dMobs since Inq: \u00a7f7");
-            lines.add("\u00a7dInqs since Chimera: \u00a7f2  \u00a77(\u00a7d1.00%\u00a77/mob)");
+            lines.add("\u00a7dInqs since Chimera: \u00a7f2  \u00a77(\u00a7d1.00%\u00a77/mob)  \u00a77[\u00a7bLS \u00a7f3\u00a77]");
             lines.add("\u00a76Minotaurs since Stick: \u00a7f15");
             lines.add("\u00a75Champs since Relic: \u00a7f30");
             lines.add("\u00a71Griffin Feathers: \u00a7f3");
@@ -98,11 +90,11 @@ public class DianaOverlay {
         }
 
         DianaStats stats = DianaStats.getInstance();
-        if (!stats.isTracking()) return lines;   // empty → nothing drawn
+        if (!stats.isTracking()) return lines;
 
         DianaData d      = stats.getData();
         double bph       = stats.getBph();
-        double inqChance = stats.getInqChance();   // -1 means no inq yet
+        double inqChance = stats.getInqChance();
 
         lines.add("\u00a76\u00a7lDiana Tracker");
 
@@ -112,12 +104,17 @@ public class DianaOverlay {
         lines.add(String.format("\u00a7dMobs since Inq: \u00a7f%d",
                 d.mobsSinceInq));
 
+        // Inqs since chimera + optional rate + LS count
+        String lsSuffix = d.totalInqsLootshared > 0
+                ? String.format("  \u00a77[\u00a7bLS \u00a7f%d\u00a77]", d.totalInqsLootshared)
+                : "";
+
         if (inqChance >= 0) {
-            lines.add(String.format("\u00a7dInqs since Chimera: \u00a7f%d  \u00a77(\u00a7d%.2f%%\u00a77/mob)",
-                    d.inqsSinceChimera, inqChance));
+            lines.add(String.format("\u00a7dInqs since Chimera: \u00a7f%d  \u00a77(\u00a7d%.2f%%\u00a77/mob)%s",
+                    d.inqsSinceChimera, inqChance, lsSuffix));
         } else {
-            lines.add(String.format("\u00a7dInqs since Chimera: \u00a7f%d",
-                    d.inqsSinceChimera));
+            lines.add(String.format("\u00a7dInqs since Chimera: \u00a7f%d%s",
+                    d.inqsSinceChimera, lsSuffix));
         }
 
         lines.add(String.format("\u00a76Minotaurs since Stick: \u00a7f%d",
@@ -139,7 +136,6 @@ public class DianaOverlay {
 
         return lines;
     }
-
 
     private static String formatCoins(long coins) {
         if (coins >= 1_000_000) return String.format("%.2fM", coins / 1_000_000.0);

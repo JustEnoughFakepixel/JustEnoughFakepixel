@@ -19,7 +19,6 @@ public class PartyCommands {
     private static final Pattern PARTY_MSG =
             Pattern.compile("^Party > (?:\\[[^]]*])?\\s*(\\w{1,16}):\\s*(.+)$");
 
-    // 10s cooldown for !help to prevent spam
     private static final long HELP_COOLDOWN_MS = 10_000L;
     private long lastHelpMs = 0L;
 
@@ -37,27 +36,30 @@ public class PartyCommands {
         String content = matcher.group(2);
         if (content == null) return;
 
-        String[] parts = content.trim().split("\\s+");
-        String   cmd   = parts[0].toLowerCase();
+        String body = content.trim().toLowerCase();
 
-        switch (cmd) {
+        // Dungeon PBs
+        if (body.startsWith("!pb")) {
+            String[] parts = body.split("\\s+");
+            String arg1 = parts.length >= 2 ? parts[1] : null;
+            String arg2 = parts.length >= 3 ? parts[2] : null;
+            if (arg1 == null) { respond("Usage: !pb <floor> | !pb <floor> br | !pb p1-p5"); return; }
+            respond(DungeonStats.getFormattedPb(arg1, arg2));
+            return;
+        }
 
-            // pba
-            case "!pb": {
-                String arg1 = parts.length >= 2 ? parts[1] : null;
-                String arg2 = parts.length >= 3 ? parts[2] : null;
-                if (arg1 == null) { respond("Usage: !pb <floor> | !pb <floor> br | !pb p1-p5"); return; }
-                respond(DungeonStats.getFormattedPb(arg1, arg2));
-                break;
-            }
-
-            // Diana Commands
+        // Diana commands
+        switch (body) {
             case "!bph":
                 respond(DianaTracker.getBphMessage());
                 break;
 
             case "!inq":
                 respond(DianaTracker.getInqMessage());
+                break;
+
+            case "!chim":
+                respond(DianaTracker.getChimMessage());
                 break;
 
             case "!stick":
@@ -68,24 +70,28 @@ public class PartyCommands {
                 respond(DianaTracker.getRelicMessage());
                 break;
 
-            case "!drops":
-                respond(DianaTracker.getDropsMessage());
+            case "!stats burrow":
+                respond(DianaTracker.getBurrowStatsMessage());
+                break;
+
+            case "!stats mob":
+                respond(DianaTracker.getMobStatsMessage());
+                break;
+
+            case "!stats mobdrop":
+                respond(DianaTracker.getMobDropStatsMessage());
                 break;
 
             case "!help": {
                 long now = System.currentTimeMillis();
-                if (now - lastHelpMs < HELP_COOLDOWN_MS) break; // cooldown to counter spam
+                if (now - lastHelpMs < HELP_COOLDOWN_MS) break;
                 lastHelpMs = now;
                 printLocal(DianaTracker.getHelpMessage());
                 break;
             }
-
-            default:
-                break;
         }
     }
 
-    /** Sends a message to party chat after a short delay. */
     private void respond(String msg) {
         if (mc.thePlayer == null) return;
         scheduler.schedule(() -> {
@@ -94,10 +100,8 @@ public class PartyCommands {
         }, 1500, TimeUnit.MILLISECONDS);
     }
 
-    /** Prints a message directly into the chat */
     private void printLocal(String msg) {
         if (mc.thePlayer == null) return;
-        // split on \n and add each line
         for (String line : msg.split("\n")) {
             mc.thePlayer.addChatMessage(new ChatComponentText(line));
         }
