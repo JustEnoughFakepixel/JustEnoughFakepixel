@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiTextField;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.gui.inventory.GuiInventory;
@@ -45,13 +46,33 @@ public class SearchBar {
     private static String lastCalcInput = "";
     private static String lastCalcResult = null;
 
-    public static String getSearchText() {
-        return searchText;
+    private static final int BAR_WIDTH  = 170;
+    private static final int BAR_HEIGHT = 20;
+
+    public static int getOverlayWidth()  { return BAR_WIDTH; }
+    public static int getOverlayHeight() { return BAR_HEIGHT; }
+
+    public static void renderOverlay(boolean preview) {
+        ScaledResolution sr = new ScaledResolution(MC);
+        com.jef.justenoughfakepixel.core.config.utils.Position pos =
+                JefConfig.feature.misc.searchBarPos;
+        int x = pos.getAbsX(sr, BAR_WIDTH);
+        int y = pos.getAbsY(sr, BAR_HEIGHT);
+        if (pos.isCenterX()) x -= BAR_WIDTH / 2;
+        if (pos.isCenterY()) y -= BAR_HEIGHT / 2;
+
+        Gui.drawRect(x, y, x + BAR_WIDTH, y + BAR_HEIGHT, 0xFF2C2C2C);
+        Gui.drawRect(x + 1, y + 1, x + BAR_WIDTH - 1, y + BAR_HEIGHT - 1, 0xFF111111);
+        MC.fontRendererObj.drawStringWithShadow("Search...", x + 5, y + BAR_HEIGHT / 2 - 4, 0x8F8F8F);
     }
 
     private static boolean isEnabled() {
         return JefConfig.feature != null
                 && JefConfig.feature.misc.searchBar;
+    }
+
+    public static String getSearchText() {
+        return searchText;
     }
 
     @SubscribeEvent
@@ -60,10 +81,16 @@ public class SearchBar {
         if (!(event.gui instanceof GuiContainer)) return;
         if (!(event.gui instanceof GuiInventory) && !(event.gui instanceof GuiChest)) return;
 
-        int w = 170;
-        int h = 20;
-        int x = event.gui.width / 2 - w / 2;
-        int y = event.gui.height - 10 - h;
+        int w = BAR_WIDTH;
+        int h = BAR_HEIGHT;
+
+        ScaledResolution sr = new ScaledResolution(MC);
+        com.jef.justenoughfakepixel.core.config.utils.Position pos =
+                JefConfig.feature.misc.searchBarPos;
+        int x = pos.getAbsX(sr, w);
+        int y = pos.getAbsY(sr, h);
+        if (pos.isCenterX()) x -= w / 2;
+        if (pos.isCenterY()) y -= h / 2;
 
         searchBar = new GuiTextField(0, MC.fontRendererObj, x, y, w, h);
         searchBar.setCanLoseFocus(false);

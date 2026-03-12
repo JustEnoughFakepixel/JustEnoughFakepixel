@@ -78,6 +78,14 @@ public class MiscConfig {
     public boolean searchBar = true;
 
     @Expose
+    @ConfigOption(name = "Edit Search Bar Position", desc = "Drag the search bar to reposition it")
+    @ConfigEditorButton(runnableId = "openSearchBarEditor", buttonText = "Edit")
+    public boolean editSearchBarPosDummy = false;
+
+    @Expose
+    public Position searchBarPos = new Position(0, -30, true, false);
+
+    @Expose
     @ConfigOption(name = "No Swap Animation", desc = "Removes item switch animation")
     @ConfigEditorBoolean
     public boolean noItemSwitchAnimation = true;

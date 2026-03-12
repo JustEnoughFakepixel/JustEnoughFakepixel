@@ -127,7 +127,6 @@ public class Config {
         @ConfigEditorBoolean
         public boolean itemStackTips = true;
 
-
         @Expose
         @ConfigOption(name = "Skill XP Display", desc = "Hold SHIFT on a skill item to see XP remaining to max level")
         @ConfigEditorBoolean
@@ -143,6 +142,15 @@ public class Config {
         @ConfigEditorBoolean
         @ConfigAccordionId(id = 10)
         public boolean searchBar = true;
+
+        @Expose
+        @ConfigOption(name = "Edit Search Bar Position", desc = "Drag the search bar to reposition it")
+        @ConfigEditorButton(runnableId = "openSearchBarEditor", buttonText = "Edit")
+        @ConfigAccordionId(id = 10)
+        public boolean editSearchBarPosDummy = false;
+
+        @Expose
+        public Position searchBarPos = new Position(0, -30, true, false);
 
         @Expose
         @ConfigOption(name = "Highlight Color", desc = "Color used to highlight matching items in the search results")
@@ -164,7 +172,6 @@ public class Config {
         @ConfigOption(name = "Disable Entity Fire", desc = "Hides the fire overlay rendered on burning entities")
         @ConfigEditorBoolean
         public boolean disableEntityFire = false;
-
 
     }
 
@@ -351,6 +358,9 @@ public class Config {
                 break;
             case "openHudEditor":
                 JefConfig.openHudEditor();
+                break;
+            case "openSearchBarEditor":
+                JefConfig.openSearchBarEditor();
                 break;
             case "openDianaEventEditor":
                 JefConfig.openDianaEventEditor();

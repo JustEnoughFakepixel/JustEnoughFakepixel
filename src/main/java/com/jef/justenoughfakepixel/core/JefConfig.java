@@ -12,6 +12,7 @@ import com.jef.justenoughfakepixel.features.diana.DianaLootOverlay;
 import com.jef.justenoughfakepixel.features.diana.DianaEventOverlay;
 import com.jef.justenoughfakepixel.features.dungeons.DungeonStats;
 import com.jef.justenoughfakepixel.features.misc.PerformanceHUD;
+import com.jef.justenoughfakepixel.features.misc.SearchBar;
 import com.jef.justenoughfakepixel.features.waypoints.WaypointGroupGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -140,6 +141,17 @@ public class JefConfig {
                 JefConfig::saveConfig,
                 JefConfig::saveConfig
         ).withOverlayScale(feature.misc.hudScale);
+    }
+    public static void openSearchBarEditor() {
+        if (feature == null) return;
+        screenToOpen = new GuiPositionEditor(
+                feature.misc.searchBarPos,
+                (IntSupplier) SearchBar::getOverlayWidth,
+                (IntSupplier) SearchBar::getOverlayHeight,
+                () -> SearchBar.renderOverlay(true),
+                JefConfig::saveConfig,
+                JefConfig::saveConfig
+        );
     }
 
     public static void openDianaEventEditor() {
