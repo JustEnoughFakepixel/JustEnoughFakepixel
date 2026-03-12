@@ -2,6 +2,7 @@ package com.jef.justenoughfakepixel.features.diana;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.jef.justenoughfakepixel.utils.ScoreboardUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StringUtils;
@@ -9,6 +10,7 @@ import net.minecraft.util.StringUtils;
 import java.io.*;
 
 public class DianaStats {
+
 
     private static DianaStats INSTANCE;
 
@@ -19,28 +21,33 @@ public class DianaStats {
 
     private DianaStats() {}
 
-    private static final long   INACTIVITY_LIMIT_MS = 90_000L;
-    private static final Gson   GSON                = new GsonBuilder().setPrettyPrinting().create();
+
+    private static final long    INACTIVITY_LIMIT_MS = 90_000L;
+    private static final Gson    GSON                = new GsonBuilder().setPrettyPrinting().create();
     private static final Minecraft mc               = Minecraft.getMinecraft();
+
 
     private File      file = null;
     private DianaData data = new DianaData();
 
-    public volatile String lastDropType   = null;
-    public volatile long   lastDropAmount = 0L;
 
-    // Lootshare
+    public volatile String  lastDropType   = null;   // set immediately on drop
+    public volatile long    lastDropAmount = 0L;
+    public volatile long    lastDropMs     = 0L;     // timestamp of last drop — used to match doubled
+
+
+    private volatile boolean trackingEnabled = true;
     private volatile long    lastLootShareMs  = 0L;
     private volatile boolean hasTrackedInqLs  = false;
 
-    // Timer state
+    private long sessionStartMs = -1L;   // wall-clock, set on login
+
     private boolean timerRunning      = false;
     private boolean timerStartedOnce  = false;
     private boolean inactivityFlagged = false;
     private long    timerStartTime    = 0L;
     private long    lastActivityTime  = 0L;
 
-    // File I/O
 
     public void initFile(File configDir) {
         this.file = new File(configDir, "diana_stats.json");
@@ -65,14 +72,15 @@ public class DianaStats {
         }
     }
 
-    // Reset
 
     public void reset() {
         data              = new DianaData();
         lastDropType      = null;
         lastDropAmount    = 0L;
+        lastDropMs        = 0L;
         lastLootShareMs   = 0L;
         hasTrackedInqLs   = false;
+        sessionStartMs    = (sessionStartMs > 0) ? System.currentTimeMillis() : -1L;
         timerRunning      = false;
         timerStartedOnce  = false;
         inactivityFlagged = false;
@@ -80,13 +88,21 @@ public class DianaStats {
         lastActivityTime  = 0L;
     }
 
-    // Accessors
+    public boolean isTrackingEnabled() { return trackingEnabled; }
+
+    public boolean toggleTracking() {
+        trackingEnabled = !trackingEnabled;
+        return trackingEnabled;
+    }
+
 
     public DianaData getData() { return data; }
 
     public boolean isTracking() {
-        return hasSpadeInHotbar();
+        return trackingEnabled && hasSpadeInHotbar()
+                && ScoreboardUtils.getCurrentLocation() == ScoreboardUtils.Location.HUB;
     }
+
 
     public static boolean hasSpadeInHotbar() {
         if (mc.thePlayer == null) return false;
@@ -100,22 +116,33 @@ public class DianaStats {
         return false;
     }
 
-    // Lootshare
+
+    /** Called when the player connects to a server. */
+    public void onClientLogin() {
+        sessionStartMs = System.currentTimeMillis();
+    }
+
+    /** Called on disconnect. Pauses the active timer and clears session. */
+    public void onClientLogout() {
+        pauseTimer();
+        sessionStartMs = -1L;
+    }
+
+
+    public long getSessionTimeMs() {
+        if (sessionStartMs <= 0) return 0L;
+        return System.currentTimeMillis() - sessionStartMs;
+    }
+
 
     public void onLootshare() {
         lastLootShareMs = System.currentTimeMillis();
     }
 
-    /** Returns true if a lootshare message arrived within the last {@code seconds} seconds. */
     public boolean gotLootShareRecently(long seconds) {
         return (System.currentTimeMillis() - lastLootShareMs) / 1000L <= seconds;
     }
 
-    /**
-     * Called when a Minos Inquisitor armor stand disappears from the world nearby.
-     * If a lootshare arrived within the last 3 seconds, counts it as a lootshared inq.
-     * Per-call cooldown prevents double-counting if the event fires more than once.
-     */
     public void onInqDeath() {
         if (hasTrackedInqLs) return;
         if (!gotLootShareRecently(3)) return;
@@ -124,14 +151,12 @@ public class DianaStats {
         data.totalInqsLootshared++;
         save();
 
-        // Reset cooldown after 2 seconds
         new Thread(() -> {
             try { Thread.sleep(2_000L); } catch (InterruptedException ignored) {}
             hasTrackedInqLs = false;
         }).start();
     }
 
-    // Timer
 
     public void updateActivity() {
         if (!timerStartedOnce) {
@@ -168,15 +193,42 @@ public class DianaStats {
         save();
     }
 
-    // Computed stats
 
     public double getBph() {
-        if (data.activeTimeMs < 1_000L || data.totalBurrows == 0) return 0.0;
-        return data.totalBurrows / (data.activeTimeMs / 3_600_000.0);
+        if (data.activeTimeMs < 1_000L || data.totalBorrows == 0) return 0.0;
+        return data.totalBorrows / (data.activeTimeMs / 3_600_000.0);
     }
 
     public double getInqChance() {
         if (data.totalInqs == 0 || data.totalMobs == 0) return -1.0;
         return (double) data.totalInqs / data.totalMobs * 100.0;
+    }
+
+    public double getMobPercent(int mobCount) {
+        if (mobCount == 0 || data.totalMobs == 0) return 0.0;
+        return (double) mobCount / data.totalMobs * 100.0;
+    }
+
+
+    public static String formatTime(long ms) {
+        if (ms <= 0) return "0s";
+        long totalSeconds = ms / 1000;
+        long days    = totalSeconds / 86400;
+        long hours   = (totalSeconds % 86400) / 3600;
+        long minutes = (totalSeconds % 3600) / 60;
+        long seconds = totalSeconds % 60;
+
+        StringBuilder sb = new StringBuilder();
+        if (days > 0)                            sb.append(days).append("d ");
+        if (hours > 0 || days > 0)               sb.append(hours).append("h ");
+        if (minutes > 0 || hours > 0 || days > 0) sb.append(minutes).append("m ");
+        if (sb.length() == 0)                    sb.append(seconds).append("s");
+        return sb.toString().trim();
+    }
+
+    public static String fmtCoins(long coins) {
+        if (coins >= 1_000_000) return String.format("%.1fM", coins / 1_000_000.0);
+        if (coins >= 1_000)     return String.format("%.1fK", coins / 1_000.0);
+        return String.valueOf(coins);
     }
 }

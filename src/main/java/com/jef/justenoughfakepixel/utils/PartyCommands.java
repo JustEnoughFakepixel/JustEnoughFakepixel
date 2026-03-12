@@ -38,7 +38,6 @@ public class PartyCommands {
 
         String body = content.trim().toLowerCase();
 
-        // Dungeon PBs
         if (body.startsWith("!pb")) {
             String[] parts = body.split("\\s+");
             String arg1 = parts.length >= 2 ? parts[1] : null;
@@ -48,14 +47,23 @@ public class PartyCommands {
             return;
         }
 
-        // Diana commands
+        //Diana commands
         switch (body) {
-            case "!bph":
-                respond(DianaTracker.getBphMessage());
+
+            case "!borrows":
+                respond(DianaTracker.getBorrowsMessage());
                 break;
 
             case "!inq":
                 respond(DianaTracker.getInqMessage());
+                break;
+
+            case "!mobs":
+                respond(DianaTracker.getMobsMessage());
+                break;
+
+            case "!time":
+                respond(DianaTracker.getTimeMessage());
                 break;
 
             case "!chim":
@@ -70,16 +78,8 @@ public class PartyCommands {
                 respond(DianaTracker.getRelicMessage());
                 break;
 
-            case "!stats burrow":
-                respond(DianaTracker.getBurrowStatsMessage());
-                break;
-
-            case "!stats mob":
-                respond(DianaTracker.getMobStatsMessage());
-                break;
-
-            case "!stats mobdrop":
-                respond(DianaTracker.getMobDropStatsMessage());
+            case "!loot":
+                respond(DianaTracker.getLootMessage());
                 break;
 
             case "!help": {

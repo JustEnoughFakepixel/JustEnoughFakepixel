@@ -1,6 +1,7 @@
 package com.jef.justenoughfakepixel.features.misc;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
+import com.jef.justenoughfakepixel.utils.ScoreboardUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.renderer.GlStateManager;
@@ -34,11 +35,16 @@ public class BrewingStandHelper {
     private final Map<BlockPos, Long> brewingStandToTimeMap = new HashMap<>();
     private int tickCounter = 0;
 
+    private static boolean isOnPrivateIsland() {
+        return ScoreboardUtils.getCurrentLocation() == ScoreboardUtils.Location.PRIVATE_ISLAND;
+    }
+
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.START) return;
         if (JefConfig.feature == null || !JefConfig.feature.general.colorBrewingStands) return;
         if (mc.theWorld == null) return;
+        if (!isOnPrivateIsland()) return;
         if (++tickCounter % 100 != 0) return;
 
         Iterator<Map.Entry<BlockPos, Long>> it = brewingStandToTimeMap.entrySet().iterator();
@@ -51,6 +57,7 @@ public class BrewingStandHelper {
     @SubscribeEvent
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (JefConfig.feature == null || !JefConfig.feature.general.colorBrewingStands) return;
+        if (!isOnPrivateIsland()) return;
         if (event.action != PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK) return;
         if (mc.theWorld == null) return;
         if (mc.theWorld.getTileEntity(event.pos) instanceof TileEntityBrewingStand)
@@ -60,6 +67,7 @@ public class BrewingStandHelper {
     @SubscribeEvent
     public void onGuiDraw(GuiScreenEvent.DrawScreenEvent.Pre event) {
         if (JefConfig.feature == null || !JefConfig.feature.general.colorBrewingStands) return;
+        if (!isOnPrivateIsland()) return;
         if (lastBrewingStand == null) return;
         if (!(event.gui instanceof GuiChest)) return;
 
@@ -92,6 +100,7 @@ public class BrewingStandHelper {
     @SubscribeEvent
     public void onRenderWorld(RenderWorldLastEvent event) {
         if (JefConfig.feature == null || !JefConfig.feature.general.colorBrewingStands) return;
+        if (!isOnPrivateIsland()) return;
         if (mc.theWorld == null || mc.thePlayer == null) return;
 
         float pt = event.partialTicks;
@@ -102,7 +111,7 @@ public class BrewingStandHelper {
         long now = System.currentTimeMillis();
 
         for (Map.Entry<BlockPos, Long> entry : brewingStandToTimeMap.entrySet()) {
-            if (entry.getValue() <= now) continue; // skip done stands
+            if (entry.getValue() <= now) continue;
             BlockPos pos = entry.getKey();
             AxisAlignedBB bb = new AxisAlignedBB(
                     pos.getX()     - vx, pos.getY()     - vy, pos.getZ()     - vz,

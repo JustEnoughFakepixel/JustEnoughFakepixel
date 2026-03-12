@@ -4,6 +4,7 @@ import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.command.SimpleCommandFilter;
 import com.jef.justenoughfakepixel.utils.ItemStackUtils;
 import com.jef.justenoughfakepixel.utils.PartyCommands;
+import com.jef.justenoughfakepixel.utils.TablistParser;
 import com.jef.justenoughfakepixel.features.mining.FetchurHelper;
 import com.jef.justenoughfakepixel.features.general.DamageSplashes;
 import com.jef.justenoughfakepixel.features.general.SkyblockIdTooltip;
@@ -18,7 +19,9 @@ import com.jef.justenoughfakepixel.features.waypoints.WaypointCommand;
 import com.jef.justenoughfakepixel.features.waypoints.WaypointRenderer;
 import com.jef.justenoughfakepixel.features.waypoints.WaypointStorage;
 import com.jef.justenoughfakepixel.features.diana.DianaCommand;
-import com.jef.justenoughfakepixel.features.diana.DianaOverlay;
+import com.jef.justenoughfakepixel.features.diana.DianaEventOverlay;
+import com.jef.justenoughfakepixel.features.diana.DianaLootOverlay;
+import com.jef.justenoughfakepixel.features.diana.DianaMobDetect;
 import com.jef.justenoughfakepixel.features.diana.DianaStats;
 import com.jef.justenoughfakepixel.features.diana.DianaTracker;
 import com.jef.justenoughfakepixel.repo.RepoHandler;
@@ -42,7 +45,7 @@ public class JefMod {
 
     public static final String MODID = "justenoughfakepixel";
     public static final String NAME  = "JustEnoughFakepixel";
-    public static final String VERSION = "1.2.0";
+    public static final String VERSION = "1.2.1";
 
     @SubscribeEvent
     public void onServerJoin(FMLNetworkEvent.ClientConnectedToServerEvent e) {
@@ -50,7 +53,6 @@ public class JefMod {
         RepoHandler.refresh(JefRepo.KEY_UPDATE);
     }
 
-    // Make config accessible to features
     public static JefConfig config;
 
     @Mod.EventHandler
@@ -58,9 +60,7 @@ public class JefMod {
         JefConfig.init();
         JefRepo.init();
 
-        // Point waypoint storage at the same config directory as JEF
         WaypointStorage.getInstance().initFile(JefConfig.configDirectory);
-        // Point diana tracker to JEF config dir
         DianaStats.getInstance().initFile(JefConfig.configDirectory);
     }
 
@@ -71,13 +71,12 @@ public class JefMod {
         DianaStats.getInstance().load();
         MinecraftForge.EVENT_BUS.register(this);
 
-
-        // Register features
         MinecraftForge.EVENT_BUS.register(new SearchBar());
         MinecraftForge.EVENT_BUS.register(new DamageSplashes());
         MinecraftForge.EVENT_BUS.register(new BloodMobDisplay());
         MinecraftForge.EVENT_BUS.register(new DungeonStats());
         MinecraftForge.EVENT_BUS.register(new PartyCommands());
+        MinecraftForge.EVENT_BUS.register(new TablistParser());
         MinecraftForge.EVENT_BUS.register(new FetchurHelper());
         MinecraftForge.EVENT_BUS.register(new PerformanceHUD());
         MinecraftForge.EVENT_BUS.register(new SkillXpDisplay());
@@ -89,7 +88,9 @@ public class JefMod {
         MinecraftForge.EVENT_BUS.register(new ItemStackUtils());
         MinecraftForge.EVENT_BUS.register(new CursorResetHandler());
         MinecraftForge.EVENT_BUS.register(new DianaTracker());
-        MinecraftForge.EVENT_BUS.register(new DianaOverlay());
+        MinecraftForge.EVENT_BUS.register(new DianaMobDetect());
+        MinecraftForge.EVENT_BUS.register(new DianaEventOverlay());
+        MinecraftForge.EVENT_BUS.register(new DianaLootOverlay());
         ClientCommandHandler.instance.registerCommand(new DianaCommand());
         ClientCommandHandler.instance.registerCommand(new WaypointCommand());
     }

@@ -8,10 +8,11 @@ import com.jef.justenoughfakepixel.core.config.command.JefCommand;
 import com.jef.justenoughfakepixel.core.config.editors.GuiPositionEditor;
 import java.util.function.IntSupplier;
 
+import com.jef.justenoughfakepixel.features.diana.DianaLootOverlay;
+import com.jef.justenoughfakepixel.features.diana.DianaEventOverlay;
 import com.jef.justenoughfakepixel.features.dungeons.DungeonStats;
 import com.jef.justenoughfakepixel.features.misc.PerformanceHUD;
 import com.jef.justenoughfakepixel.features.waypoints.WaypointGroupGui;
-import com.jef.justenoughfakepixel.features.diana.DianaOverlay;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.settings.KeyBinding;
@@ -28,8 +29,6 @@ import java.nio.file.Files;
 
 
 public class JefConfig {
-
-    // Static state
 
     public static Config feature;
     public static File configDirectory = new File("config/JustEnoughFakepixel");
@@ -52,9 +51,6 @@ public class JefConfig {
 
     private static boolean registered = false;
 
-    // Bootstrap
-
-
     public static void register() {
         if (registered) return;
 
@@ -65,8 +61,6 @@ public class JefConfig {
 
         registered = true;
     }
-
-    // Config I/O
 
     public static void init() {
         if (!configDirectory.exists()) {
@@ -112,24 +106,18 @@ public class JefConfig {
         }
     }
 
-    // GUI helpers
-
-    /** Opens the config GUI main screen on the next tick. */
     public static void openGui() {
         screenToOpen = new GuiScreenElementWrapper(new ConfigEditor(feature));
     }
 
-    /** Opens the config GUI directly to a named category on the next tick. */
     public static void openCategory(String categoryName) {
         screenToOpen = new GuiScreenElementWrapper(new ConfigEditor(feature, categoryName));
     }
 
-    /** Opens the waypoint group manager panel on the next tick. */
     public static void openWaypointGroupGui() {
         screenToOpen = new GuiScreenElementWrapper(new WaypointGroupGui());
     }
 
-    /** Opens the dungeon stats overlay position editor on the next tick. */
     public static void openStatsEditor() {
         if (feature == null) return;
         screenToOpen = new GuiPositionEditor(
@@ -142,7 +130,6 @@ public class JefConfig {
         ).withOverlayScale(feature.dungeons.statsScale);
     }
 
-    /** Opens the performance HUD position editor on the next tick. */
     public static void openHudEditor() {
         if (feature == null) return;
         screenToOpen = new GuiPositionEditor(
@@ -155,20 +142,29 @@ public class JefConfig {
         ).withOverlayScale(feature.misc.hudScale);
     }
 
-    /** Opens the Diana stats overlay position editor on the next tick. */
-    public static void openDianaEditor() {
+    public static void openDianaEventEditor() {
         if (feature == null) return;
         screenToOpen = new GuiPositionEditor(
-                feature.diana.overlayPos,
-                (IntSupplier) DianaOverlay::getOverlayWidth,
-                (IntSupplier) DianaOverlay::getOverlayHeight,
-                () -> DianaOverlay.renderOverlay(true),
+                feature.diana.eventOverlayPos,
+                (IntSupplier) DianaEventOverlay::getOverlayWidth,
+                (IntSupplier) DianaEventOverlay::getOverlayHeight,
+                () -> DianaEventOverlay.renderOverlay(true),
                 JefConfig::saveConfig,
                 JefConfig::saveConfig
         ).withOverlayScale(feature.diana.overlayScale);
     }
 
-    // Tick event
+    public static void openDianaLootEditor() {
+        if (feature == null) return;
+        screenToOpen = new GuiPositionEditor(
+                feature.diana.lootOverlayPos,
+                (IntSupplier) DianaLootOverlay::getOverlayWidth,
+                (IntSupplier) DianaLootOverlay::getOverlayHeight,
+                () -> DianaLootOverlay.renderOverlay(true),
+                JefConfig::saveConfig,
+                JefConfig::saveConfig
+        ).withOverlayScale(feature.diana.overlayScale);
+    }
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {

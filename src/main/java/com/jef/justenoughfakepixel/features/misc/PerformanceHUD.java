@@ -1,12 +1,10 @@
 package com.jef.justenoughfakepixel.features.misc;
 
-// Ported from https://github.com/odtheking/OdinLegacy/blob/main/src/main/kotlin/me/odinmain/features/impl/render/PerformanceHUD.kt
-// Ping method ported from https://github.com/Skytils/SkytilsMod (AGPLv3)
-
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
 import com.jef.justenoughfakepixel.events.PacketReceiveStatsEvent;
 import com.jef.justenoughfakepixel.events.PacketReceiveTimeUpdateEvent;
+import com.jef.justenoughfakepixel.utils.OverlayUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
@@ -33,18 +31,16 @@ public class PerformanceHUD {
     private static final String C_LABEL = EnumChatFormatting.AQUA.toString();
     private static final String C_VAL   = EnumChatFormatting.WHITE.toString();
 
-    // TPS — rolling average over last 5 S03 packets
     private static final int TPS_SAMPLES = 5;
     private static final long[] tpsTimes = new long[TPS_SAMPLES];
     private static int tpsHead = 0;
     private static int tpsCount = 0;
     private static float currentTps = 20f;
 
-    // Ping — Skytils stats-packet method
     private static long pingSentAt = -1L;
     private static double pingMs = -1;
     private static int ticksSincePing = 0;
-    private static final int PING_INTERVAL_TICKS = 100; // ~5 seconds
+    private static final int PING_INTERVAL_TICKS = 100;
 
     @SubscribeEvent
     public void onTimeUpdate(PacketReceiveTimeUpdateEvent event) {
@@ -73,7 +69,7 @@ public class PerformanceHUD {
     public void onTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         if (mc.thePlayer == null || mc.thePlayer.sendQueue == null) return;
-        if (pingSentAt >= 0) return; // already waiting for reply
+        if (pingSentAt >= 0) return;
 
         ticksSincePing++;
         if (ticksSincePing < PING_INTERVAL_TICKS) return;
@@ -99,6 +95,7 @@ public class PerformanceHUD {
     public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
         if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
         if (JefConfig.feature == null || !JefConfig.feature.misc.performanceHud) return;
+        if (OverlayUtils.shouldHide()) return;
         renderOverlay(false);
     }
 

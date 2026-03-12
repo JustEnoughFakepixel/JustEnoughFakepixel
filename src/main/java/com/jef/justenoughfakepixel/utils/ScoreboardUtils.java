@@ -16,6 +16,44 @@ public final class ScoreboardUtils {
 
     private ScoreboardUtils() {}
 
+    public enum Location {
+        HUB("skyblock-", "skyblock_sandbox-", "skyblocktest-"),
+        DUNGEON("sbdungeon-", "sbdungeon_sandbox-", "sbdungeon_test-"),
+        DWARVEN("sbm-", "sbm_sandbox-", "sbm_test-"),
+        CRYSTAL_HOLLOWS("sbch-", "sbch_sandbox-", "sbtest_alpha-"),
+        CRIMSON_ISLE("sbcris-", "sbcris_sandbox-", "sbcris_test-"),
+        PRIVATE_ISLAND("sbi-", "sbi_sandbox-", "sbi_test-"),
+        DUNGEON_HUB("sbdh-", "sbdh_sandbox-", "sbdh_test-"),
+        BARN("sbfarms-", "sbfarms_sandbox-", "sbfarms_test-"),
+        PARK("sbpark-", "sbpark_sandbox-", "sbpark_test-"),
+        SPIDERS_DEN("sbspiders-", "sbspiders_sandbox-", "sbspiders_test-"),
+        THE_END("sbend-", "sbend_sandbox-", "sbend_test-"),
+        JERRY("sbj-", "sbj_sandbox-", "sbj_test-"),
+        GOLD_MINE("sbmines-", "sbmines_sandbox-", "sbmines_test-"),
+        NONE("", "", "");
+
+        public final String main, sandbox, alpha;
+        Location(String main, String sandbox, String alpha) {
+            this.main = main;
+            this.sandbox = sandbox;
+            this.alpha = alpha;
+        }
+    }
+
+    public static String getServerId() {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.theWorld == null) return "";
+        Scoreboard sb = mc.theWorld.getScoreboard();
+        if (sb == null) return "";
+        ScoreObjective obj = sb.getObjectiveInDisplaySlot(1);
+        if (obj == null) return "";
+        return net.minecraft.util.StringUtils.stripControlCodes(obj.getDisplayName());
+    }
+
+    public static Location getCurrentLocation() {
+        return TablistParser.getCurrentLocation();
+    }
+
     public static List<String> getScoreboardLines() {
         Minecraft mc = Minecraft.getMinecraft();
         if (mc.theWorld == null) return Collections.emptyList();
@@ -45,7 +83,6 @@ public final class ScoreboardUtils {
                 .collect(Collectors.toList());
     }
 
-    /** Returns raw unformatted scoreboard lines (no color codes). */
     public static List<String> getCleanScoreboardLines() {
         return getScoreboardLines().stream()
                 .map(s -> net.minecraft.util.StringUtils.stripControlCodes(s).trim())
@@ -53,14 +90,7 @@ public final class ScoreboardUtils {
     }
 
     public static boolean isOnSkyblock() {
-        Minecraft mc = Minecraft.getMinecraft();
-        if (mc.theWorld == null || mc.thePlayer == null) return false;
-        Scoreboard sb = mc.theWorld.getScoreboard();
-        if (sb == null) return false;
-        ScoreObjective obj = sb.getObjectiveInDisplaySlot(1);
-        if (obj == null) return false;
-        String title = net.minecraft.util.StringUtils.stripControlCodes(obj.getDisplayName());
-        return title.contains("SKYBLOCK");
+        return getCurrentLocation() != Location.NONE;
     }
 
     public static boolean isInDungeon() {
