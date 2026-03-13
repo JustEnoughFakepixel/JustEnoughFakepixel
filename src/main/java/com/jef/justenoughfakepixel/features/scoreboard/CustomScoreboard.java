@@ -67,26 +67,23 @@ public class CustomScoreboard extends JefOverlay {
         if (preview) {
             lines.add("\u00A76\u00A7l SKYBLOCK ");
             lines.add("\u00A7fLate Autumn 31st \u00A7b5:30am");
-            lines.add(" \u00A77www.fakepixel.fun");
+            lines.add(" \u00A77www.fakepixel.me");
             lines.add("\u00A7fPurse: \u00A76822,022");
             lines.add("\u00A7fBank: \u00A761,204,802");
-            lines.add("\u00A7fBits: \u00A7b6,100");
+            lines.add("\u00A7fBits: \u00A7b6,039,340");
             lines.add("\u00A7eActive Quest");
             lines.add("\u00A7cKill 500 Zombies");
             lines.add("\u00A77(327/500) Progress");
             return lines;
         }
 
-        if (!ScoreboardUtils.isOnSkyblock()) return lines;
+        List<String> raw = new ArrayList<>(ScoreboardUtils.getScoreboardLines());
+        if (raw.isEmpty()) return lines;
+        Collections.reverse(raw);
 
         String title = ScoreboardUtils.getServerId();
         if (title == null || title.trim().isEmpty()) title = "SKYBLOCK";
         lines.add("\u00A76\u00A7l" + title.trim());
-
-        List<String> raw = new ArrayList<>(ScoreboardUtils.getScoreboardLines());
-        Collections.reverse(raw);
-
-        if (raw.isEmpty()) return lines;
 
         boolean hasPurse = false, hasBank = false;
         for (String l : raw) {
