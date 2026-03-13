@@ -20,10 +20,10 @@ import java.util.List;
 public class CustomScoreboard extends JefOverlay {
 
     // ── Layout ────────────────────────────────────────────────────────────────
-    private static final int PAD_X    = 4;
-    private static final int PAD_Y    = 4;
-    private static final int LINE_GAP = 1;
-    private static final int SUPERSAMPLE = 2; // render at 2x then scale down
+    private static final int PAD_X      = 4;
+    private static final int PAD_Y      = 4;
+    private static final int LINE_GAP   = 1;
+    private static final int SUPERSAMPLE = 2;
 
     // ── Colours ───────────────────────────────────────────────────────────────
     private static final int TITLE_COL = 0xFFFFAA00;
@@ -77,12 +77,16 @@ public class CustomScoreboard extends JefOverlay {
             return lines;
         }
 
+        if (!ScoreboardUtils.isOnSkyblock()) return lines;
+
         String title = ScoreboardUtils.getServerId();
         if (title == null || title.trim().isEmpty()) title = "SKYBLOCK";
         lines.add("\u00A76\u00A7l" + title.trim());
 
         List<String> raw = new ArrayList<>(ScoreboardUtils.getScoreboardLines());
         Collections.reverse(raw);
+
+        if (raw.isEmpty()) return lines;
 
         boolean hasPurse = false, hasBank = false;
         for (String l : raw) {
@@ -129,7 +133,6 @@ public class CustomScoreboard extends JefOverlay {
         for (String line : lines)
             maxW = Math.max(maxW, mc.fontRendererObj.getStringWidth(stripColor(line)));
 
-        // logical dimensions
         int boxW = maxW + PAD_X * 2;
         int boxH = lines.size() * lh + PAD_Y * 2 - LINE_GAP;
         lastW = boxW;
@@ -144,7 +147,6 @@ public class CustomScoreboard extends JefOverlay {
 
         GL11.glPushMatrix();
         GL11.glTranslatef(x, y, 0);
-        // scale down by ss so Gui.drawRect pixels become 1/ss size
         GL11.glScalef(scale / ss, scale / ss, 1f);
 
         GlStateManager.enableBlend();
@@ -154,8 +156,7 @@ public class CustomScoreboard extends JefOverlay {
         int r = (int) JefConfig.feature.scoreboard.cornerRadius * ss;
         drawRoundedRect(0, 0, boxW * ss, boxH * ss, r, (bgAlpha << 24) | 0x101010);
 
-        // text is drawn at ss scale so push/pop with ss compensation
-        GL11.glScalef(ss, ss, 1f); // back to scale/1 for text
+        GL11.glScalef(ss, ss, 1f);
 
         String titleLine = lines.get(0);
         int titleW = mc.fontRendererObj.getStringWidth(stripColor(titleLine));
@@ -177,12 +178,10 @@ public class CustomScoreboard extends JefOverlay {
     private static void drawRoundedRect(int x, int y, int w, int h, int r, int color) {
         r = Math.min(r, Math.min(w, h) / 2);
 
-        // main body
-        Gui.drawRect(x + r, y,     x + w - r, y + h,     color);
-        Gui.drawRect(x,     y + r, x + r,     y + h - r, color);
-        Gui.drawRect(x + w - r, y + r, x + w, y + h - r, color);
+        Gui.drawRect(x + r, y,       x + w - r, y + h,     color);
+        Gui.drawRect(x,     y + r,   x + r,     y + h - r, color);
+        Gui.drawRect(x + w - r, y + r, x + w,   y + h - r, color);
 
-        // corners — one strip per column using circle equation
         for (int i = 0; i < r; i++) {
             int cut = (int) Math.round(r - Math.sqrt(Math.max(0.0, (double) r * r - (double)(r - i - 1) * (r - i - 1))));
             Gui.drawRect(x + i,         y + cut,   x + i + 1,   y + r,       color);
