@@ -6,11 +6,9 @@ import com.jef.justenoughfakepixel.utils.JefOverlay;
 import com.jef.justenoughfakepixel.utils.OverlayUtils;
 import com.jef.justenoughfakepixel.utils.ScoreboardUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
@@ -25,6 +23,7 @@ public class CustomScoreboard extends JefOverlay {
     private static final int PAD_X    = 4;
     private static final int PAD_Y    = 4;
     private static final int LINE_GAP = 1;
+    private static final int SUPERSAMPLE = 2; // render at 2x then scale down
 
     // ── Colours ───────────────────────────────────────────────────────────────
     private static final int TITLE_COL = 0xFFFFAA00;
@@ -92,10 +91,9 @@ public class CustomScoreboard extends JefOverlay {
             if (c.startsWith("Bank:")) hasBank = true;
         }
 
-        // add raw lines, injecting bank immediately after purse
         for (String l : raw) {
             String c = stripColor(l).trim();
-            if (c.startsWith("Bank:")) continue; // skip, repositioned after purse
+            if (c.startsWith("Bank:")) continue;
             lines.add(l);
             if (hasPurse && (c.startsWith("Purse:") || c.startsWith("Piggy:"))) {
                 if (hasBank) {
@@ -122,14 +120,16 @@ public class CustomScoreboard extends JefOverlay {
         List<String> lines = getLines(preview);
         if (lines.isEmpty()) return;
 
-        Minecraft mc    = Minecraft.getMinecraft();
-        float     scale = getScale();
-        int       lh    = LINE_HEIGHT + LINE_GAP;
+        Minecraft mc  = Minecraft.getMinecraft();
+        float   scale = getScale();
+        int     lh    = LINE_HEIGHT + LINE_GAP;
+        int     ss    = SUPERSAMPLE;
 
         int maxW = 60;
         for (String line : lines)
             maxW = Math.max(maxW, mc.fontRendererObj.getStringWidth(stripColor(line)));
 
+        // logical dimensions
         int boxW = maxW + PAD_X * 2;
         int boxH = lines.size() * lh + PAD_Y * 2 - LINE_GAP;
         lastW = boxW;
@@ -144,16 +144,18 @@ public class CustomScoreboard extends JefOverlay {
 
         GL11.glPushMatrix();
         GL11.glTranslatef(x, y, 0);
-        GL11.glScalef(scale, scale, 1f);
+        // scale down by ss so Gui.drawRect pixels become 1/ss size
+        GL11.glScalef(scale / ss, scale / ss, 1f);
 
         GlStateManager.enableBlend();
         GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
-        GlStateManager.disableAlpha();
 
         int bgAlpha = (int)(JefConfig.feature.scoreboard.opacity / 100f * 255f);
-        drawRoundedRect(0, 0, boxW, boxH, 0, (bgAlpha << 24) | 0x101010);
+        int r = (int) JefConfig.feature.scoreboard.cornerRadius * ss;
+        drawRoundedRect(0, 0, boxW * ss, boxH * ss, r, (bgAlpha << 24) | 0x101010);
 
-        GlStateManager.enableAlpha();
+        // text is drawn at ss scale so push/pop with ss compensation
+        GL11.glScalef(ss, ss, 1f); // back to scale/1 for text
 
         String titleLine = lines.get(0);
         int titleW = mc.fontRendererObj.getStringWidth(stripColor(titleLine));
@@ -173,54 +175,21 @@ public class CustomScoreboard extends JefOverlay {
     // ── Rounded rect ──────────────────────────────────────────────────────────
 
     private static void drawRoundedRect(int x, int y, int w, int h, int r, int color) {
-        float a  = ((color >> 24) & 0xFF) / 255f;
-        float cr = ((color >> 16) & 0xFF) / 255f;
-        float g  = ((color >>  8) & 0xFF) / 255f;
-        float b  = ( color        & 0xFF) / 255f;
+        r = Math.min(r, Math.min(w, h) / 2);
 
-        GlStateManager.disableTexture2D();
-        Tessellator   tess = Tessellator.getInstance();
-        WorldRenderer wr   = tess.getWorldRenderer();
+        // main body
+        Gui.drawRect(x + r, y,     x + w - r, y + h,     color);
+        Gui.drawRect(x,     y + r, x + r,     y + h - r, color);
+        Gui.drawRect(x + w - r, y + r, x + w, y + h - r, color);
 
-        wr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-        // centre column
-        wr.pos(x + w - r, y,     0).color(cr, g, b, a).endVertex();
-        wr.pos(x + r,     y,     0).color(cr, g, b, a).endVertex();
-        wr.pos(x + r,     y + h, 0).color(cr, g, b, a).endVertex();
-        wr.pos(x + w - r, y + h, 0).color(cr, g, b, a).endVertex();
-        // left strip
-        wr.pos(x + r, y + r,     0).color(cr, g, b, a).endVertex();
-        wr.pos(x,     y + r,     0).color(cr, g, b, a).endVertex();
-        wr.pos(x,     y + h - r, 0).color(cr, g, b, a).endVertex();
-        wr.pos(x + r, y + h - r, 0).color(cr, g, b, a).endVertex();
-        // right strip
-        wr.pos(x + w,     y + r,     0).color(cr, g, b, a).endVertex();
-        wr.pos(x + w - r, y + r,     0).color(cr, g, b, a).endVertex();
-        wr.pos(x + w - r, y + h - r, 0).color(cr, g, b, a).endVertex();
-        wr.pos(x + w,     y + h - r, 0).color(cr, g, b, a).endVertex();
-        tess.draw();
-
-        int segs = 24;
-        drawCorner(tess, wr, x + r,     y + r,     r, segs, Math.PI,       1.5 * Math.PI, cr, g, b, a);
-        drawCorner(tess, wr, x + w - r, y + r,     r, segs, 1.5 * Math.PI, 2.0 * Math.PI, cr, g, b, a);
-        drawCorner(tess, wr, x + w - r, y + h - r, r, segs, 0,             0.5 * Math.PI, cr, g, b, a);
-        drawCorner(tess, wr, x + r,     y + h - r, r, segs, 0.5 * Math.PI, Math.PI,       cr, g, b, a);
-
-        GlStateManager.enableTexture2D();
-    }
-
-    private static void drawCorner(Tessellator tess, WorldRenderer wr,
-                                   int cx, int cy, int r, int segs,
-                                   double start, double end,
-                                   float cr, float g, float b, float a) {
-        wr.begin(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION_COLOR);
-        wr.pos(cx, cy, 0).color(cr, g, b, a).endVertex();
-        for (int i = 0; i <= segs; i++) {
-            double angle = start + (end - start) * i / segs;
-            wr.pos(cx + Math.cos(angle) * r, cy + Math.sin(angle) * r, 0)
-                    .color(cr, g, b, a).endVertex();
+        // corners — one strip per column using circle equation
+        for (int i = 0; i < r; i++) {
+            int cut = (int) Math.round(r - Math.sqrt(Math.max(0.0, (double) r * r - (double)(r - i - 1) * (r - i - 1))));
+            Gui.drawRect(x + i,         y + cut,   x + i + 1,   y + r,       color);
+            Gui.drawRect(x + w - i - 1, y + cut,   x + w - i,   y + r,       color);
+            Gui.drawRect(x + i,         y + h - r, x + i + 1,   y + h - cut, color);
+            Gui.drawRect(x + w - i - 1, y + h - r, x + w - i,   y + h - cut, color);
         }
-        tess.draw();
     }
 
     private static String stripColor(String s) {

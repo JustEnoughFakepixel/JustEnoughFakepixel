@@ -40,5 +40,11 @@ public class Scoreboard {
     public boolean editPosDummy = false;
 
     @Expose
+    @ConfigOption(name = "Corner Radius", desc = "Roundness of the scoreboard corners")
+    @ConfigEditorSliderAnnotation(minValue = 0f, maxValue = 20f, minStep = 1f)
+    @ConfigAccordionId(id = 20)
+    public float cornerRadius = 8f;
+
+    @Expose
     public Position position = new Position(-2, 10);
 }
