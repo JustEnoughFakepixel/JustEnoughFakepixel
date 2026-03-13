@@ -34,7 +34,7 @@ public class SearchBar {
     private static final ResourceLocation TEX_GOLD =
             new ResourceLocation("justenoughfakepixel", "textures/gui/search_bar_gold.png");
 
-    private static final DecimalFormat CALC_FORMAT = new DecimalFormat("#,##0.##");
+    private static final DecimalFormat CALC_FORMAT = new DecimalFormat("#,##0.##########");
     private static final Set<Character> CALC_SYMBOLS = new HashSet<>(Arrays.asList('+', '-', '*', '/', 'x', '(', ')'));
     private static final Map<ResourceLocation, Boolean> RESOURCE_CACHE = new HashMap<>();
 
@@ -356,12 +356,12 @@ public class SearchBar {
                             stack.push(new BigDecimal(t.numericValue).scaleByPowerOfTen(t.exponent));
                             break;
                         case BINOP: {
-                            BigDecimal r = stack.pop().setScale(2, RoundingMode.HALF_UP);
-                            BigDecimal l = stack.pop().setScale(2, RoundingMode.HALF_UP);
+                            BigDecimal r = stack.pop();
+                            BigDecimal l = stack.pop();
                             switch (t.operatorValue) {
                                 case "x": case "*": stack.push(l.multiply(r).setScale(2, RoundingMode.HALF_UP)); break;
                                 case "/":
-                                    try { stack.push(l.divide(r, RoundingMode.HALF_UP).setScale(2, RoundingMode.HALF_UP)); }
+                                    try { BigDecimal result = l.divide(r, 10, RoundingMode.HALF_UP).stripTrailingZeros(); stack.push(result.scale() < 2 ? result.setScale(2) : result); }
                                     catch (ArithmeticException e) { throw new CalculatorException("Division by zero", t.tokenStart, t.tokenLength); }
                                     break;
                                 case "+": stack.push(l.add(r).setScale(2, RoundingMode.HALF_UP)); break;
