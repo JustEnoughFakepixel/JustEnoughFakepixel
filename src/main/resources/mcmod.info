@@ -2,7 +2,7 @@
   {
     "modid": "${modid}",
     "name": "JustEnoughFakepixel",
-    "description": "A QOL mod for fakepixel skyblock",
+    "description": "A mod QOL for fakepixel skyblock",
     "version": "${version}",
     "mcversion": "${mcversion}",
     "url": "https://github.com/bighidkxd/JustEnoughfakepixel",

@@ -27,6 +27,7 @@ public class GuiPositionEditor extends GuiScreen {
 
     private int guiScaleOverride = -1;
     private float overlayScale = 1f;
+    private GuiScreen parentScreen = null;
 
     public GuiPositionEditor(Position position, IntSupplier elementWidth, IntSupplier elementHeight, Runnable renderCallback, Runnable positionChangedCallback, Runnable closedCallback) {
         this.position = position;
@@ -52,6 +53,10 @@ public class GuiPositionEditor extends GuiScreen {
         return this;
     }
 
+    public GuiPositionEditor withParent(GuiScreen parent) {
+        this.parentScreen = parent;
+        return this;
+    }
 
     private int scaledW() { return (int)(elementWidth.getAsInt()  * overlayScale); }
     private int scaledH() { return (int)(elementHeight.getAsInt() * overlayScale); }
@@ -59,7 +64,6 @@ public class GuiPositionEditor extends GuiScreen {
     @Override
     public void onGuiClosed() {
         super.onGuiClosed();
-        closedCallback.run();
     }
 
     @Override
@@ -137,6 +141,12 @@ public class GuiPositionEditor extends GuiScreen {
     protected void keyTyped(char typedChar, int keyCode) throws IOException {
         Keyboard.enableRepeatEvents(true);
 
+        if (keyCode == Keyboard.KEY_ESCAPE && parentScreen != null) {
+            closedCallback.run();
+            mc.displayGuiScreen(parentScreen);
+            return;
+        }
+
         if (keyCode == Keyboard.KEY_R) {
             position.set(originalPosition);
         } else if (!clicked) {
@@ -152,6 +162,7 @@ public class GuiPositionEditor extends GuiScreen {
                 position.moveX(dist, scaledW(), new ScaledResolution(Minecraft.getMinecraft()));
             }
         }
+
         super.keyTyped(typedChar, keyCode);
     }
 

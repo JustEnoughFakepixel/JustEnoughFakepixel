@@ -1,10 +1,10 @@
-package com.jef.justenoughfakepixel.core.categories;
+package com.jef.justenoughfakepixel.core.features;
 
 import com.google.gson.annotations.Expose;
 import com.jef.justenoughfakepixel.core.config.gui.config.ConfigAnnotations.*;
 import org.lwjgl.input.Keyboard;
 
-public class WaypointsConfig {
+public class Waypoints {
 
     @Expose
     @ConfigOption(name = "Manage Waypoints", desc = "Open waypoint manager")
@@ -61,5 +61,4 @@ public class WaypointsConfig {
     @ConfigEditorSliderAnnotation(minValue = 250f, maxValue = 10000f, minStep = 250f)
     @ConfigAccordionId(id = 2)
     public float advanceDelayMs = 2000f;
-
 }

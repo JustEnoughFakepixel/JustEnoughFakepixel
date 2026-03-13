@@ -6,13 +6,12 @@ import com.jef.justenoughfakepixel.core.config.gui.config.ConfigEditor;
 import com.jef.justenoughfakepixel.core.config.gui.GuiScreenElementWrapper;
 import com.jef.justenoughfakepixel.core.config.command.JefCommand;
 import com.jef.justenoughfakepixel.core.config.editors.GuiPositionEditor;
-import java.util.function.IntSupplier;
 
 import com.jef.justenoughfakepixel.features.diana.DianaLootOverlay;
 import com.jef.justenoughfakepixel.features.diana.DianaEventOverlay;
+import com.jef.justenoughfakepixel.features.mining.FetchurOverlay;
 import com.jef.justenoughfakepixel.features.dungeons.DungeonStats;
 import com.jef.justenoughfakepixel.features.misc.PerformanceHUD;
-import com.jef.justenoughfakepixel.features.misc.SearchBar;
 import com.jef.justenoughfakepixel.features.waypoints.WaypointGroupGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -121,61 +120,72 @@ public class JefConfig {
 
     public static void openStatsEditor() {
         if (feature == null) return;
+        DungeonStats stats = DungeonStats.getInstance();
         screenToOpen = new GuiPositionEditor(
                 feature.dungeons.statsPos,
-                (IntSupplier) DungeonStats::getOverlayWidth,
-                (IntSupplier) DungeonStats::getOverlayHeight,
-                () -> DungeonStats.renderOverlay(true),
+                stats::getOverlayWidth,
+                stats::getOverlayHeight,
+                () -> stats.render(true),
                 JefConfig::saveConfig,
                 JefConfig::saveConfig
-        ).withOverlayScale(feature.dungeons.statsScale);
+        ).withOverlayScale(feature.dungeons.statsScale)
+                .withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     public static void openHudEditor() {
         if (feature == null) return;
+        PerformanceHUD hud = PerformanceHUD.getInstance();
         screenToOpen = new GuiPositionEditor(
                 feature.misc.hudPos,
-                (IntSupplier) PerformanceHUD::getOverlayWidth,
-                (IntSupplier) PerformanceHUD::getOverlayHeight,
-                () -> PerformanceHUD.renderOverlay(true),
+                hud::getOverlayWidth,
+                hud::getOverlayHeight,
+                () -> hud.render(true),
                 JefConfig::saveConfig,
                 JefConfig::saveConfig
-        ).withOverlayScale(feature.misc.hudScale);
+        ).withOverlayScale(feature.misc.hudScale)
+                .withParent(Minecraft.getMinecraft().currentScreen);
     }
-    public static void openSearchBarEditor() {
+
+    public static void openFetchurEditor() {
         if (feature == null) return;
+        FetchurOverlay fetchur = FetchurOverlay.getInstance();
         screenToOpen = new GuiPositionEditor(
-                feature.misc.searchBarPos,
-                (IntSupplier) SearchBar::getOverlayWidth,
-                (IntSupplier) SearchBar::getOverlayHeight,
-                () -> SearchBar.renderOverlay(true),
+                feature.mining.fetchurOverlayPos,
+                fetchur::getOverlayWidth,
+                fetchur::getOverlayHeight,
+                () -> fetchur.render(true),
                 JefConfig::saveConfig,
                 JefConfig::saveConfig
-        );
+        ).withOverlayScale(feature.mining.fetchurOverlayScale)
+                .withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     public static void openDianaEventEditor() {
         if (feature == null) return;
+        DianaEventOverlay overlay = DianaEventOverlay.getInstance();
         screenToOpen = new GuiPositionEditor(
                 feature.diana.eventOverlayPos,
-                (IntSupplier) DianaEventOverlay::getOverlayWidth,
-                (IntSupplier) DianaEventOverlay::getOverlayHeight,
-                () -> DianaEventOverlay.renderOverlay(true),
+                overlay::getOverlayWidth,
+                overlay::getOverlayHeight,
+                () -> overlay.render(true),
                 JefConfig::saveConfig,
                 JefConfig::saveConfig
-        ).withOverlayScale(feature.diana.overlayScale);
+        ).withOverlayScale(feature.diana.overlayScale)
+                .withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     public static void openDianaLootEditor() {
         if (feature == null) return;
+        DianaLootOverlay overlay = DianaLootOverlay.getInstance();
         screenToOpen = new GuiPositionEditor(
                 feature.diana.lootOverlayPos,
-                (IntSupplier) DianaLootOverlay::getOverlayWidth,
-                (IntSupplier) DianaLootOverlay::getOverlayHeight,
-                () -> DianaLootOverlay.renderOverlay(true),
+                overlay::getOverlayWidth,
+                overlay::getOverlayHeight,
+                () -> overlay.render(true),
                 JefConfig::saveConfig,
                 JefConfig::saveConfig
-        ).withOverlayScale(feature.diana.overlayScale);
+        ).withOverlayScale(feature.diana.overlayScale)
+                .withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     @SubscribeEvent

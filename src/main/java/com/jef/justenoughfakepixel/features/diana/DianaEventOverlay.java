@@ -2,78 +2,39 @@ package com.jef.justenoughfakepixel.features.diana;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
-import com.jef.justenoughfakepixel.utils.OverlayUtils;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.ScaledResolution;
+import com.jef.justenoughfakepixel.utils.JefOverlay;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
 
+public class DianaEventOverlay extends JefOverlay {
 
-public class DianaEventOverlay {
+    private static DianaEventOverlay instance;
 
-    private static final Minecraft mc = Minecraft.getMinecraft();
+    public DianaEventOverlay() {
+        super(180, LINE_HEIGHT * 7 + PADDING * 2);
+        instance = this;
+    }
 
-    private static final int LINE_HEIGHT = 10;
-    private static final int PADDING     = 3;
-    private static final int BASE_WIDTH  = 180;
+    public static DianaEventOverlay getInstance() { return instance; }
 
-    private static int lastW = BASE_WIDTH;
-    private static int lastH = LINE_HEIGHT * 7 + PADDING * 2;
-
-    public static int getOverlayWidth()  { return lastW; }
-    public static int getOverlayHeight() { return lastH; }
+    @Override protected int     getBaseWidth()   { return 180; }
+    @Override public Position   getPosition()    { return JefConfig.feature.diana.eventOverlayPos; }
+    @Override public float      getScale()       { return JefConfig.feature.diana.overlayScale; }
+    @Override public boolean    showBackground() { return JefConfig.feature.diana.overlayBackground; }
 
     @SubscribeEvent
     public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
         if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
         if (JefConfig.feature == null || !JefConfig.feature.diana.enabled
                 || !JefConfig.feature.diana.showEventOverlay) return;
-        renderOverlay(false);
+        render(false);
     }
 
-    public static void renderOverlay(boolean preview) {
-        if (JefConfig.feature == null) return;
-        if (!preview && OverlayUtils.shouldHide()) return;
-        List<String> lines = buildLines(preview);
-        if (lines.isEmpty()) return;
-
-        float scale = JefConfig.feature.diana.overlayScale;
-        int w = BASE_WIDTH;
-        for (String line : lines)
-            w = Math.max(w, mc.fontRendererObj.getStringWidth(line) + PADDING * 2);
-        int h = lines.size() * LINE_HEIGHT + PADDING * 2;
-        lastW = w;
-        lastH = h;
-
-        ScaledResolution sr  = new ScaledResolution(mc);
-        Position         pos = JefConfig.feature.diana.eventOverlayPos;
-        int x = pos.getAbsX(sr, (int)(w * scale));
-        int y = pos.getAbsY(sr, (int)(h * scale));
-        if (pos.isCenterX()) x -= (int)(w * scale / 2);
-        if (pos.isCenterY()) y -= (int)(h * scale / 2);
-
-        GL11.glPushMatrix();
-        GL11.glTranslatef(x, y, 0);
-        GL11.glScalef(scale, scale, 1f);
-
-        if (JefConfig.feature.diana.overlayBackground)
-            Gui.drawRect(-PADDING, -PADDING, w, h - PADDING, 0x88000000);
-
-        int dy = 0;
-        for (String line : lines) {
-            mc.fontRendererObj.drawStringWithShadow(line, 0, dy, 0xFFFFFF);
-            dy += LINE_HEIGHT;
-        }
-
-        GL11.glPopMatrix();
-    }
-
-    static List<String> buildLines(boolean preview) {
+    @Override
+    public List<String> getLines(boolean preview) {
         List<String> lines = new ArrayList<>();
 
         if (preview) {

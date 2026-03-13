@@ -2,10 +2,10 @@ package com.jef.justenoughfakepixel;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.command.SimpleCommandFilter;
+import com.jef.justenoughfakepixel.features.mining.FetchurOverlay;
 import com.jef.justenoughfakepixel.utils.ItemStackUtils;
 import com.jef.justenoughfakepixel.utils.PartyCommands;
 import com.jef.justenoughfakepixel.utils.TablistParser;
-import com.jef.justenoughfakepixel.features.mining.FetchurHelper;
 import com.jef.justenoughfakepixel.features.general.DamageSplashes;
 import com.jef.justenoughfakepixel.features.general.SkyblockIdTooltip;
 import com.jef.justenoughfakepixel.features.general.CursorResetHandler;
@@ -77,7 +77,7 @@ public class JefMod {
         MinecraftForge.EVENT_BUS.register(new DungeonStats());
         MinecraftForge.EVENT_BUS.register(new PartyCommands());
         MinecraftForge.EVENT_BUS.register(new TablistParser());
-        MinecraftForge.EVENT_BUS.register(new FetchurHelper());
+        MinecraftForge.EVENT_BUS.register(new FetchurOverlay());
         MinecraftForge.EVENT_BUS.register(new PerformanceHUD());
         MinecraftForge.EVENT_BUS.register(new SkillXpDisplay());
         MinecraftForge.EVENT_BUS.register(new SkyblockIdTooltip());

@@ -2,7 +2,7 @@ package com.jef.justenoughfakepixel.features.dungeons;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
-import com.jef.justenoughfakepixel.utils.OverlayUtils;
+import com.jef.justenoughfakepixel.utils.JefOverlay;
 import com.jef.justenoughfakepixel.utils.ScoreboardUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -14,6 +14,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,15 +24,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class DungeonStats {
+public class DungeonStats extends JefOverlay {
 
     private static final Minecraft mc = Minecraft.getMinecraft();
     private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     public static final int OVERLAY_WIDTH  = 160;
     public static final int OVERLAY_HEIGHT = 160;
-    private static final int LINE_HEIGHT   = 10;
-    private static final int PADDING       = 3;
 
     private static final int[][] BOSS_COORDS = {
             {29, 71, 80},
@@ -111,6 +110,63 @@ public class DungeonStats {
     private int     lastClearedPct  = 0;
     private int     tickCounter     = 0;
     private final EndStats endStats = new EndStats();
+
+    private static DungeonStats instance;
+    public DungeonStats() {
+        super(OVERLAY_WIDTH, OVERLAY_HEIGHT);
+        instance = this;
+    }
+    public static DungeonStats getInstance() { return instance; }
+
+
+    @Override public Position getPosition()    { return JefConfig.feature.dungeons.statsPos; }
+    @Override public float    getScale()       { return JefConfig.feature.dungeons.statsScale; }
+    @Override public boolean  showBackground() { return JefConfig.feature.dungeons.statsBackground; }
+    @Override protected boolean extraGuard()   { return inDungeon && runStart != 0; }
+
+
+    @Override
+    public void render(boolean preview) {
+        if (JefConfig.feature == null) return;
+        if (!preview && (shouldHideOverlay())) return;
+
+        List<String> lines = getLines(preview);
+        if (lines == null || lines.isEmpty()) return;
+
+        float scale = getScale();
+        int w = 0;
+        for (String l : lines) w = Math.max(w, mc.fontRendererObj.getStringWidth(l));
+        w = Math.max(w + PADDING * 2, 60);
+        int h = lines.size() * LINE_HEIGHT + PADDING * 2;
+        lastW = w; lastH = h;
+
+        ScaledResolution sr = new ScaledResolution(mc);
+        Position pos        = getPosition();
+        int x               = pos.getAbsX(sr, (int)(w * scale));
+        int y               = pos.getAbsY(sr, (int)(h * scale));
+        if (pos.isCenterX()) x -= (int)(w * scale / 2);
+        if (pos.isCenterY()) y -= (int)(h * scale / 2);
+
+        GL11.glPushMatrix();
+        GL11.glTranslatef(x, y, 0);
+        GL11.glScalef(scale, scale, 1f);
+
+        if (showBackground())
+            Gui.drawRect(-PADDING, -PADDING, w, h - PADDING, 0x88000000);
+
+        int dy = 0;
+        for (String line : lines) {
+            mc.fontRendererObj.drawStringWithShadow(line, 0, dy, 0xFFFFFF);
+            dy += LINE_HEIGHT;
+        }
+
+        GL11.glPopMatrix();
+    }
+
+    private boolean shouldHideOverlay() {
+        return com.jef.justenoughfakepixel.utils.OverlayUtils.shouldHide() || !extraGuard();
+    }
+
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
@@ -270,51 +326,16 @@ public class DungeonStats {
         if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
         if (JefConfig.feature == null || !JefConfig.feature.dungeons.dungeonStats) return;
         if (!inDungeon || runStart == 0) return;
-        if (OverlayUtils.shouldHide()) return;
-        renderOverlay(false);
+        if (com.jef.justenoughfakepixel.utils.OverlayUtils.shouldHide()) return;
+        render(false);
     }
 
-    private static int lastW = OVERLAY_WIDTH;
-    private static int lastH = OVERLAY_HEIGHT;
-    public static int getOverlayWidth()  { return lastW; }
-    public static int getOverlayHeight() { return lastH; }
+    @SubscribeEvent
+    public void onWorldUnload(WorldEvent.Unload event) { reset(); }
 
-    public static void renderOverlay(boolean preview) {
-        if (JefConfig.feature == null) return;
-        List<String> lines = buildLines(preview);
-        if (lines.isEmpty()) return;
 
-        float scale = JefConfig.feature.dungeons.statsScale;
-        int w = 0;
-        for (String l : lines) w = Math.max(w, Minecraft.getMinecraft().fontRendererObj.getStringWidth(l));
-        w = Math.max(w + PADDING * 2, 60);
-        int h = lines.size() * LINE_HEIGHT + PADDING * 2;
-        lastW = w; lastH = h;
-
-        ScaledResolution sr = new ScaledResolution(mc);
-        Position pos        = JefConfig.feature.dungeons.statsPos;
-        int x               = pos.getAbsX(sr, (int)(w * scale));
-        int y               = pos.getAbsY(sr, (int)(h * scale));
-        if (pos.isCenterX()) x -= (int)(w * scale / 2);
-        if (pos.isCenterY()) y -= (int)(h * scale / 2);
-
-        org.lwjgl.opengl.GL11.glPushMatrix();
-        org.lwjgl.opengl.GL11.glTranslatef(x, y, 0);
-        org.lwjgl.opengl.GL11.glScalef(scale, scale, 1f);
-
-        if (JefConfig.feature.dungeons.statsBackground)
-            Gui.drawRect(-PADDING, -PADDING, w, h - PADDING, 0x88000000);
-
-        int dy = 0;
-        for (String line : lines) {
-            mc.fontRendererObj.drawStringWithShadow(line, 0, dy, 0xFFFFFF);
-            dy += LINE_HEIGHT;
-        }
-
-        org.lwjgl.opengl.GL11.glPopMatrix();
-    }
-
-    static List<String> buildLines(boolean preview) {
+    @Override
+    public List<String> getLines(boolean preview) {
         DungeonStats s   = getInstance();
         boolean ended    = s != null && s.runEnded;
         long now         = ended ? (s.bossDeadTime > 0 ? s.bossDeadTime : s.elapsed()) : (s != null ? s.elapsed() : 0);
@@ -351,13 +372,13 @@ public class DungeonStats {
         }
 
         if (preview || f.isF7orM7()) {
-            addPhase(out, C_MAXOR,  "Maxor",       s != null ? s.maxorStart    : 0, s != null ? s.maxorEnd    : 0, now, preview, "0:18.000");
-            addPhase(out, C_STORM,  "Storm",        s != null ? s.stormStart   : 0, s != null ? s.stormEnd    : 0, now, preview, "0:12.000");
-            addPhase(out, C_GOLDOR, "Terminals",    s != null ? s.terminalStart: 0, s != null ? s.goldorFight : 0, now, preview, "0:20.000");
-            addPhase(out, C_GOLDOR, "Goldor",       s != null ? s.goldorFight  : 0, s != null ? s.goldorEnd   : 0, now, preview, "0:08.000");
-            addPhase(out, C_NECRON, "Necron",       s != null ? s.necronStart  : 0, s != null ? s.necronEnd   : 0, now, preview, "0:05.000");
+            addPhase(out, C_MAXOR,  "Maxor",      s != null ? s.maxorStart    : 0, s != null ? s.maxorEnd    : 0, now, preview, "0:18.000");
+            addPhase(out, C_STORM,  "Storm",       s != null ? s.stormStart   : 0, s != null ? s.stormEnd    : 0, now, preview, "0:12.000");
+            addPhase(out, C_GOLDOR, "Terminals",   s != null ? s.terminalStart: 0, s != null ? s.goldorFight : 0, now, preview, "0:20.000");
+            addPhase(out, C_GOLDOR, "Goldor",      s != null ? s.goldorFight  : 0, s != null ? s.goldorEnd   : 0, now, preview, "0:08.000");
+            addPhase(out, C_NECRON, "Necron",      s != null ? s.necronStart  : 0, s != null ? s.necronEnd   : 0, now, preview, "0:05.000");
             if (preview || mm)
-                addPhase(out, C_WITHER, "Wither King", s != null ? s.witherStart  : 0, s != null ? s.witherEnd   : 0, now, preview, "0:04.000");
+                addPhase(out, C_WITHER, "Wither King", s != null ? s.witherStart : 0, s != null ? s.witherEnd : 0, now, preview, "0:04.000");
         }
 
         if (preview || f.isF6orM6()) {
@@ -369,6 +390,7 @@ public class DungeonStats {
         out.removeIf(l -> l == null);
         return out;
     }
+
 
     private static String line(String color, String label, long locked, long now, boolean preview, String previewVal) {
         if (preview)    return color + label + " took: " + C_VAL + previewVal;
@@ -465,7 +487,7 @@ public class DungeonStats {
         send(msg);
         scheduler.schedule(() -> {
             if (mc.thePlayer != null)
-                mc.thePlayer.sendChatMessage("/pc NEW PB " + phase + ": " + fmtPlain(duration));
+                mc.thePlayer.sendChatMessage("/pc NEW PB " + phase + ": " + fmt(duration));
         }, 1500, TimeUnit.MILLISECONDS);
     }
 
@@ -483,12 +505,12 @@ public class DungeonStats {
 
         if (arg2 == null) {
             long pb = JefConfig.feature.dungeons.getPb(floor.name() + "_boss");
-            return pb > 0 ? floor.name() + " PB: " + fmtPlain(pb) : floor.name() + ": No PB";
+            return pb > 0 ? floor.name() + " PB: " + fmt(pb) : floor.name() + ": No PB";
         }
 
         if (arg2.equalsIgnoreCase("br")) {
             long pb = JefConfig.feature.dungeons.getPb(floor.name() + "_blood");
-            return pb > 0 ? floor.name() + " blood rush PB: " + fmtPlain(pb) : floor.name() + " blood rush: No PB";
+            return pb > 0 ? floor.name() + " blood rush PB: " + fmt(pb) : floor.name() + " blood rush: No PB";
         }
 
         if (arg2.toLowerCase().startsWith("p")) {
@@ -496,7 +518,7 @@ public class DungeonStats {
             String key   = floor.name() + "_" + phase;
             long pb = JefConfig.feature.dungeons.getPb(key);
             String label = phaseLabel(phase);
-            return pb > 0 ? floor.name() + " " + label + ": " + fmtPlain(pb) : floor.name() + " " + label + ": No PB";
+            return pb > 0 ? floor.name() + " " + label + ": " + fmt(pb) : floor.name() + " " + label + ": No PB";
         }
 
         return "Usage: !pb <floor> | !pb <floor> br | !pb <floor> p1-p5";
@@ -512,9 +534,6 @@ public class DungeonStats {
             default:   return phase.toUpperCase();
         }
     }
-
-    @SubscribeEvent
-    public void onWorldUnload(WorldEvent.Unload event) { reset(); }
 
     private void reset() {
         inDungeon = false; runFailed = false; runEnded = false;
@@ -535,10 +554,6 @@ public class DungeonStats {
         return (s / 60) + ":" + String.format("%02d", s % 60) + "." + String.format("%03d", ms % 1000);
     }
 
-    private static String fmtPlain(long ms) {
-        return fmt(ms);
-    }
-
     private static int[] getBossCoords(DungeonFloor floor) {
         int idx;
         switch (floor) {
@@ -557,10 +572,6 @@ public class DungeonStats {
     private static void send(String msg) {
         if (mc.thePlayer != null) mc.thePlayer.addChatMessage(new ChatComponentText(msg));
     }
-
-    private static DungeonStats instance;
-    public DungeonStats() { instance = this; }
-    static DungeonStats getInstance() { return instance; }
 
     private static class EndStats {
         String bossName, score, grade;
