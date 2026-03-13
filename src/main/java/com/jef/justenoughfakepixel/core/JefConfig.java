@@ -6,12 +6,13 @@ import com.jef.justenoughfakepixel.core.config.gui.config.ConfigEditor;
 import com.jef.justenoughfakepixel.core.config.gui.GuiScreenElementWrapper;
 import com.jef.justenoughfakepixel.core.config.command.JefCommand;
 import com.jef.justenoughfakepixel.core.config.editors.GuiPositionEditor;
-
+import com.jef.justenoughfakepixel.features.misc.SearchBar;
 import com.jef.justenoughfakepixel.features.diana.DianaLootOverlay;
 import com.jef.justenoughfakepixel.features.diana.DianaEventOverlay;
 import com.jef.justenoughfakepixel.features.mining.FetchurOverlay;
 import com.jef.justenoughfakepixel.features.dungeons.DungeonStats;
 import com.jef.justenoughfakepixel.features.misc.PerformanceHUD;
+import com.jef.justenoughfakepixel.features.scoreboard.CustomScoreboard;
 import com.jef.justenoughfakepixel.features.waypoints.WaypointGroupGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -186,6 +187,33 @@ public class JefConfig {
                 JefConfig::saveConfig
         ).withOverlayScale(feature.diana.overlayScale)
                 .withParent(Minecraft.getMinecraft().currentScreen);
+    }
+
+    public static void openScoreboardEditor() {
+        if (feature == null) return;
+        CustomScoreboard sb = CustomScoreboard.getInstance();
+        screenToOpen = new GuiPositionEditor(
+                feature.scoreboard.position,
+                sb::getOverlayWidth,
+                sb::getOverlayHeight,
+                () -> sb.render(true),
+                JefConfig::saveConfig,
+                JefConfig::saveConfig
+        ).withOverlayScale(feature.scoreboard.scale)
+                .withParent(Minecraft.getMinecraft().currentScreen);
+    }
+
+    public static void openSearchBarEditor() {
+        if (feature == null) return;
+        SearchBar sb = SearchBar.getInstance();
+        screenToOpen = new GuiPositionEditor(
+                feature.misc.searchBarPos,
+                sb::getOverlayWidth,
+                sb::getOverlayHeight,
+                () -> sb.render(true),
+                JefConfig::saveConfig,
+                JefConfig::saveConfig
+        ).withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     @SubscribeEvent

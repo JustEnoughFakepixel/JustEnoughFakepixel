@@ -7,6 +7,8 @@ import com.jef.justenoughfakepixel.utils.ItemStackUtils;
 import com.jef.justenoughfakepixel.utils.PartyCommands;
 import com.jef.justenoughfakepixel.utils.TablistParser;
 import com.jef.justenoughfakepixel.features.general.DamageSplashes;
+import com.jef.justenoughfakepixel.features.scoreboard.CustomScoreboard;
+import com.jef.justenoughfakepixel.features.scoreboard.BankParser;
 import com.jef.justenoughfakepixel.features.general.SkyblockIdTooltip;
 import com.jef.justenoughfakepixel.features.general.CursorResetHandler;
 import com.jef.justenoughfakepixel.features.misc.BrewingStandHelper;
@@ -75,6 +77,8 @@ public class JefMod {
         MinecraftForge.EVENT_BUS.register(new DamageSplashes());
         MinecraftForge.EVENT_BUS.register(new BloodMobDisplay());
         MinecraftForge.EVENT_BUS.register(new DungeonStats());
+        MinecraftForge.EVENT_BUS.register(new CustomScoreboard());
+        MinecraftForge.EVENT_BUS.register(new BankParser());
         MinecraftForge.EVENT_BUS.register(new PartyCommands());
         MinecraftForge.EVENT_BUS.register(new TablistParser());
         MinecraftForge.EVENT_BUS.register(new FetchurOverlay());

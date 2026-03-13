@@ -11,6 +11,10 @@ public class Config {
     public final General general = new General();
 
     @Expose
+    @Category(name = "Scoreboard", desc = "Custom scoreboard panel")
+    public final Scoreboard scoreboard = new Scoreboard();
+
+    @Expose
     @Category(name = "Misc", desc = "Misc features")
     public final Misc misc = new Misc();
 
@@ -32,12 +36,14 @@ public class Config {
 
     public void executeRunnable(String runnableId) {
         switch (runnableId) {
+            case "openScoreboardEditor":  JefConfig.openScoreboardEditor();   break;
             case "openWaypointGroupGui":  JefConfig.openWaypointGroupGui();   break;
             case "openStatsEditor":       JefConfig.openStatsEditor();        break;
             case "openHudEditor":         JefConfig.openHudEditor();          break;
             case "openFetchurEditor":     JefConfig.openFetchurEditor();      break;
             case "openDianaEventEditor":  JefConfig.openDianaEventEditor();   break;
             case "openDianaLootEditor":   JefConfig.openDianaLootEditor();    break;
+            case "openSearchBarEditor":   JefConfig.openSearchBarEditor();    break;
         }
     }
 }

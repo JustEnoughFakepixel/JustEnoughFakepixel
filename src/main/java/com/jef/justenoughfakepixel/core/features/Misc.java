@@ -90,6 +90,15 @@ public class Misc {
     public String searchBarHighlightColor = "0:102:255:0:0";
 
     @Expose
+    @ConfigOption(name = "Edit Search Bar Position", desc = "Drag the search bar to reposition it")
+    @ConfigEditorButton(runnableId = "openSearchBarEditor", buttonText = "Edit")
+    @ConfigAccordionId(id = 10)
+    public boolean editSearchBarPosDummy = false;
+
+    @Expose
+    public Position searchBarPos = new Position(0, -30, true, false);
+
+    @Expose
     @ConfigOption(name = "No Swap Animation", desc = "Removes the item lowering animation when switching hotbar slots")
     @ConfigEditorBoolean
     public boolean noItemSwitchAnimation = true;
