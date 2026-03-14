@@ -13,12 +13,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import java.util.regex.Pattern;
+import com.jef.justenoughfakepixel.utils.ColorUtils;
 
 public class ItemStackUtils {
 
     private static final Minecraft mc = Minecraft.getMinecraft();
-    private static final Pattern STRIP_COLOR = Pattern.compile("(?i)\u00a7.");
 
     @SubscribeEvent
     public void onItemOverlay(RenderItemOverlayEvent event) {
@@ -92,7 +91,5 @@ public class ItemStackUtils {
         return extra.hasKey("id") ? extra.getString("id") : null;
     }
 
-    private static String strip(String s) {
-        return s == null ? "" : STRIP_COLOR.matcher(s).replaceAll("");
-    }
+    private static String strip(String s) { return ColorUtils.stripColor(s); }
 }

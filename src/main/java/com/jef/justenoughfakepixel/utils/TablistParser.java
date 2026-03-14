@@ -1,5 +1,6 @@
 package com.jef.justenoughfakepixel.utils;
 
+import com.jef.justenoughfakepixel.utils.ColorUtils;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
 import com.jef.justenoughfakepixel.features.scoreboard.BankParser;
@@ -17,16 +18,13 @@ import java.util.List;
 
 public class TablistParser {
 
-    // ── Location cache ────────────────────────────────────────────────────────
     private static ScoreboardUtils.Location currentLocation = ScoreboardUtils.Location.NONE;
 
     public static ScoreboardUtils.Location getCurrentLocation() { return currentLocation; }
 
-    // ── Tick interval ─────────────────────────────────────────────────────────
     private static final int TICK_INTERVAL = 20;
     private int tickCounter = 0;
 
-    // ── Tab-list ordering ─────────────────────────────────────────────────────
     private static final Ordering<NetworkPlayerInfo> PLAYER_ORDERING =
             Ordering.from(new PlayerComparator());
 
@@ -46,8 +44,6 @@ public class TablistParser {
         }
     }
 
-    // ── Events ────────────────────────────────────────────────────────────────
-
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
@@ -65,9 +61,6 @@ public class TablistParser {
         BankParser.clear();
     }
 
-    // ── Core parser ───────────────────────────────────────────────────────────
-    // Single pass through the tab list — handles both Server Info and Account Info sections.
-
     private static void parseTablist(Minecraft mc) {
         GuiPlayerTabOverlay tab = mc.ingameGUI.getTabList();
         List<NetworkPlayerInfo> infos =
@@ -82,7 +75,6 @@ public class TablistParser {
 
             String line = net.minecraft.util.StringUtils.stripControlCodes(raw).trim();
 
-            // ── Section headers ───────────────────────────────────────────
             if (raw.contains("§3§l Server Info§r")) {
                 inServerSection  = true;
                 inAccountSection = false;
@@ -93,7 +85,6 @@ public class TablistParser {
                 inServerSection  = false;
                 continue;
             }
-            // Any other known section header ends both
             if (raw.contains("§2§lPlayer Stats§r")
                     || line.equals("Player Stats") || line.equals("Quests")
                     || line.equals("Party")        || line.equals("Dungeon")) {
@@ -104,7 +95,6 @@ public class TablistParser {
 
             if (line.isEmpty()) continue;
 
-            // ── Server Info → location ────────────────────────────────────
             if (inServerSection) {
                 if (line.startsWith("Dungeon: ")) {
                     currentLocation = ScoreboardUtils.Location.DUNGEON;
@@ -121,7 +111,6 @@ public class TablistParser {
                 }
             }
 
-            // ── Account Info → bank / purse ───────────────────────────────
             if (inAccountSection) {
                 if (line.startsWith("Bank: ")) {
                     BankParser.setBank(parseAmount(raw, line.substring("Bank: ".length())));
@@ -136,7 +125,6 @@ public class TablistParser {
             }
         }
     }
-
 
     private static String parseAmount(String raw, String fallback) {
         String afterColon = raw.substring(raw.indexOf(": ") + 2);
@@ -165,7 +153,5 @@ public class TablistParser {
         return -1;
     }
 
-    private static String stripColor(String s) {
-        return s == null ? "" : s.replaceAll("\u00A7[0-9a-fklmnorA-FKLMNOR]", "");
-    }
+    private static String stripColor(String s) { return ColorUtils.stripColor(s); }
 }

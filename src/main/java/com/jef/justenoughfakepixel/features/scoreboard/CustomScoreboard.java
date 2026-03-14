@@ -3,6 +3,7 @@ package com.jef.justenoughfakepixel.features.scoreboard;
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
+import com.jef.justenoughfakepixel.utils.ColorUtils;
 import com.jef.justenoughfakepixel.features.mining.FetchurHelper;
 import com.jef.justenoughfakepixel.utils.JefOverlay;
 import com.jef.justenoughfakepixel.utils.ScoreboardUtils;
@@ -224,8 +225,12 @@ public class CustomScoreboard extends JefOverlay {
                     break;
 
                 case LINE_BANK:
-                    if (bankRaw != null)
+                    if (bankRaw != null) {
                         lines.add(bankRaw);
+                    } else {
+                        String bank = BankParser.getBank();
+                        if (bank != null) lines.add("\u00A7fBank: \u00A76" + bank);
+                    }
                     break;
 
                 case LINE_FETCHUR:
@@ -312,7 +317,5 @@ public class CustomScoreboard extends JefOverlay {
         GL11.glPopMatrix();
     }
 
-    private static String stripColor(String s) {
-        return s == null ? "" : s.replaceAll("\u00A7[0-9a-fklmnorA-FKLMNOR]", "");
-    }
+    private static String stripColor(String s) { return ColorUtils.stripColor(s); }
 }

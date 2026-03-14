@@ -9,26 +9,15 @@ import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagList;
+import com.jef.justenoughfakepixel.utils.ColorUtils;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.io.*;
 
-/**
- * Scans the "Accessory Bag Thaumaturgy" chest every tick while it is open,
- * caches the selected power name, and persists it to disk so it survives
- * game restarts.
- *
- * Saved to: config/JustEnoughFakepixel/maxwell_power.json
- *
- * Wire up in JefMod:
- *   preInit:    MaxwellPowerSync.getInstance().initFile(JefConfig.configDirectory);
- *   clientInit: MaxwellPowerSync.getInstance().load();
- *               MinecraftForge.EVENT_BUS.register(MaxwellPowerSync.getInstance());
- */
+
 public class MaxwellPowerSync {
 
-    // ── Singleton ─────────────────────────────────────────────────────────────
     private static MaxwellPowerSync INSTANCE;
 
     public static MaxwellPowerSync getInstance() {
@@ -38,7 +27,6 @@ public class MaxwellPowerSync {
 
     private MaxwellPowerSync() {}
 
-    // ── Persistence ───────────────────────────────────────────────────────────
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private File file = null;
 
@@ -71,13 +59,11 @@ public class MaxwellPowerSync {
         }
     }
 
-    // ── Public accessor ───────────────────────────────────────────────────────
     public static String getPower() {
         if (INSTANCE == null) return null;
         return INSTANCE.data.power;
     }
 
-    // ── Tick scan ─────────────────────────────────────────────────────────────
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
@@ -106,7 +92,6 @@ public class MaxwellPowerSync {
         }
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
     private boolean hasSelectedLine(ItemStack item) {
         try {
             NBTTagList lore = item.getTagCompound()
@@ -121,7 +106,5 @@ public class MaxwellPowerSync {
         return false;
     }
 
-    private static String stripColor(String s) {
-        return s == null ? "" : s.replaceAll("\u00A7[0-9a-fklmnorA-FKLMNOR]", "");
-    }
+    private static String stripColor(String s) { return ColorUtils.stripColor(s); }
 }
