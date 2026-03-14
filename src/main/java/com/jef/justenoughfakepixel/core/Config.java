@@ -41,7 +41,7 @@ public class Config {
             case "openStatsEditor":       JefConfig.openStatsEditor();        break;
             case "openHudEditor":         JefConfig.openHudEditor();          break;
             case "openFetchurEditor":     JefConfig.openFetchurEditor();      break;
-            case "openDianaEventEditor":  JefConfig.openDianaEventEditor();   break;
+            case "openInqHealthEditor":   JefConfig.openInqHealthEditor();    break;
             case "openDianaLootEditor":   JefConfig.openDianaLootEditor();    break;
             case "openSearchBarEditor":   JefConfig.openSearchBarEditor();    break;
         }

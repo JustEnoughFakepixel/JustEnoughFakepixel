@@ -8,6 +8,7 @@ import com.jef.justenoughfakepixel.core.config.command.JefCommand;
 import com.jef.justenoughfakepixel.core.config.editors.GuiPositionEditor;
 import com.jef.justenoughfakepixel.features.misc.SearchBar;
 import com.jef.justenoughfakepixel.features.diana.DianaLootOverlay;
+import com.jef.justenoughfakepixel.features.diana.InqHealthOverlay;
 import com.jef.justenoughfakepixel.features.diana.DianaEventOverlay;
 import com.jef.justenoughfakepixel.features.mining.FetchurOverlay;
 import com.jef.justenoughfakepixel.features.dungeons.DungeonStats;
@@ -158,6 +159,20 @@ public class JefConfig {
                 JefConfig::saveConfig,
                 JefConfig::saveConfig
         ).withOverlayScale(feature.mining.fetchurOverlayScale)
+                .withParent(Minecraft.getMinecraft().currentScreen);
+    }
+
+    public static void openInqHealthEditor() {
+        if (feature == null) return;
+        InqHealthOverlay overlay = InqHealthOverlay.getInstance();
+        screenToOpen = new GuiPositionEditor(
+                feature.diana.inqHealthPos,
+                overlay::getOverlayWidth,
+                overlay::getOverlayHeight,
+                () -> overlay.render(true),
+                JefConfig::saveConfig,
+                JefConfig::saveConfig
+        ).withOverlayScale(feature.diana.overlayScale)
                 .withParent(Minecraft.getMinecraft().currentScreen);
     }
 

@@ -37,7 +37,17 @@ public class Diana {
     public float overlayScale = 1f;
 
     @Expose
-    @ConfigOption(name = "Edit Event Overlay Position", desc = "Drag to reposition the Diana Event overlay")
+    @ConfigOption(name = "Show Inquisitor HP", desc = "Show a live HP bar for the nearest Minos Inquisitor")
+    @ConfigEditorBoolean
+    public boolean showInqHealthOverlay = true;
+
+    @Expose
+    @ConfigOption(name = "Edit Inquisitor HP Position", desc = "Drag to reposition the Inquisitor HP overlay")
+    @ConfigEditorButton(runnableId = "openInqHealthEditor", buttonText = "Edit")
+    public boolean editInqHealthPosDummy = false;
+
+    @Expose
+    public Position inqHealthPos = new Position(4, 400);
     @ConfigEditorButton(runnableId = "openDianaEventEditor", buttonText = "Edit")
     public boolean editEventPosDummy = false;
 

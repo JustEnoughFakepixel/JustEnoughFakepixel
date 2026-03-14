@@ -70,6 +70,11 @@ public class DianaTracker {
 
         if (LOOT_SHARE.matcher(msg).find()) {
             stats.onLootshare();
+            // If an inq stand just disappeared, it was killed by someone else — reclassify
+            if (DianaMobDetect.wasInqKilledByOther()) {
+                stats.getData().totalInqsLootshared++;
+                DianaMobDetect.clearInqDisappear();
+            }
         }
 
         handleBorrowDrops(msg, stats);

@@ -23,6 +23,7 @@ import com.jef.justenoughfakepixel.features.waypoints.WaypointStorage;
 import com.jef.justenoughfakepixel.features.diana.DianaCommand;
 import com.jef.justenoughfakepixel.features.diana.DianaEventOverlay;
 import com.jef.justenoughfakepixel.features.diana.DianaLootOverlay;
+import com.jef.justenoughfakepixel.features.diana.InqHealthOverlay;
 import com.jef.justenoughfakepixel.features.diana.DianaMobDetect;
 import com.jef.justenoughfakepixel.features.diana.DianaStats;
 import com.jef.justenoughfakepixel.features.diana.DianaTracker;
@@ -74,15 +75,14 @@ public class JefMod {
         WaypointStorage.getInstance().load();
         DianaStats.getInstance().load();
         MaxwellPowerSync.getInstance().load();
-
         MinecraftForge.EVENT_BUS.register(this);
 
         MinecraftForge.EVENT_BUS.register(new SearchBar());
+        MinecraftForge.EVENT_BUS.register(MaxwellPowerSync.getInstance());
         MinecraftForge.EVENT_BUS.register(new DamageSplashes());
         MinecraftForge.EVENT_BUS.register(new BloodMobDisplay());
         MinecraftForge.EVENT_BUS.register(new DungeonStats());
         MinecraftForge.EVENT_BUS.register(new CustomScoreboard());
-        MinecraftForge.EVENT_BUS.register(MaxwellPowerSync.getInstance());
         MinecraftForge.EVENT_BUS.register(new PartyCommands());
         MinecraftForge.EVENT_BUS.register(new TablistParser());
         MinecraftForge.EVENT_BUS.register(new FetchurOverlay());
@@ -99,6 +99,7 @@ public class JefMod {
         MinecraftForge.EVENT_BUS.register(new DianaMobDetect());
         MinecraftForge.EVENT_BUS.register(new DianaEventOverlay());
         MinecraftForge.EVENT_BUS.register(new DianaLootOverlay());
+        MinecraftForge.EVENT_BUS.register(new InqHealthOverlay());
         ClientCommandHandler.instance.registerCommand(new DianaCommand());
         ClientCommandHandler.instance.registerCommand(new WaypointCommand());
     }
