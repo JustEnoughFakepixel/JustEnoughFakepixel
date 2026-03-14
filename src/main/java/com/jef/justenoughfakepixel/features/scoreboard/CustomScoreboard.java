@@ -216,6 +216,13 @@ public class CustomScoreboard extends JefOverlay {
                     if (bitsRaw != null) lines.add(bitsRaw);
                     break;
 
+                case LINE_POWER:
+                    String power = MaxwellPowerSync.getPower();
+                    if (power != null && ScoreboardUtils.isOnSkyblock()) {
+                        lines.add("\u00A7fPower: \u00A7d" + power);
+                    }
+                    break;
+
                 case LINE_BANK:
                     if (bankRaw != null)
                         lines.add(bankRaw);
