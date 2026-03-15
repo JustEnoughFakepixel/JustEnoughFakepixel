@@ -41,7 +41,13 @@ public class CustomScoreboard extends JefOverlay {
     private static final int LINE_PROFILE_TYPE = 11;
     private static final int LINE_EVENT        = 12;
     private static final int LINE_COOKIE       = 13;
-    private static final int LINE_EMPTY        = 14;
+    private static final int LINE_EMPTY1       = 14;
+    private static final int LINE_EMPTY2       = 15;
+    private static final int LINE_EMPTY3       = 16;
+    private static final int LINE_EMPTY4       = 17;
+    private static final int LINE_EMPTY5       = 18;
+    private static final int LINE_EMPTY6       = 19;
+    private static final int LINE_EMPTY7       = 20;
 
     private static final String LOC_SYMBOL_NORMAL = "\u23E3";
     private static final String LOC_SYMBOL_RIFT   = "\u0444";
@@ -270,7 +276,31 @@ public class CustomScoreboard extends JefOverlay {
                     }
                     break;
 
-                case LINE_EMPTY:
+                case LINE_EMPTY1:
+                    lines.add("");
+                    break;
+
+                case LINE_EMPTY2:
+                    lines.add("");
+                    break;
+
+                case LINE_EMPTY3:
+                    lines.add("");
+                    break;
+
+                case LINE_EMPTY4:
+                    lines.add("");
+                    break;
+
+                case LINE_EMPTY5:
+                    lines.add("");
+                    break;
+
+                case LINE_EMPTY6:
+                    lines.add("");
+                    break;
+
+                case LINE_EMPTY7:
                     lines.add("");
                     break;
             }

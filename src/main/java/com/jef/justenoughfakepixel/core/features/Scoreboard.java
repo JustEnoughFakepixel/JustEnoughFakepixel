@@ -62,7 +62,13 @@ public class Scoreboard {
             "§7♲ Ironman",                      // 11 PROFILE_TYPE
             "§6Fishing Festival §f12m 30s",     // 12 EVENT
             "§6Cookie Buff: §f3d 17h",           // 13 COOKIE
-            "§8─────────────────"              // 14 EMPTY LINE
+            "§8─────────────────", // 14 EMPTY LINE
+            "§8─────────────────", // 15 EMPTY LINE
+            "§8─────────────────",// 16 EMPTY LINE
+            "§8─────────────────",// 17 EMPTY LINE
+            "§8─────────────────",// 18 EMPTY LINE
+            "§8─────────────────",// 19 EMPTY LINE
+            "§8─────────────────" // 20 EMPTY LINE
     })
     @ConfigAccordionId(id = 20)
     public List<Integer> scoreboardLines =
