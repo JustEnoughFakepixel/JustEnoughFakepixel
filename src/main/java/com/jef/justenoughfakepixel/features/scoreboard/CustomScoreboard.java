@@ -266,7 +266,7 @@ public class CustomScoreboard extends JefOverlay {
                     if (!inDungeon) {
                         String cookie = TablistParser.readCookieBuff();
                         if (cookie != null)
-                            lines.add("\u00A76Cookie Buff \u00A7f" + cookie);
+                            lines.add("\u00A7dCookie Buff: \u00A7f" + cookie);
                     }
                     break;
 

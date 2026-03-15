@@ -51,7 +51,6 @@ public class Scoreboard {
             "§e03/15/26 §8dh-1",           // 0  SERVER
             "§fLate Summer §b11th",             // 1  SEASON
             "§f10:40pm",                        // 2  TIME
-            "§7♲ Ironman",                      // 11 PROFILE_TYPE
             "§b⏣ Hub",                          // 3  LOCATION
             "§fPurse: §652,763,737",            // 4  PURSE
             "§fBank: §6249M",                   // 5  BANK
@@ -60,6 +59,7 @@ public class Scoreboard {
             "§fFetchur: §eSand",                // 8  FETCHUR
             "§fSlayer Quest",                   // 9  SLAYER
             "§fGems: §a57,873",                 // 10 GEMS
+            "§7♲ Ironman",                      // 11 PROFILE_TYPE
             "§6Fishing Festival §f12m 30s",     // 12 EVENT
             "§6Cookie Buff: §f3d 17h",           // 13 COOKIE
             "§8─────────────────"              // 14 EMPTY LINE
