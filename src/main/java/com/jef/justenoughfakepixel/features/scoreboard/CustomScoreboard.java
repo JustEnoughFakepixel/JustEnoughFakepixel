@@ -6,6 +6,7 @@ import com.jef.justenoughfakepixel.core.config.utils.Position;
 import com.jef.justenoughfakepixel.utils.ColorUtils;
 import com.jef.justenoughfakepixel.features.mining.FetchurHelper;
 import com.jef.justenoughfakepixel.utils.JefOverlay;
+import com.jef.justenoughfakepixel.utils.OverlayUtils;
 import com.jef.justenoughfakepixel.utils.ScoreboardUtils;
 import com.jef.justenoughfakepixel.utils.TablistParser;
 import net.minecraft.client.Minecraft;
@@ -103,6 +104,7 @@ public class CustomScoreboard extends JefOverlay {
     public void onRender(RenderGameOverlayEvent.Post event) {
         if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
         if (Minecraft.getMinecraft().gameSettings.showDebugInfo) return;
+        if (JefConfig.feature.scoreboard.hideOnTab && OverlayUtils.shouldHide()) return;
         render(false);
     }
 
@@ -315,7 +317,9 @@ public class CustomScoreboard extends JefOverlay {
                 case LINE_EMPTY5:
                 case LINE_EMPTY6:
                 case LINE_EMPTY7:
-                    lines.add("");
+                    if (ScoreboardUtils.isOnSkyblock() && !ScoreboardUtils.isInDungeon()) {
+                        lines.add("");
+                    }
                     break;
             }
         }
