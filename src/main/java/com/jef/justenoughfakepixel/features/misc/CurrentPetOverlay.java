@@ -33,6 +33,7 @@ public class CurrentPetOverlay extends JefOverlay {
         instance = this;
     }
 
+
     public static CurrentPetOverlay getInstance() { return instance; }
 
     @Override public Position getPosition()     { return JefConfig.feature.misc.currentPetPos; }

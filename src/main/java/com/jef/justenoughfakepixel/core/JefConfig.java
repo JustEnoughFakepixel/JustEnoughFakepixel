@@ -6,7 +6,6 @@ import com.jef.justenoughfakepixel.core.config.gui.config.ConfigEditor;
 import com.jef.justenoughfakepixel.core.config.gui.GuiScreenElementWrapper;
 import com.jef.justenoughfakepixel.core.config.command.JefCommand;
 import com.jef.justenoughfakepixel.core.config.editors.GuiPositionEditor;
-import com.jef.justenoughfakepixel.features.misc.CurrentPetOverlay;
 import com.jef.justenoughfakepixel.features.misc.SearchBar;
 import com.jef.justenoughfakepixel.features.diana.DianaEventOverlay;
 import com.jef.justenoughfakepixel.features.diana.GuiDianaOverlayEditor;
@@ -196,15 +195,8 @@ public class JefConfig {
                 JefConfig::saveConfig
         ).withParent(Minecraft.getMinecraft().currentScreen);
     }
+
     public static void openCurrentPetEditor() {
-        if (feature == null) return;
-        CurrentPetOverlay o = CurrentPetOverlay.getInstance();
-        screenToOpen = new GuiPositionEditor(
-                feature.misc.currentPetPos,
-                o::getOverlayWidth, o::getOverlayHeight,
-                () -> o.render(true),
-                JefConfig::saveConfig, JefConfig::saveConfig
-        ).withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     @SubscribeEvent

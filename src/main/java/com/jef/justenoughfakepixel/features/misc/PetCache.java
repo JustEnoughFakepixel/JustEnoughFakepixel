@@ -26,7 +26,17 @@ public class PetCache {
         return INSTANCE;
     }
 
+
     private PetCache() {}
+
+    public static String normalizePetName(String name) {
+        if (name == null) return "";
+
+        return name
+                .replace("✦", "")   // remove skinned pet symbol
+                .replace("’", "'")  // normalize apostrophe
+                .trim();
+    }
 
     private File file;
     private final Map<String, CachedPet> pets = new HashMap<>();
@@ -68,6 +78,9 @@ public class PetCache {
     }
 
     public void update(String baseName, String formattedName, String textureValue) {
+
+        baseName = normalizePetName(baseName);
+
         CachedPet existing = pets.get(baseName);
         if (existing != null
                 && existing.formattedName.equals(formattedName)
@@ -82,11 +95,11 @@ public class PetCache {
     }
 
     public CachedPet get(String baseName) {
-        return pets.get(baseName);
+        return pets.get(normalizePetName(baseName));
     }
 
     public boolean hasTexture(String baseName) {
-        CachedPet p = pets.get(baseName);
+        CachedPet p = pets.get(normalizePetName(baseName));
         return p != null && p.textureValue != null && !p.textureValue.isEmpty();
     }
 }
