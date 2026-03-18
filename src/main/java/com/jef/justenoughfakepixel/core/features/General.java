@@ -25,7 +25,7 @@ public class General {
 
 
     @Expose
-    @ConfigOption(name = "Enchant Highlight", desc = "Settings for enchant highlighting and layout")
+    @ConfigOption(name = "kms", desc = "Settings for enchants and layout")
     @ConfigEditorAccordion(id = 21)
     public boolean enchantHighlightAccordion = false;
 
@@ -48,6 +48,24 @@ public class General {
     public boolean enchantChroma = true;
 
     @Expose
+    @ConfigOption(name = "Chroma Speed", desc = "Speed of the chroma animation (lower = faster)")
+    @ConfigEditorSliderAnnotation(minValue = 10f, maxValue = 5000f, minStep = 10f)
+    @ConfigAccordionId(id = 21)
+    public int enchantChromaSpeed = 1000;
+
+    @Expose
+    @ConfigOption(name = "Chroma Mode", desc = "All Same: one hue | Fade: position-based gradient")
+    @ConfigEditorDropdown(values = {"All Same", "Fade"})
+    @ConfigAccordionId(id = 21)
+    public int enchantChromaMode = 1;
+
+    @Expose
+    @ConfigOption(name = "Chroma Size", desc = "Gradient size for fade mode")
+    @ConfigEditorSliderAnnotation(minValue = 20f, maxValue = 400f, minStep = 5f)
+    @ConfigAccordionId(id = 21)
+    public float enchantChromaSize = 120f;
+
+    @Expose
     @ConfigOption(name = "Poor Color", desc = "Color for enchants below half max level")
     @ConfigEditorColour
     @ConfigAccordionId(id = 21)
@@ -57,19 +75,19 @@ public class General {
     @ConfigOption(name = "Good Color", desc = "Color for enchants at or above half max level")
     @ConfigEditorColour
     @ConfigAccordionId(id = 21)
-    public String enchantGoodColor = "0:255:85:85:85";
+    public String enchantGoodColor = "0:255:85:255:85";
 
     @Expose
     @ConfigOption(name = "Great Color", desc = "Color for enchants one below max level")
     @ConfigEditorColour
     @ConfigAccordionId(id = 21)
-    public String enchantGreatColor = "0:255:0:170:170";
+    public String enchantGreatColor = "0:255:85:85:255";
 
     @Expose
     @ConfigOption(name = "Perfect Color", desc = "Color for enchants at max level")
     @ConfigEditorColour
     @ConfigAccordionId(id = 21)
-    public String enchantPerfectColor = "0:255:85:255:255";
+    public String enchantPerfectColor = "0:255:255:85:255";
 
     @Expose
     @ConfigOption(name = "Ultimate Color", desc = "Color for ultimate enchants")
