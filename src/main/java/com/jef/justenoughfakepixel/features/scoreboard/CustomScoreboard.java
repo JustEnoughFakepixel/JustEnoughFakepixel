@@ -261,7 +261,10 @@ public class CustomScoreboard extends JefOverlay {
                 case LINE_COOKIE:
                     if (!inDungeon) {
                         String cookie = TablistParser.readCookieBuff();
-                        if (cookie != null) { lines.add("\u00A7dCookie Buff: \u00A7f" + cookie); lineRawIndex.add(-1); }
+                        if (cookie != null && !cookie.toLowerCase().contains("not active")) {
+                            lines.add("\u00A7dCookie Buff: \u00A7f" + cookie);
+                            lineRawIndex.add(-1);
+                        }
                     }
                     break;
                 case LINE_POWER: {
