@@ -23,6 +23,60 @@ public class General {
     @ConfigAccordionId(id = 0)
     public boolean hideNonCritSplashes = false;
 
+
+    @Expose
+    @ConfigOption(name = "Enchant Highlight", desc = "Settings for enchant highlighting and layout")
+    @ConfigEditorAccordion(id = 21)
+    public boolean enchantHighlightAccordion = false;
+
+    @Expose
+    @ConfigOption(name = "Enable", desc = "Color enchants by level and sort ultimates to the top")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 21)
+    public boolean enchantHighlight = true;
+
+    @Expose
+    @ConfigOption(name = "Layout", desc = "Normal: 2 per line | Compress: pack to fit | Expand: one per line with descriptions")
+    @ConfigEditorDropdown(values = {"Normal", "Compress", "Expand"})
+    @ConfigAccordionId(id = 21)
+    public int enchantLayout = 0;
+
+    @Expose
+    @ConfigOption(name = "Chroma", desc = "Animate enchant colors with a rainbow chroma effect when chroma is selected in color picker")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 21)
+    public boolean enchantChroma = true;
+
+    @Expose
+    @ConfigOption(name = "Poor Color", desc = "Color for enchants below half max level")
+    @ConfigEditorColour
+    @ConfigAccordionId(id = 21)
+    public String enchantPoorColor = "0:170:170:170:170";
+
+    @Expose
+    @ConfigOption(name = "Good Color", desc = "Color for enchants at or above half max level")
+    @ConfigEditorColour
+    @ConfigAccordionId(id = 21)
+    public String enchantGoodColor = "0:255:85:85:85";
+
+    @Expose
+    @ConfigOption(name = "Great Color", desc = "Color for enchants one below max level")
+    @ConfigEditorColour
+    @ConfigAccordionId(id = 21)
+    public String enchantGreatColor = "0:255:0:170:170";
+
+    @Expose
+    @ConfigOption(name = "Perfect Color", desc = "Color for enchants at max level")
+    @ConfigEditorColour
+    @ConfigAccordionId(id = 21)
+    public String enchantPerfectColor = "0:255:85:255:255";
+
+    @Expose
+    @ConfigOption(name = "Ultimate Color", desc = "Color for ultimate enchants")
+    @ConfigEditorColour
+    @ConfigAccordionId(id = 21)
+    public String enchantUltimateColor = "0:255:255:85:255";
+
     @Expose
     @ConfigOption(name = "Gyro Wand Helper", desc = "Settings for the Gyrokinetic Wand helper")
     @ConfigEditorAccordion(id = 20)
@@ -56,7 +110,7 @@ public class General {
     @ConfigOption(name = "Background Color", desc = "Background color of the cooldown timer overlay")
     @ConfigEditorColour
     @ConfigAccordionId(id = 20)
-    public String gyroWandBgColor = "0:0:0:0:0";
+    public String gyroWandBgColor = "0:136:0:0:0";
 
     @Expose
     @ConfigOption(name = "Corner Radius", desc = "Roundness of the cooldown timer overlay corners")
@@ -77,7 +131,7 @@ public class General {
     public boolean gyroWandEditPosDummy = false;
 
     @Expose
-    public Position gyroWandPos = new Position(-295, -162);
+    public Position gyroWandPos = new Position(4, 4);
 
     @Expose
     @ConfigOption(name = "Roman Numerals", desc = "Converts Roman numerals to integers in tooltips and tab list")
@@ -103,4 +157,10 @@ public class General {
     @ConfigOption(name = "Brewing helper", desc = "Highlights brewing stands when done brewing")
     @ConfigEditorBoolean
     public boolean colorBrewingStands = true;
+
+
+    @Expose
+    @ConfigOption(name = "Missing Enchants", desc = "Hold SHIFT on an enchanted item to see missing enchants")
+    @ConfigEditorBoolean
+    public boolean missingEnchants = true;
 }
