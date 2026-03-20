@@ -39,6 +39,16 @@ public class HighlightUtils {
         GlStateManager.enableLighting();
     }
 
+    public static void renderButtonHighlight(int x, int y) {
+        GlStateManager.disableLighting();
+        GlStateManager.disableDepth();
+        GlStateManager.colorMask(true, true, true, false);
+        Gui.drawRect(x, y, x + 18, y + 18, 0x80ffffff);
+        GlStateManager.colorMask(true, true, true, true);
+        GlStateManager.enableDepth();
+        GlStateManager.enableLighting();
+    }
+
     private static boolean matches(ItemStack stack, String query) {
         String display = stack.getDisplayName();
         if (display != null && strip(display).toLowerCase(Locale.ROOT).contains(query)) return true;

@@ -23,9 +23,6 @@ public class SkyblockItemCache {
     private static final Pattern VALUE_PATTERN =
             Pattern.compile("Value\\s*:\\s*[\"']([A-Za-z0-9+/=\\s]+)[\"']");
 
-    // Hardcoded island/location heads — copied directly from NEU's GuiInvButtonEditor.skullIcons.
-    // These are not in the NEU item repo; they are baked into NEU's source.
-    // Key = display name, Value = texture hash (without the "skull:" prefix)
     private static final LinkedHashMap<String, String> BUILTIN_SKULLS;
     static {
         BUILTIN_SKULLS = new LinkedHashMap<String, String>();
@@ -64,8 +61,6 @@ public class SkyblockItemCache {
         BUILTIN_SKULLS.put("wizard tower",              "838564e28aba98301dbda5fafd86d1da4e2eaeef12ea94dcf440b883e559311c");
         BUILTIN_SKULLS.put("dwarven mines base camp",   "2461ec3bd654f62ca9a393a32629e21b4e497c877d3f3380bcf2db0e20fc0244");
     }
-
-    // INSTANCE must be declared AFTER BUILTIN_SKULLS so the static block runs first
     private static final SkyblockItemCache INSTANCE = new SkyblockItemCache();
     public static SkyblockItemCache getInstance() { return INSTANCE; }
 
@@ -79,7 +74,6 @@ public class SkyblockItemCache {
     });
 
     private SkyblockItemCache() {
-        // Pre-populate with hardcoded island/location heads from NEU
         skullMap.putAll(BUILTIN_SKULLS);
     }
 

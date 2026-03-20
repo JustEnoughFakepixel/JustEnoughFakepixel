@@ -413,13 +413,13 @@ public class GuiInvButtonEditor extends GuiScreen {
 
             if (type == 0) {
                 SkyblockItemCache cache = SkyblockItemCache.getInstance();
-                Iterable<String> ids = cache.isLoaded() ? cache.getAllItemIds() : getBuiltinItemIds();
+                Iterable<String> ids = cache.getAllItemIds();
                 for (String id : ids) {
                     if (q.isEmpty() || id.toLowerCase().contains(q)) results.add(id);
                 }
             } else if (type == 1) {
                 SkyblockItemCache cache = SkyblockItemCache.getInstance();
-                Map<String, String> skulls = cache.isLoaded() ? cache.getSkullItems() : getBuiltinSkulls();
+                Map<String, String> skulls = cache.getSkullItems();
                 for (Map.Entry<String, String> e : skulls.entrySet()) {
                     if (q.isEmpty() || e.getKey().toLowerCase().contains(q))
                         results.add("skull:" + e.getValue());
@@ -473,7 +473,6 @@ public class GuiInvButtonEditor extends GuiScreen {
             if (!loaded.isEmpty()) InventoryButtonStorage.getInstance().setButtons(loaded);
         } catch (Exception e) { e.printStackTrace(); }
     }
-
     private void saveToClipboard() {
         try {
             String json = GSON.toJson(InventoryButtonStorage.getInstance().getButtons());
@@ -482,30 +481,10 @@ public class GuiInvButtonEditor extends GuiScreen {
             Utils.copyToClipboard(b64);
         } catch (Exception e) { e.printStackTrace(); }
     }
-
     private static String getClipboard() {
         try {
             return (String) java.awt.Toolkit.getDefaultToolkit()
                     .getSystemClipboard().getData(java.awt.datatransfer.DataFlavor.stringFlavor);
         } catch (Exception e) { return null; }
-    }
-
-    private static List<String> getBuiltinItemIds() {
-        return Arrays.asList("WORKBENCH", "ENDER_CHEST", "CHEST", "COMPASS",
-                "GOLD_BLOCK", "EMERALD", "IRON_SWORD", "BOOK", "NETHER_STAR");
-    }
-
-    private static Map<String, String> getBuiltinSkulls() {
-        Map<String, String> m = new LinkedHashMap<>();
-        m.put("personal bank",  "e36e94f6c34a35465fce4a90f2e25976389eb9709a12273574ff70fd4daa6852");
-        m.put("skyblock hub",   "d7cc6687423d0570d556ac53e0676cb563bbdd9717cd8269bdebed6f6d4e7bf8");
-        m.put("private island", "c9c8881e42915a9d29bb61a16fb26d059913204d265df5b439b3d792acd56");
-        m.put("dungeon hub",    "9b56895b9659896ad647f58599238af532d46db9c1b0389b8bbeb70999dab33d");
-        m.put("dwarven mines",  "51539dddf9ed255ece6348193cd75012c82c93aec381f05572cecf7379711b3b");
-        m.put("bazaar",         "c232e3820897429157619b0ee099fec0628f602fff12b695de54aef11d923ad7");
-        m.put("crimson isle",   "c3687e25c632bce8aa61e0d64c24e694c3eea629ea944f4cf30dcfb4fbce071");
-        m.put("garden",         "f4880d2c1e7b86e87522e20882656f45bafd42f94932b2c5e0d6ecaa490cb4c");
-        m.put("museum",         "438cf3f8e54afc3b3f91d20a49f324dca1486007fe545399055524c17941f4dc");
-        return m;
     }
 }

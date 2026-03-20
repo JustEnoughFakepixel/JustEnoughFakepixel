@@ -1,7 +1,9 @@
 package com.jef.justenoughfakepixel.features.invbuttons;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
+import com.jef.justenoughfakepixel.events.GuiContainerRenderButtonsEvent;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
+import com.jef.justenoughfakepixel.utils.HighlightUtils;
 import com.jef.justenoughfakepixel.utils.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -40,24 +42,50 @@ public class InvButtonRenderer {
     private InventoryButton hovered = null;
     private long hoveredSince = 0L;
 
+    private static boolean isEnabled() {
+        return JefConfig.feature != null && JefConfig.feature.misc.enableInvButtons;
+    }
+
+    private static boolean isGuiEditor() {
+        return Minecraft.getMinecraft().currentScreen instanceof GuiInvButtonEditor;
+    }
+
+    private static int btnX(InventoryButton btn, int gl, int gw) {
+        return gl + btn.x + (btn.anchorRight ? gw : 0);
+    }
+
+    private static int btnY(InventoryButton btn, int gt, int gh) {
+        return gt + btn.y + (btn.anchorBottom ? gh : 0);
+    }
+
+    private static boolean isVisible(InventoryButton btn, GuiContainer gui) {
+        return btn.isActive() && (!btn.playerInvOnly || gui instanceof GuiInventory);
+    }
+
+    private static InventoryButton hitTest(int mx, int my, int gl, int gt, int gw, int gh, GuiContainer gui) {
+        for (InventoryButton btn : InventoryButtonStorage.getInstance().getButtons()) {
+            if (!isVisible(btn, gui)) continue;
+            int bx = btnX(btn, gl, gw);
+            int by = btnY(btn, gt, gh);
+            if (mx >= bx && mx <= bx + 18 && my >= by && my <= by + 18) return btn;
+        }
+        return null;
+    }
+
     @SubscribeEvent
-    public void onDrawPost(GuiScreenEvent.DrawScreenEvent.Post event) {
-        if (!isEnabled()) return;
-        if (!(event.gui instanceof GuiContainer)) return;
-        if (event.gui instanceof GuiInvButtonEditor) return;
+    public void onRenderButtons(GuiContainerRenderButtonsEvent event) {
+        if (!isEnabled() || isGuiEditor()) return;
 
-        GuiContainer gui = (GuiContainer) event.gui;
+        GuiContainer gui = event.gui;
         int gl = gui.guiLeft, gt = gui.guiTop, gw = gui.xSize, gh = gui.ySize;
-
-        List<InventoryButton> buttons = InventoryButtonStorage.getInstance().getButtons();
+        int mx = event.mouseX, my = event.mouseY;
 
         GlStateManager.pushMatrix();
-        GlStateManager.translate(0, 0, 50);
-        for (InventoryButton btn : buttons) {
-            if (!btn.isActive()) continue;
-            if (btn.playerInvOnly && !(event.gui instanceof GuiInventory)) continue;
-            int bx = gl + btn.x + (btn.anchorRight  ? gw : 0);
-            int by = gt + btn.y + (btn.anchorBottom ? gh : 0);
+        GlStateManager.translate(-gl, -gt, 50);
+        for (InventoryButton btn : InventoryButtonStorage.getInstance().getButtons()) {
+            if (!isVisible(btn, gui)) continue;
+            int bx = btnX(btn, gl, gw);
+            int by = btnY(btn, gt, gh);
 
             GlStateManager.color(1, 1, 1, 1f);
             GlStateManager.enableDepth();
@@ -74,69 +102,60 @@ public class InvButtonRenderer {
         }
         GlStateManager.popMatrix();
 
-        // tooltip
-        int mx = event.mouseX, my = event.mouseY;
+        InventoryButton newHovered = hitTest(mx, my, gl, gt, gw, gh, gui);
         long now = System.currentTimeMillis();
-        int delay = JefConfig.feature != null ? JefConfig.feature.misc.invButtonTooltipDelay : 600;
-
-        InventoryButton newHovered = null;
-        for (InventoryButton btn : buttons) {
-            if (!btn.isActive()) continue;
-            if (btn.playerInvOnly && !(event.gui instanceof GuiInventory)) continue;
-            int bx = gl + btn.x + (btn.anchorRight  ? gw : 0);
-            int by = gt + btn.y + (btn.anchorBottom ? gh : 0);
-            if (mx >= bx && mx <= bx + 18 && my >= by && my <= by + 18) { newHovered = btn; break; }
-        }
         if (newHovered != hovered) { hovered = newHovered; hoveredSince = now; }
-        if (hovered != null && now - hoveredSince >= delay && drawHoveringTextMethod != null) {
+
+        if (hovered == null) return;
+
+        int bx = btnX(hovered, gl, gw);
+        int by = btnY(hovered, gt, gh);
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(-gl, -gt, 60);
+        HighlightUtils.renderButtonHighlight(bx, by);
+        GlStateManager.popMatrix();
+
+        int delay = JefConfig.feature != null ? JefConfig.feature.misc.invButtonTooltipDelay : 600;
+        if (now - hoveredSince >= delay && drawHoveringTextMethod != null) {
             String cmd = hovered.command.trim();
             if (!cmd.startsWith("/")) cmd = "/" + cmd;
+            GlStateManager.pushMatrix();
+            GlStateManager.translate(-gl, -gt, 400);
             try {
                 drawHoveringTextMethod.invoke(gui,
                         Collections.singletonList("\u00a77" + cmd),
                         mx, my, Minecraft.getMinecraft().fontRendererObj);
             } catch (Exception ignored) {}
+            GlStateManager.popMatrix();
         }
     }
 
     @SubscribeEvent
     public void onMouseInput(GuiScreenEvent.MouseInputEvent.Pre event) {
-        if (!isEnabled()) return;
+        if (!isEnabled() || isGuiEditor()) return;
         if (Mouse.getEventButton() < 0) return;
         if (!(event.gui instanceof GuiContainer)) return;
-        if (event.gui instanceof GuiInvButtonEditor) return;
 
         GuiContainer gui = (GuiContainer) event.gui;
         int gl = gui.guiLeft, gt = gui.guiTop, gw = gui.xSize, gh = gui.ySize;
         int mx = Mouse.getEventX() * event.gui.width  / Minecraft.getMinecraft().displayWidth;
         int my = event.gui.height - Mouse.getEventY() * event.gui.height / Minecraft.getMinecraft().displayHeight - 1;
 
+        InventoryButton btn = hitTest(mx, my, gl, gt, gw, gh, gui);
+        if (btn == null) return;
+
+        if (Minecraft.getMinecraft().thePlayer.inventory.getItemStack() != null) {
+            event.setCanceled(true);
+            return;
+        }
+
         int clickType = JefConfig.feature != null ? JefConfig.feature.misc.invButtonClickType : 0;
         boolean fire  = clickType == 0 ? Mouse.getEventButtonState() : !Mouse.getEventButtonState();
-
-        for (InventoryButton btn : InventoryButtonStorage.getInstance().getButtons()) {
-            if (!btn.isActive()) continue;
-            if (btn.playerInvOnly && !(event.gui instanceof GuiInventory)) continue;
-            int bx = gl + btn.x + (btn.anchorRight  ? gw : 0);
-            int by = gt + btn.y + (btn.anchorBottom ? gh : 0);
-            if (mx >= bx && mx <= bx + 18 && my >= by && my <= by + 18) {
-                if (Minecraft.getMinecraft().thePlayer.inventory.getItemStack() == null) {
-                    if (fire) {
-                        String cmd = btn.command.trim();
-                        if (!cmd.startsWith("/")) cmd = "/" + cmd;
-                        if (ClientCommandHandler.instance.executeCommand(
-                                Minecraft.getMinecraft().thePlayer, cmd) == 0)
-                            Minecraft.getMinecraft().thePlayer.sendChatMessage(cmd);
-                    }
-                } else {
-                    event.setCanceled(true);
-                }
-                return;
-            }
+        if (fire) {
+            String cmd = btn.command.trim();
+            if (!cmd.startsWith("/")) cmd = "/" + cmd;
+            if (ClientCommandHandler.instance.executeCommand(Minecraft.getMinecraft().thePlayer, cmd) == 0)
+                Minecraft.getMinecraft().thePlayer.sendChatMessage(cmd);
         }
-    }
-
-    private static boolean isEnabled() {
-        return JefConfig.feature != null && JefConfig.feature.misc.enableInvButtons;
     }
 }

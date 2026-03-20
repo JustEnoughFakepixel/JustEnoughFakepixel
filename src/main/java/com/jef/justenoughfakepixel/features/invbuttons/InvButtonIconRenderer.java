@@ -3,6 +3,7 @@ package com.jef.justenoughfakepixel.features.invbuttons;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.jef.justenoughfakepixel.utils.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
@@ -35,7 +36,7 @@ public class InvButtonIconRenderer {
                     "invbuttons/extraicons/" + name + ".png");
             Minecraft.getMinecraft().getTextureManager().bindTexture(loc);
             GlStateManager.color(1, 1, 1, 1);
-            drawTexturedRect(x, y, 16, 16);
+            Utils.drawTexturedRect(x, y, 16, 16);
         } else {
             ItemStack stack = getStack(icon);
             if (stack == null) return;
@@ -167,17 +168,4 @@ public class InvButtonIconRenderer {
         RenderHelper.disableStandardItemLighting();
     }
 
-    private static void drawTexturedRect(float x, float y, float w, float h) {
-        GlStateManager.enableTexture2D();
-        GlStateManager.enableBlend();
-        net.minecraft.client.renderer.Tessellator tess = net.minecraft.client.renderer.Tessellator.getInstance();
-        net.minecraft.client.renderer.WorldRenderer wr = tess.getWorldRenderer();
-        wr.begin(7, net.minecraft.client.renderer.vertex.DefaultVertexFormats.POSITION_TEX);
-        wr.pos(x,     y + h, 0).tex(0, 1).endVertex();
-        wr.pos(x + w, y + h, 0).tex(1, 1).endVertex();
-        wr.pos(x + w, y,     0).tex(1, 0).endVertex();
-        wr.pos(x,     y,     0).tex(0, 0).endVertex();
-        tess.draw();
-        GlStateManager.disableBlend();
-    }
 }
