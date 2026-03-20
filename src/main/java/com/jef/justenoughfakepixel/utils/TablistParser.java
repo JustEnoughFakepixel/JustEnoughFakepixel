@@ -1,7 +1,6 @@
 package com.jef.justenoughfakepixel.utils;
 
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import com.jef.justenoughfakepixel.utils.ColorUtils;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
 import com.jef.justenoughfakepixel.features.scoreboard.BankParser;
@@ -21,8 +20,16 @@ import java.util.List;
 public class TablistParser {
 
     private static ScoreboardUtils.Location currentLocation = ScoreboardUtils.Location.NONE;
+    private static String activeEvent        = null;
+    private static String activeEventTimeLeft = null;
 
-    public static ScoreboardUtils.Location getCurrentLocation() { return currentLocation; }
+    public static ScoreboardUtils.Location getCurrentLocation()  { return currentLocation; }
+    public static String getActiveEvent()                        { return activeEvent; }
+    public static String getActiveEventTimeLeft()                { return activeEventTimeLeft; }
+
+    public static boolean isEventActive(String eventName) {
+        return activeEvent != null && activeEvent.contains(eventName);
+    }
 
     private static net.minecraft.util.IChatComponent getTabFooter() {
         try {
@@ -104,7 +111,9 @@ public class TablistParser {
 
     @SubscribeEvent
     public void onWorldUnload(WorldEvent.Unload event) {
-        currentLocation = ScoreboardUtils.Location.NONE;
+        currentLocation       = ScoreboardUtils.Location.NONE;
+        activeEvent           = null;
+        activeEventTimeLeft   = null;
         BankParser.clear();
     }
 
@@ -115,6 +124,9 @@ public class TablistParser {
 
         boolean inServerSection  = false;
         boolean inAccountSection = false;
+        boolean expectEventTime  = false;
+
+        String  pendingEvent     = null;
 
         for (NetworkPlayerInfo info : infos) {
             String raw = tab.getPlayerName(info);
@@ -125,11 +137,13 @@ public class TablistParser {
             if (raw.contains("\u00A73\u00A7l Server Info\u00A7r")) {
                 inServerSection  = true;
                 inAccountSection = false;
+                expectEventTime  = false;
                 continue;
             }
             if (raw.contains("\u00A76\u00A7lAccount Info") || line.equals("Account Info")) {
                 inAccountSection = true;
                 inServerSection  = false;
+                expectEventTime  = false;
                 continue;
             }
             if (raw.contains("\u00A72\u00A7lPlayer Stats\u00A7r")
@@ -137,10 +151,19 @@ public class TablistParser {
                     || line.equals("Party")        || line.equals("Dungeon")) {
                 inServerSection  = false;
                 inAccountSection = false;
+                expectEventTime  = false;
                 continue;
             }
 
-            if (line.isEmpty()) continue;
+            if (line.isEmpty()) {
+                if (expectEventTime) {
+                    activeEvent         = pendingEvent;
+                    activeEventTimeLeft = null;
+                    expectEventTime     = false;
+                    pendingEvent        = null;
+                }
+                continue;
+            }
 
             if (inServerSection) {
                 if (line.startsWith("Dungeon: ")) {
@@ -159,6 +182,25 @@ public class TablistParser {
             }
 
             if (inAccountSection) {
+                if (expectEventTime) {
+                    if (line.startsWith("Ends in: ")) {
+                        activeEvent         = pendingEvent;
+                        activeEventTimeLeft = line.substring("Ends in: ".length()).trim();
+                    } else {
+                        activeEvent         = pendingEvent;
+                        activeEventTimeLeft = null;
+                    }
+                    expectEventTime = false;
+                    pendingEvent    = null;
+                    continue;
+                }
+
+                if (line.startsWith("Event: ")) {
+                    pendingEvent    = line.substring("Event: ".length()).trim();
+                    expectEventTime = true;
+                    continue;
+                }
+
                 if (line.startsWith("Bank: ")) {
                     BankParser.setBank(parseAmount(raw, line.substring("Bank: ".length())));
                     continue;
@@ -170,6 +212,11 @@ public class TablistParser {
                     continue;
                 }
             }
+        }
+
+        if (expectEventTime && pendingEvent != null) {
+            activeEvent         = pendingEvent;
+            activeEventTimeLeft = null;
         }
     }
 
@@ -199,5 +246,4 @@ public class TablistParser {
         }
         return -1;
     }
-
 }

@@ -11,12 +11,13 @@ import com.jef.justenoughfakepixel.features.diana.DianaEventOverlay;
 import com.jef.justenoughfakepixel.features.diana.GuiDianaOverlayEditor;
 import com.jef.justenoughfakepixel.features.general.GyroWandOverlay;
 import com.jef.justenoughfakepixel.features.mining.FetchurOverlay;
+import com.jef.justenoughfakepixel.features.mining.PowderOverlay;
+import com.jef.justenoughfakepixel.features.mining.PowderStats;
 import com.jef.justenoughfakepixel.features.dungeons.DungeonStats;
 import com.jef.justenoughfakepixel.features.misc.CurrentPetOverlay;
 import com.jef.justenoughfakepixel.features.misc.PerformanceHUD;
 import com.jef.justenoughfakepixel.features.scoreboard.CustomScoreboard;
 import com.jef.justenoughfakepixel.features.waypoints.WaypointGroupGui;
-import com.jef.justenoughfakepixel.init.RegisterKeybind;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.settings.KeyBinding;
@@ -42,7 +43,6 @@ public class JefConfig {
             .excludeFieldsWithoutExposeAnnotation()
             .create();
 
-    @RegisterKeybind
     public static final KeyBinding openGuiKey = new KeyBinding(
             "Open JEF GUI",
             Keyboard.KEY_P,
@@ -52,12 +52,14 @@ public class JefConfig {
     public static GuiScreen screenToOpen = null;
     private static int screenTicks = 0;
     private static boolean waypointManagerKeyWasDown = false;
+    private static boolean powderToggleKeyWasDown = false;
     private static boolean registered = false;
 
     public static void register() {
         if (registered) return;
         init();
         MinecraftForge.EVENT_BUS.register(new JefConfig());
+        ClientRegistry.registerKeyBinding(openGuiKey);
         ClientCommandHandler.instance.registerCommand(new JefCommand());
         registered = true;
     }
@@ -215,6 +217,25 @@ public class JefConfig {
                 .withParent(Minecraft.getMinecraft().currentScreen);
     }
 
+    public static void openPowderEditor() {
+        if (feature == null) return;
+        PowderOverlay overlay = PowderOverlay.getInstance();
+        if (overlay == null) return;
+        screenToOpen = new GuiPositionEditor(
+                feature.mining.powderOverlayPos,
+                overlay::getOverlayWidth,
+                overlay::getOverlayHeight,
+                () -> overlay.render(true),
+                JefConfig::saveConfig,
+                JefConfig::saveConfig
+        ).withOverlayScale(feature.mining.powderOverlayScale)
+                .withParent(Minecraft.getMinecraft().currentScreen);
+    }
+
+    public static void resetPowderTracker() {
+        PowderStats.getInstance().reset();
+    }
+
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
@@ -234,8 +255,22 @@ public class JefConfig {
         boolean managerKeyDown = feature != null
                 && feature.waypoints.waypointManagerKey != org.lwjgl.input.Keyboard.KEY_NONE
                 && org.lwjgl.input.Keyboard.isKeyDown(feature.waypoints.waypointManagerKey);
+
         if (managerKeyDown && !waypointManagerKeyWasDown && Minecraft.getMinecraft().currentScreen == null)
             openWaypointGroupGui();
+
         waypointManagerKeyWasDown = managerKeyDown;
+
+        if (feature != null
+                && feature.mining.powderToggleKey != org.lwjgl.input.Keyboard.KEY_NONE
+                && org.lwjgl.input.Keyboard.isKeyDown(feature.mining.powderToggleKey)
+                && !powderToggleKeyWasDown
+                && Minecraft.getMinecraft().currentScreen == null) {
+            PowderStats.getInstance().toggleTracking();
+        }
+
+        powderToggleKeyWasDown = feature != null
+                && feature.mining.powderToggleKey != org.lwjgl.input.Keyboard.KEY_NONE
+                && org.lwjgl.input.Keyboard.isKeyDown(feature.mining.powderToggleKey);
     }
 }

@@ -49,6 +49,8 @@ public class Config {
             case "openSearchBarEditor":   JefConfig.openSearchBarEditor();    break;
             case "openCurrentPetEditor": JefConfig.openCurrentPetEditor();    break;
             case "openGyroWandEditor": JefConfig.openGyroWandEditor(); break;
+            case "openPowderEditor":   JefConfig.openPowderEditor();   break;
+            case "resetPowderTracker": JefConfig.resetPowderTracker(); break;
         }
     }
 }

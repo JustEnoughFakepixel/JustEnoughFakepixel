@@ -7,6 +7,7 @@ import com.jef.justenoughfakepixel.features.misc.PetCache;
 import com.jef.justenoughfakepixel.features.scoreboard.MaxwellPowerSync;
 import com.jef.justenoughfakepixel.features.waypoints.WaypointStorage;
 import com.jef.justenoughfakepixel.features.diana.DianaStats;
+import com.jef.justenoughfakepixel.features.mining.PowderStats;
 import com.jef.justenoughfakepixel.init.JefEventRegistrar;
 import com.jef.justenoughfakepixel.repo.JefRepo;
 import com.jef.justenoughfakepixel.repo.RepoHandler;
@@ -38,6 +39,7 @@ public class JefMod {
         JefRepo.init();
         WaypointStorage.getInstance().initFile(JefConfig.configDirectory);
         DianaStats.getInstance().initFile(JefConfig.configDirectory);
+        PowderStats.getInstance().initFile(JefConfig.configDirectory);
         MaxwellPowerSync.getInstance().initFile(JefConfig.configDirectory);
         PetCache.getInstance().initFile(JefConfig.configDirectory);
         CurrentPetTracker.getInstance().initFile(JefConfig.configDirectory);
@@ -48,6 +50,7 @@ public class JefMod {
         JefConfig.register();
         WaypointStorage.getInstance().load();
         DianaStats.getInstance().load();
+        PowderStats.getInstance().load();
         MaxwellPowerSync.getInstance().load();
         PetCache.getInstance().load();
         CurrentPetTracker.getInstance().load();
