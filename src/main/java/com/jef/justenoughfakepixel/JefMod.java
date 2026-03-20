@@ -2,6 +2,8 @@ package com.jef.justenoughfakepixel;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.data.ApiHandler;
+import com.jef.justenoughfakepixel.features.invbuttons.InventoryButtonStorage;
+import com.jef.justenoughfakepixel.features.invbuttons.SkyblockItemCache;
 import com.jef.justenoughfakepixel.features.misc.CurrentPetTracker;
 import com.jef.justenoughfakepixel.features.misc.PetCache;
 import com.jef.justenoughfakepixel.features.scoreboard.MaxwellPowerSync;
@@ -38,6 +40,7 @@ public class JefMod {
         JefConfig.init();
         JefRepo.init();
         WaypointStorage.getInstance().initFile(JefConfig.configDirectory);
+        InventoryButtonStorage.getInstance().initFile(JefConfig.configDirectory);
         DianaStats.getInstance().initFile(JefConfig.configDirectory);
         PowderStats.getInstance().initFile(JefConfig.configDirectory);
         MaxwellPowerSync.getInstance().initFile(JefConfig.configDirectory);
@@ -49,6 +52,8 @@ public class JefMod {
     public void clientInit(FMLInitializationEvent event) {
         JefConfig.register();
         WaypointStorage.getInstance().load();
+        InventoryButtonStorage.getInstance().load();
+        SkyblockItemCache.getInstance().loadAsync();
         DianaStats.getInstance().load();
         PowderStats.getInstance().load();
         MaxwellPowerSync.getInstance().load();

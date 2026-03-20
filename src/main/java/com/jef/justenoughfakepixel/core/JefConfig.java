@@ -249,6 +249,10 @@ public class JefConfig {
                 .withParent(Minecraft.getMinecraft().currentScreen);
     }
 
+    public static void openInvButtonEditor() {
+        screenToOpen = new com.jef.justenoughfakepixel.features.invbuttons.GuiInvButtonEditor();
+    }
+
     public static void resetPowderTracker() {
         PowderStats.getInstance().reset();
     }

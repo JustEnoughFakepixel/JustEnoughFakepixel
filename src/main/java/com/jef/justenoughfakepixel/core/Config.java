@@ -55,6 +55,7 @@ public class Config {
             case "openItemPickupLogEditor": JefConfig.openItemPickupLogEditor(); break;
             case "openGyroWandEditor": JefConfig.openGyroWandEditor(); break;
             case "openPowderEditor":   JefConfig.openPowderEditor();   break;
+            case "openInvButtonEditor": JefConfig.openInvButtonEditor(); break;
             case "resetPowderTracker": JefConfig.resetPowderTracker(); break;
         }
     }

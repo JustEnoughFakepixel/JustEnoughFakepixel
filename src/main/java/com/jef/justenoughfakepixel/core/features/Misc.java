@@ -170,6 +170,38 @@ public class Misc {
     @Expose
     public Position currentPetPos = new Position(18, 14);
 
+
+    // ── Inventory Buttons ────────────────────────────────────────────────────
+
+    @Expose
+    @ConfigOption(name = "Inventory Buttons", desc = "Clickable shortcut buttons on inventories")
+    @ConfigEditorAccordion(id = 30)
+    public boolean invButtonsAccordion = false;
+
+    @Expose
+    @ConfigOption(name = "Enable", desc = "Show inventory buttons")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 30)
+    public boolean enableInvButtons = true;
+
+    @Expose
+    @ConfigOption(name = "Open Button Editor", desc = "Open the button editor (/jefbuttons)")
+    @ConfigEditorButton(runnableId = "openInvButtonEditor", buttonText = "Open")
+    @ConfigAccordionId(id = 30)
+    public boolean openInvButtonEditorDummy = false;
+
+    @Expose
+    @ConfigOption(name = "Click Type", desc = "Mouse Down or Mouse Up to fire")
+    @ConfigEditorDropdown(values = {"Mouse Down", "Mouse Up"})
+    @ConfigAccordionId(id = 30)
+    public int invButtonClickType = 0;
+
+    @Expose
+    @ConfigOption(name = "Tooltip Delay (ms)", desc = "Hover time before command tooltip appears")
+    @ConfigEditorSliderAnnotation(minValue = 0f, maxValue = 1500f, minStep = 50f)
+    @ConfigAccordionId(id = 30)
+    public int invButtonTooltipDelay = 600;
+
     @Expose
     @ConfigOption(name = "Item Stack Tips", desc = "Shows enchant levels on books and floor numbers on Catacombs passes")
     @ConfigEditorBoolean
