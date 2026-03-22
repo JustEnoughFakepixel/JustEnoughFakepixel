@@ -6,3 +6,4 @@ build/
 
 gradle.properties
 settings.gradle.kts
+gradle.properties
