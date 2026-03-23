@@ -7,6 +7,7 @@ import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.JefOverlay;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -20,6 +21,9 @@ public class ItemPickupLog extends JefOverlay {
     private static final int MAX_LINES = 15;
     public static final int OVERLAY_WIDTH  = 140;
     public static final int OVERLAY_HEIGHT = 80;
+
+    // Hotbar slot index to ignore (0-based, slot 9 = index 8)
+    private static final int IGNORED_HOTBAR_SLOT = 8;
 
     private static class LogEntry {
         final String displayName;
@@ -45,7 +49,12 @@ public class ItemPickupLog extends JefOverlay {
     }
 
     private static ItemPickupLog instance;
+
+    // Snapshot taken when a screen opens, diffed when it closes
+    private ItemStack[] preScreenSnapshot = null;
+    // Snapshot from last tick when no screen is open
     private ItemStack[] previousInventory = null;
+
     private final LinkedList<LogEntry> log = new LinkedList<>();
 
     public ItemPickupLog() {
@@ -65,10 +74,33 @@ public class ItemPickupLog extends JefOverlay {
         return JefConfig.feature.misc.itemPickupLog;
     }
 
+    // ── GUI open/close ────────────────────────────────────────────────────────
+
     @SubscribeEvent
-    public void onWorldUnload(WorldEvent.Unload event) {
-        resetSnapshot();
+    public void onGuiOpen(GuiOpenEvent event) {
+        if (!isEnabled()) return;
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.thePlayer == null) return;
+
+        if (event.gui == null) {
+            // Screen closing — diff against what we had before screen opened
+            if (preScreenSnapshot != null) {
+                ItemStack[] current = mc.thePlayer.inventory.mainInventory;
+                if (preScreenSnapshot.length == current.length) {
+                    diffAndLog(preScreenSnapshot, current);
+                }
+                preScreenSnapshot = null;
+            }
+            // Reset tick snapshot so we don't double-count on the next tick
+            previousInventory = copyInventory(mc.thePlayer.inventory.mainInventory);
+        } else {
+            // Screen opening — take a snapshot of inventory right now
+            preScreenSnapshot = copyInventory(mc.thePlayer.inventory.mainInventory);
+            previousInventory = null;
+        }
     }
+
+    // ── Tick tracking (only while no screen is open) ──────────────────────────
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
@@ -82,6 +114,9 @@ public class ItemPickupLog extends JefOverlay {
 
         log.removeIf(LogEntry::isExpired);
 
+        // Screen is open — tick tracking paused, GUI events handle the diff
+        if (mc.currentScreen != null) return;
+
         ItemStack[] current = mc.thePlayer.inventory.mainInventory;
 
         if (previousInventory != null && previousInventory.length == current.length) {
@@ -91,11 +126,19 @@ public class ItemPickupLog extends JefOverlay {
         previousInventory = copyInventory(current);
     }
 
+    @SubscribeEvent
+    public void onWorldUnload(WorldEvent.Unload event) {
+        resetSnapshot();
+    }
+
+    // ── Diff logic ────────────────────────────────────────────────────────────
+
     private void diffAndLog(ItemStack[] prev, ItemStack[] curr) {
         Map<String, Integer> prevMap = new HashMap<>();
         Map<String, Integer> currMap = new HashMap<>();
 
         for (int i = 0; i < prev.length; i++) {
+            if (i == IGNORED_HOTBAR_SLOT) continue;
             accumulate(prevMap, prev[i]);
             accumulate(currMap, curr[i]);
         }
@@ -128,6 +171,8 @@ public class ItemPickupLog extends JefOverlay {
         log.addLast(new LogEntry(name, delta));
     }
 
+    // ── Rendering ─────────────────────────────────────────────────────────────
+
     @Override
     public List<String> getLines(boolean preview) {
         List<String> lines = new ArrayList<>();
@@ -151,8 +196,11 @@ public class ItemPickupLog extends JefOverlay {
         return lines;
     }
 
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
     public void resetSnapshot() {
         previousInventory = null;
+        preScreenSnapshot = null;
         log.clear();
     }
 
