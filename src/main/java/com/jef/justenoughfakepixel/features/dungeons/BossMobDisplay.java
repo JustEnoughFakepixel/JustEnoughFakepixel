@@ -14,7 +14,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.StringUtils;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -22,25 +22,18 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 @RegisterEvents
-public class BloodMobDisplay {
+public class BossMobDisplay {
 
-    private static final Pattern MOB_NAME = Pattern.compile(
-            ".*(?:Putrid|Reaper|Vader|Frost|Cannibal|Revoker|Tear|Mr\\.? Dead|Skull|Walker|Psycho|Ooze|Freak|Flamer|Mute|Leech|Parasite).*"
-    );
-    private static final Pattern DYING1 = Pattern.compile(
-            "^§.\\[§.Lv\\d+§.\\] §.+ (?:§.)+0§f/.+§c❤$"
-    );
-    private static final Pattern DYING2 = Pattern.compile(
-            "^.+ (?:§.)+0§c❤$"
-    );
+    private enum BossType { BONZO, SCARF, SCARF_MINION, PROFESSOR, PROFESSOR_GUARDIAN }
 
+    private volatile Map<EntityLivingBase, BossType> bossMobs = new HashMap<>();
     private static final Minecraft mc = Minecraft.getMinecraft();
-    private volatile Set<EntityLivingBase> bloodMobs = new HashSet<>();
     private int tickCounter = 0;
 
     // ── Scan ─────────────────────────────────────────────────────────────────
@@ -48,54 +41,98 @@ public class BloodMobDisplay {
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
-        if (JefConfig.feature == null || JefConfig.feature.dungeons.bloodMobHighlight == 2) return;
+        if (JefConfig.feature == null) return;
+
+        boolean anyEnabled =
+                JefConfig.feature.dungeons.bonzoHighlight != 2 ||
+                        JefConfig.feature.dungeons.scarfHighlight != 2 ||
+                        JefConfig.feature.dungeons.scarfMinionHighlight != 2 ||
+                        JefConfig.feature.dungeons.professorHighlight != 2;
+        if (!anyEnabled) return;
 
         if (++tickCounter < 4) return;
         tickCounter = 0;
 
         if (!ScoreboardUtils.isInDungeon() || mc.theWorld == null) {
-            bloodMobs = new HashSet<>();
+            bossMobs = new HashMap<>();
             return;
         }
 
-        Set<EntityLivingBase> found = new HashSet<>();
+        Map<EntityLivingBase, BossType> found = new HashMap<>();
+
         for (Entity entity : mc.theWorld.loadedEntityList) {
             if (!(entity instanceof EntityArmorStand)) continue;
-            String name = entity.getName();
-            if (name == null || !MOB_NAME.matcher(name).matches()) continue;
+            String raw = entity.getName();
+            if (raw == null) continue;
+            String name = StringUtils.stripControlCodes(raw).toLowerCase();
 
+            BossType type = null;
+
+            if (JefConfig.feature.dungeons.bonzoHighlight != 2 && name.contains("bonzo")) {
+                type = BossType.BONZO;
+            } else if (JefConfig.feature.dungeons.scarfMinionHighlight != 2
+                    && (name.contains("undead mage")
+                    || name.contains("undead archer")
+                    || name.contains("undead warrior")
+                    || name.contains("undead priest"))) {
+                type = BossType.SCARF_MINION;
+            } else if (JefConfig.feature.dungeons.scarfHighlight != 2 && name.contains("scarf")) {
+                type = BossType.SCARF;
+            } else if (JefConfig.feature.dungeons.professorHighlight != 2
+                    && (name.contains("healthy")
+                    || name.contains("chaos")
+                    || name.contains("laser")
+                    || name.contains("rogue")
+                    || name.contains("reinforced"))) {
+                type = BossType.PROFESSOR_GUARDIAN;
+            } else if (JefConfig.feature.dungeons.professorHighlight != 2 && name.contains("professor")) {
+                type = BossType.PROFESSOR;
+            }
+
+            if (type == null) continue;
+
+            final BossType finalType = type;
             EntityLivingBase mob = mc.theWorld.getEntitiesWithinAABB(
                     EntityLivingBase.class,
-                    entity.getEntityBoundingBox().expand(0.5, 3.0, 0.5),
+                    entity.getEntityBoundingBox().expand(1.0, 3.0, 1.0),
                     e -> e != null && !(e instanceof EntityArmorStand) && e != mc.thePlayer
             ).stream().findFirst().orElse(null);
 
-            if (mob != null && !isDying(mob)) found.add(mob);
+            if (mob != null && !mob.isDead && mob.getHealth() > 0)
+                found.put(mob, finalType);
         }
-        bloodMobs = found;
+
+        bossMobs = found;
     }
 
     // ── Outline mode ─────────────────────────────────────────────────────────
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void onRenderEntityModel(RenderEntityModelEvent event) {
-        if (JefConfig.feature == null || JefConfig.feature.dungeons.bloodMobHighlight != 1) return;
+        if (JefConfig.feature == null) return;
         EntityLivingBase entity = event.getEntity();
-        if (!bloodMobs.contains(entity) || isDying(entity) || entity.isInvisible()) return;
-        renderCleanOutline(event, getColor());
+        BossType type = bossMobs.get(entity);
+        if (type == null || entity.isInvisible()) return;
+        if (highlightModeFor(type) != 1) return;
+        renderCleanOutline(event, colorFor(type));
     }
 
     // ── Box mode ─────────────────────────────────────────────────────────────
 
     @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
-        if (JefConfig.feature == null || JefConfig.feature.dungeons.bloodMobHighlight != 0) return;
-        Set<EntityLivingBase> snapshot = bloodMobs;
+        if (JefConfig.feature == null) return;
+        Map<EntityLivingBase, BossType> snapshot = bossMobs;
         if (snapshot.isEmpty() || mc.thePlayer == null) return;
 
-        Color c = getColor();
-        float r = c.getRed() / 255f, g = c.getGreen() / 255f,
-                b = c.getBlue() / 255f, a = c.getAlpha() / 255f;
+        Map<BossType, Set<EntityLivingBase>> byType = new HashMap<>();
+        for (Map.Entry<EntityLivingBase, BossType> entry : snapshot.entrySet()) {
+            EntityLivingBase mob = entry.getKey();
+            BossType type = entry.getValue();
+            if (highlightModeFor(type) != 0 || mob.isDead || mob.getHealth() <= 0) continue;
+            byType.computeIfAbsent(type, k -> new HashSet<>()).add(mob);
+        }
+        if (byType.isEmpty()) return;
 
         double vx = mc.getRenderManager().viewerPosX;
         double vy = mc.getRenderManager().viewerPosY;
@@ -113,9 +150,12 @@ public class BloodMobDisplay {
         GL11.glPushMatrix();
         GL11.glTranslated(-vx, -vy, -vz);
 
-        for (EntityLivingBase mob : snapshot) {
-            if (mob.isDead || mob.getHealth() <= 0) continue;
-            drawBox(mob.getEntityBoundingBox().expand(0.1, 0.05, 0.1), r, g, b, a);
+        for (Map.Entry<BossType, Set<EntityLivingBase>> entry : byType.entrySet()) {
+            Color c = colorFor(entry.getKey());
+            float r = c.getRed() / 255f, g = c.getGreen() / 255f,
+                    b = c.getBlue() / 255f, a = c.getAlpha() / 255f;
+            for (EntityLivingBase mob : entry.getValue())
+                drawBox(mob.getEntityBoundingBox().expand(0.1, 0.05, 0.1), r, g, b, a);
         }
 
         GL11.glPopMatrix();
@@ -125,22 +165,35 @@ public class BloodMobDisplay {
 
     // ── Helpers ──────────────────────────────────────────────────────────────
 
-    private Color getColor() {
-        int argb = ChromaColour.specialToChromaRGB(JefConfig.feature.dungeons.bloodMobColor);
+    private int highlightModeFor(BossType type) {
+        if (JefConfig.feature == null) return 2;
+        switch (type) {
+            case BONZO:              return JefConfig.feature.dungeons.bonzoHighlight;
+            case SCARF:              return JefConfig.feature.dungeons.scarfHighlight;
+            case SCARF_MINION:       return JefConfig.feature.dungeons.scarfMinionHighlight;
+            case PROFESSOR:          return JefConfig.feature.dungeons.professorHighlight;
+            case PROFESSOR_GUARDIAN: return JefConfig.feature.dungeons.professorHighlight;
+            default:                 return 2;
+        }
+    }
+
+    private Color colorFor(BossType type) {
+        String raw;
+        switch (type) {
+            case BONZO:              raw = JefConfig.feature.dungeons.bonzoColor; break;
+            case SCARF:              raw = JefConfig.feature.dungeons.scarfColor; break;
+            case SCARF_MINION:       raw = JefConfig.feature.dungeons.scarfMinionColor; break;
+            case PROFESSOR:
+            case PROFESSOR_GUARDIAN: raw = JefConfig.feature.dungeons.professorColor; break;
+            default:                 raw = "200:255:255:255:255"; break;
+        }
+        int argb = ChromaColour.specialToChromaRGB(raw);
         return new Color(
                 (argb >> 16) & 0xFF,
                 (argb >> 8)  & 0xFF,
                 argb        & 0xFF,
                 (argb >> 24) & 0xFF
         );
-    }
-
-    private boolean isDying(EntityLivingBase entity) {
-        if (entity == null || entity.isDead || entity.getHealth() <= 0.1f) return true;
-        IChatComponent name = entity.getDisplayName();
-        if (name == null) return false;
-        String text = name.getUnformattedText();
-        return DYING1.matcher(text).matches() || DYING2.matcher(text).matches();
     }
 
     private void renderCleanOutline(RenderEntityModelEvent event, Color color) {
