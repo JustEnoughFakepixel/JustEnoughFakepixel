@@ -15,7 +15,7 @@ public enum HotmPerkData {
     OLD_SCHOOL          ("Old-School",              20,  PowderType.GEMSTONE, 4.0),
     PROFESSIONAL        ("Professional",            140, PowderType.GEMSTONE, 2.3),
     MOLE                ("Mole",                    200, PowderType.GEMSTONE, 2.17883),
-    GEM_LOVER           ("Gem Lover",               20,  PowderType.GEMSTONE, 4.0),
+    GEM_LOVER           ("Gem lover",               20,  PowderType.GEMSTONE, 4.0),
     SEASONED_MINEMAN    ("Seasoned Mineman",         100, PowderType.GEMSTONE, 2.3),
     FORTUNATE_MINEMAN   ("Fortunate Mineman",        50,  PowderType.GEMSTONE, 3.2),
     BLOCKHEAD           ("Blockhead",               20,  PowderType.GEMSTONE, 4.0),

@@ -39,6 +39,10 @@ public class Config {
     public final Farming farming = new Farming();
 
     @Expose
+    @Category(name = "Fishing", desc = "Fishing features")
+    public final Fishing fishing = new Fishing();
+
+    @Expose
     @Category(name = "Debug", desc = "Debug tools")
     public final Debug debug = new Debug();
 
@@ -58,6 +62,7 @@ public class Config {
             case "openInvButtonEditor": JefConfig.openInvButtonEditor(); break;
             case "resetPowderTracker": JefConfig.resetPowderTracker(); break;
             case "openDungeonBreakerEditor": JefConfig.openDungeonBreakerEditor(); break;
+            case "openTrophyFishEditor":    JefConfig.openTrophyFishEditor();    break;
         }
     }
 }

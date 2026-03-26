@@ -20,6 +20,7 @@ import com.jef.justenoughfakepixel.features.misc.CurrentPetOverlay;
 import com.jef.justenoughfakepixel.features.misc.PerformanceHUD;
 import com.jef.justenoughfakepixel.features.scoreboard.CustomScoreboard;
 import com.jef.justenoughfakepixel.features.waypoints.WaypointGroupGui;
+import com.jef.justenoughfakepixel.features.fishing.trophy.TrophyFishOverlay;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.settings.KeyBinding;
@@ -266,6 +267,21 @@ public class JefConfig {
 
     public static void openInvButtonEditor() {
         screenToOpen = new com.jef.justenoughfakepixel.features.invbuttons.GuiInvButtonEditor();
+    }
+
+    public static void openTrophyFishEditor() {
+        if (feature == null) return;
+        TrophyFishOverlay overlay = TrophyFishOverlay.getInstance();
+        if (overlay == null) return;
+        screenToOpen = new GuiPositionEditor(
+                feature.fishing.trophyFishPos,
+                overlay::getOverlayWidth,
+                overlay::getOverlayHeight,
+                () -> overlay.render(true),
+                JefConfig::saveConfig,
+                JefConfig::saveConfig
+        ).withOverlayScale(feature.fishing.trophyFishScale)
+                .withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     public static void resetPowderTracker() {
