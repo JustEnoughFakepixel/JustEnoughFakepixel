@@ -14,7 +14,7 @@ public class MixinRenderItem_Glint {
 
     @Inject(method = "renderEffect", at = @At("HEAD"), cancellable = true)
     private void jef$disableEnchantGlint(CallbackInfo ci) {
-        if (JefConfig.feature != null && JefConfig.feature.general.disableEnchantGlint)
+        if (JefConfig.feature != null && JefConfig.feature.qol.disableEnchantGlint)
             ci.cancel();
     }
 }

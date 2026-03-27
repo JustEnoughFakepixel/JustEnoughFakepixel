@@ -1,4 +1,4 @@
-package com.jef.justenoughfakepixel.features.general;
+package com.jef.justenoughfakepixel.features.qol;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
@@ -34,8 +34,8 @@ public class DamageSplashes {
     @SubscribeEvent
     public void onRenderLiving(RenderLivingEvent.Pre event) {
         if (JefConfig.feature == null) return;
-        boolean hideCrit    = JefConfig.feature.general.hideCritSplashes;
-        boolean hideNonCrit = JefConfig.feature.general.hideNonCritSplashes;
+        boolean hideCrit    = JefConfig.feature.qol.hideCritSplashes;
+        boolean hideNonCrit = JefConfig.feature.qol.hideNonCritSplashes;
         if (!hideCrit && !hideNonCrit) return;
 
         EntityLivingBase entity = event.entity;

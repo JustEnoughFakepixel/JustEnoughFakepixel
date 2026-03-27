@@ -3,7 +3,7 @@ package com.jef.justenoughfakepixel.features.invbuttons;
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.events.GuiContainerRenderButtonsEvent;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import com.jef.justenoughfakepixel.utils.HighlightUtils;
+import com.jef.justenoughfakepixel.utils.render.HighlightUtils;
 import com.jef.justenoughfakepixel.utils.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;

@@ -3,15 +3,15 @@ package com.jef.justenoughfakepixel.features.scoreboard;
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
-import com.jef.justenoughfakepixel.features.mining.FetchurHelper;
+import com.jef.justenoughfakepixel.features.mining.fetchur.FetchurData;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import org.lwjgl.input.Keyboard;
 import net.minecraft.util.ChatComponentText;
 import com.jef.justenoughfakepixel.utils.ColorUtils;
-import com.jef.justenoughfakepixel.utils.JefOverlay;
-import com.jef.justenoughfakepixel.utils.OverlayUtils;
-import com.jef.justenoughfakepixel.utils.ScoreboardUtils;
-import com.jef.justenoughfakepixel.utils.TablistParser;
+import com.jef.justenoughfakepixel.utils.overlay.Overlay;
+import com.jef.justenoughfakepixel.utils.overlay.OverlayUtils;
+import com.jef.justenoughfakepixel.utils.data.SkyblockData;
+import com.jef.justenoughfakepixel.utils.data.TablistParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
@@ -21,7 +21,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 @RegisterEvents
-public class CustomScoreboard extends JefOverlay {
+public class CustomScoreboard extends Overlay {
 
     private static final int PAD_X       = 4;
     private static final int PAD_Y       = 4;
@@ -112,11 +112,11 @@ public class CustomScoreboard extends JefOverlay {
 
     @Override
     public List<String> getLines(boolean preview) {
-        List<String> raw = new ArrayList<>(ScoreboardUtils.getScoreboardLines());
+        List<String> raw = new ArrayList<>(SkyblockData.getScoreboardLines());
         if (raw.isEmpty()) return new ArrayList<>();
         Collections.reverse(raw);
 
-        boolean inDungeon = ScoreboardUtils.isInDungeon();
+        boolean inDungeon = SkyblockData.isInDungeon();
 
         String serverRaw      = null;
         String seasonRaw      = null;
@@ -197,7 +197,7 @@ public class CustomScoreboard extends JefOverlay {
 
         List<String> lines = new ArrayList<>();
 
-        String title = ScoreboardUtils.getServerId();
+        String title = SkyblockData.getServerId();
         if (title == null || title.isEmpty()) title = "SKYBLOCK";
         lines.add("\u00A76\u00A7l" + title);
 
@@ -219,11 +219,11 @@ public class CustomScoreboard extends JefOverlay {
                     if (profileTypeRaw != null) { lines.add(profileTypeRaw); lineRawIndex.add(rawIndex.getOrDefault(profileTypeRaw, -1)); }
                     break;
                 case LINE_ISLAND: {
-                    ScoreboardUtils.Location loc = ScoreboardUtils.getCurrentLocation();
-                    if (loc != ScoreboardUtils.Location.NONE) {
+                    SkyblockData.Location loc = SkyblockData.getCurrentLocation();
+                    if (loc != SkyblockData.Location.NONE) {
                         String name;
-                        if (loc == ScoreboardUtils.Location.CRIMSON_ISLE)  name = "Crimson Isles";
-                        else if (loc == ScoreboardUtils.Location.HUB)      name = "Skyblock Hub";
+                        if (loc == SkyblockData.Location.CRIMSON_ISLE)  name = "Crimson Isles";
+                        else if (loc == SkyblockData.Location.HUB)      name = "Skyblock Hub";
                         else                                                name = toTitleCase(loc.name());
                         lines.add("\u32D6 \u00A7b" + name); lineRawIndex.add(-1);
                     }
@@ -268,14 +268,14 @@ public class CustomScoreboard extends JefOverlay {
                     break;
                 case LINE_POWER: {
                     String power = MaxwellPowerSync.getPower();
-                    if (power != null && ScoreboardUtils.isOnSkyblock()) {
+                    if (power != null && SkyblockData.isOnSkyblock()) {
                         lines.add("\u00A7fPower: \u00A7d" + power); lineRawIndex.add(-1);
                     }
                     break;
                 }
                 case LINE_FETCHUR:
-                    if (ScoreboardUtils.isOnSkyblock()) {
-                        lines.add("\u00A7fFetchur: \u00A7e" + FetchurHelper.getTodaysItem()); lineRawIndex.add(-1);
+                    if (SkyblockData.isOnSkyblock()) {
+                        lines.add("\u00A7fFetchur: \u00A7e" + FetchurData.getTodaysItem()); lineRawIndex.add(-1);
                     }
                     break;
                 case LINE_SLAYER:
@@ -285,7 +285,7 @@ public class CustomScoreboard extends JefOverlay {
                     break;
                 case LINE_EMPTY1: case LINE_EMPTY2: case LINE_EMPTY3: case LINE_EMPTY4:
                 case LINE_EMPTY5: case LINE_EMPTY6: case LINE_EMPTY7:
-                    if (ScoreboardUtils.isOnSkyblock() && !inDungeon) { lines.add(""); lineRawIndex.add(-1); }
+                    if (SkyblockData.isOnSkyblock() && !inDungeon) { lines.add(""); lineRawIndex.add(-1); }
                     break;
             }
         }

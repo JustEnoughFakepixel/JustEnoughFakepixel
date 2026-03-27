@@ -4,7 +4,7 @@ import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import com.jef.justenoughfakepixel.utils.JefOverlay;
+import com.jef.justenoughfakepixel.utils.overlay.Overlay;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.GuiOpenEvent;
@@ -15,7 +15,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import java.util.*;
 
 @RegisterEvents
-public class ItemPickupLog extends JefOverlay {
+public class ItemPickupLog extends Overlay {
 
     public static final long LIFESPAN_MS = 5_000L;
     private static final int MAX_LINES = 15;

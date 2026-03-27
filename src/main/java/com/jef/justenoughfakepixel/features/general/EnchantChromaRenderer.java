@@ -1,4 +1,4 @@
-package com.jef.justenoughfakepixel.features.general;
+package com.jef.justenoughfakepixel.features.qol;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
@@ -21,7 +21,7 @@ public class EnchantChromaRenderer {
         chromaOn = false;
         renderingShadow = shadow;
         chromaActive = JefConfig.feature != null
-                && JefConfig.feature.general.enchantChroma
+                && JefConfig.feature.qol.enchantChroma
                 && text != null
                 && (text.contains("\u00a7z") || text.contains("\u00a7Z"));
     }
@@ -39,7 +39,7 @@ public class EnchantChromaRenderer {
 
         FontRenderer fr = Minecraft.getMinecraft().fontRendererObj;
         FontRendererAccessor accessor = (FontRendererAccessor) fr;
-        int base = ChromaColour.specialToChromaRGB(JefConfig.feature.general.enchantPerfectColor);
+        int base = ChromaColour.specialToChromaRGB(JefConfig.feature.qol.enchantPerfectColor);
         int rgb = applyMode(base, accessor.jef$getPosX(), accessor.jef$getPosY());
         if (renderingShadow) {
             int a = (rgb >>> 24) & 255;
@@ -59,8 +59,8 @@ public class EnchantChromaRenderer {
     }
 
     private static int applyMode(int argb, float x, float y) {
-        if (JefConfig.feature.general.enchantChromaMode == 0) return argb;
-        float size = Math.max(1F, JefConfig.feature.general.enchantChromaSize);
+        if (JefConfig.feature.qol.enchantChromaMode == 0) return argb;
+        float size = Math.max(1F, JefConfig.feature.qol.enchantChromaSize);
         float shift = ((x + y) / size) % 1F;
         int a = (argb >>> 24) & 255;
         int r = (argb >>> 16) & 255;

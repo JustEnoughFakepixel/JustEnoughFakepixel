@@ -1,4 +1,4 @@
-package com.jef.justenoughfakepixel.features.general;
+package com.jef.justenoughfakepixel.features.qol;
 
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import net.minecraft.client.Minecraft;

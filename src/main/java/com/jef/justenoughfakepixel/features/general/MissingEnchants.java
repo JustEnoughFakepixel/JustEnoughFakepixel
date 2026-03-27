@@ -1,4 +1,4 @@
-package com.jef.justenoughfakepixel.features.general;
+package com.jef.justenoughfakepixel.features.qol;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -31,7 +31,7 @@ public class MissingEnchants {
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onTooltip(ItemTooltipEvent event) {
-        if (JefConfig.feature == null || !JefConfig.feature.general.missingEnchants) return;
+        if (JefConfig.feature == null || !JefConfig.feature.qol.missingEnchants) return;
         if (!Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) return;
 
         ItemStack stack = event.itemStack;

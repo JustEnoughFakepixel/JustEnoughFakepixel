@@ -6,8 +6,8 @@ import com.jef.justenoughfakepixel.core.config.utils.Position;
 import com.jef.justenoughfakepixel.events.PacketReceiveStatsEvent;
 import com.jef.justenoughfakepixel.events.PacketReceiveTimeUpdateEvent;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import com.jef.justenoughfakepixel.utils.JefOverlay;
-import com.jef.justenoughfakepixel.utils.OverlayUtils;
+import com.jef.justenoughfakepixel.utils.overlay.Overlay;
+import com.jef.justenoughfakepixel.utils.overlay.OverlayUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.network.play.client.C16PacketClientStatus;
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RegisterEvents
-public class PerformanceHUD extends JefOverlay {
+public class PerformanceHUD extends Overlay {
 
     public static final int OVERLAY_WIDTH  = 100;
     public static final int OVERLAY_HEIGHT = 45;

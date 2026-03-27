@@ -37,7 +37,7 @@ public class ConfigEditor extends GuiElement {
             DISCORD, GITHUB
     };
     private static final String[] socialsLink = new String[]{
-            "",
+            "https://discord.gg/fMNsgPWWrv",
             "https://github.com/hamlook/JustEnoughFakepixel"
     };
     private static final ResourceLocation SEARCH_ICON = new ResourceLocation("justenoughfakepixel:search.png");

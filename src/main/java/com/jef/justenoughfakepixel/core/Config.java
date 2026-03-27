@@ -7,8 +7,8 @@ import com.jef.justenoughfakepixel.core.config.gui.config.ConfigAnnotations.*;
 public class Config {
 
     @Expose
-    @Category(name = "General", desc = "General features")
-    public final General general = new General();
+    @Category(name = "Quality of life", desc = "QOL features")
+    public final Qol qol = new Qol();
 
     @Expose
     @Category(name = "Scoreboard", desc = "Custom scoreboard panel")

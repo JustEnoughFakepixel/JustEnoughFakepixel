@@ -1,9 +1,9 @@
-package com.jef.justenoughfakepixel.features.general;
+package com.jef.justenoughfakepixel.features.qol;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.utils.RenderUtils;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import com.jef.justenoughfakepixel.utils.ChatUtils;
+import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
 import com.jef.justenoughfakepixel.utils.ItemUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -27,7 +27,7 @@ public class GyroWandHelper {
     private static final float[] COLOR_COOLDOWN = { 1.0f, 0.2f, 0.2f, 0.6f };
 
     private boolean isEnabled() {
-        return JefConfig.feature != null && JefConfig.feature.general.gyroWand;
+        return JefConfig.feature != null && JefConfig.feature.qol.gyroWand;
     }
 
     public static boolean isHoldingGyroStatic() {
@@ -113,7 +113,7 @@ public class GyroWandHelper {
         double pz = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * event.partialTicks;
 
         float[] color = isOnCooldown() ? COLOR_COOLDOWN : COLOR_READY;
-        float thickness = JefConfig.feature.general.gyroWandThickness;
+        float thickness = JefConfig.feature.qol.gyroWandThickness;
 
         try {
             GL11.glPushMatrix();

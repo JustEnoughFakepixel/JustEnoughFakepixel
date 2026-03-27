@@ -2,7 +2,7 @@ package com.jef.justenoughfakepixel.features.diana;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.jef.justenoughfakepixel.utils.ScoreboardUtils;
+import com.jef.justenoughfakepixel.utils.data.SkyblockData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StringUtils;
@@ -92,7 +92,7 @@ public class DianaStats {
 
     public boolean isTracking() {
         return trackingEnabled && hasSpadeInHotbar()
-                && ScoreboardUtils.getCurrentLocation() == ScoreboardUtils.Location.HUB;
+                && SkyblockData.getCurrentLocation() == SkyblockData.Location.HUB;
     }
 
     public static boolean hasSpadeInHotbar() {

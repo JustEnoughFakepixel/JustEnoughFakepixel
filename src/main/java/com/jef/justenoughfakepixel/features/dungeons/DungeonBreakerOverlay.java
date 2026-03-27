@@ -6,8 +6,8 @@ import com.jef.justenoughfakepixel.core.config.utils.Position;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.ColorUtils;
 import com.jef.justenoughfakepixel.utils.ItemUtils;
-import com.jef.justenoughfakepixel.utils.JefOverlay;
-import com.jef.justenoughfakepixel.utils.ScoreboardUtils;
+import com.jef.justenoughfakepixel.utils.overlay.Overlay;
+import com.jef.justenoughfakepixel.utils.data.SkyblockData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 
 
 @RegisterEvents
-public class DungeonBreakerOverlay extends JefOverlay {
+public class DungeonBreakerOverlay extends Overlay {
 
     private static final String ITEM_ID = "DUNGEONBREAKER";
 
@@ -52,7 +52,7 @@ public class DungeonBreakerOverlay extends JefOverlay {
 
     @Override
     protected boolean extraGuard() {
-        return ScoreboardUtils.getCurrentLocation() == ScoreboardUtils.Location.DUNGEON;
+        return SkyblockData.getCurrentLocation() == SkyblockData.Location.DUNGEON;
     }
 
     @Override

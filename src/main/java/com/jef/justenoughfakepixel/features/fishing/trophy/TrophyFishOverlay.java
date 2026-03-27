@@ -4,8 +4,8 @@ import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import com.jef.justenoughfakepixel.utils.JefOverlay;
-import com.jef.justenoughfakepixel.utils.ScoreboardUtils;
+import com.jef.justenoughfakepixel.utils.overlay.Overlay;
+import com.jef.justenoughfakepixel.utils.data.SkyblockData;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -14,7 +14,7 @@ import java.util.Map;
 
 
 @RegisterEvents
-public class TrophyFishOverlay extends JefOverlay {
+public class TrophyFishOverlay extends Overlay {
 
     private static TrophyFishOverlay instance;
 
@@ -38,7 +38,7 @@ public class TrophyFishOverlay extends JefOverlay {
     @Override
     protected boolean extraGuard() {
         if (!JefConfig.feature.fishing.trophyOnlyCrimson) return true;
-        return ScoreboardUtils.getCurrentLocation() == ScoreboardUtils.Location.CRIMSON_ISLE;
+        return SkyblockData.getCurrentLocation() == SkyblockData.Location.CRIMSON_ISLE;
     }
 
     @Override

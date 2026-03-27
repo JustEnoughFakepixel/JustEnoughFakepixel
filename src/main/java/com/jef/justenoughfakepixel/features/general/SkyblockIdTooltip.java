@@ -1,4 +1,4 @@
-package com.jef.justenoughfakepixel.features.general;
+package com.jef.justenoughfakepixel.features.qol;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
@@ -24,8 +24,8 @@ public class SkyblockIdTooltip {
         if (e.toolTip == null || e.itemStack == null) return;
         if (JefConfig.feature == null) return;
 
-        boolean doRoman    = JefConfig.feature.general.romanNumerals;
-        boolean doSkyblock = JefConfig.feature.general.showSkyblockId;
+        boolean doRoman    = JefConfig.feature.qol.romanNumerals;
+        boolean doSkyblock = JefConfig.feature.qol.showSkyblockId;
 
         if (doRoman) {
             for (int i = 1; i < e.toolTip.size(); i++) {
@@ -46,7 +46,7 @@ public class SkyblockIdTooltip {
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent e) {
         if (e.phase != TickEvent.Phase.START) return;
-        if (JefConfig.feature == null || !JefConfig.feature.general.romanNumerals) return;
+        if (JefConfig.feature == null || !JefConfig.feature.qol.romanNumerals) return;
         if (++tickCounter % 20 != 0) return;
 
         try {

@@ -2,6 +2,10 @@ package com.jef.justenoughfakepixel.features.diana;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
+import com.jef.justenoughfakepixel.features.diana.overlays.DianaEventOverlay;
+import com.jef.justenoughfakepixel.features.diana.overlays.DianaLootOverlay;
+import com.jef.justenoughfakepixel.features.diana.overlays.DianaMobHealthOverlay;
+import com.jef.justenoughfakepixel.features.diana.overlays.InquisitorOverlay;
 import com.jef.justenoughfakepixel.utils.Utils;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
@@ -53,9 +57,9 @@ public class GuiDianaOverlayEditor extends GuiScreen {
         this.parentScreen = parent;
         this.saveCallback = saveCallback;
 
-        DianaEventOverlay     event = DianaEventOverlay.getInstance();
-        DianaLootOverlay      loot  = DianaLootOverlay.getInstance();
-        InqHealthOverlay      inq   = InqHealthOverlay.getInstance();
+        DianaEventOverlay event = DianaEventOverlay.getInstance();
+        DianaLootOverlay loot  = DianaLootOverlay.getInstance();
+        InquisitorOverlay inq   = InquisitorOverlay.getInstance();
         DianaMobHealthOverlay mob   = DianaMobHealthOverlay.getInstance();
 
         overlays = new OverlayEntry[]{

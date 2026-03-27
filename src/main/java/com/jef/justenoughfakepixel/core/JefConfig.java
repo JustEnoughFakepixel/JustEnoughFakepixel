@@ -8,16 +8,15 @@ import com.jef.justenoughfakepixel.core.config.command.JefCommand;
 import com.jef.justenoughfakepixel.core.config.editors.GuiPositionEditor;
 import com.jef.justenoughfakepixel.features.dungeons.DungeonBreakerOverlay;
 import com.jef.justenoughfakepixel.features.misc.SearchBar;
-import com.jef.justenoughfakepixel.features.diana.DianaEventOverlay;
 import com.jef.justenoughfakepixel.features.misc.ItemPickupLog;
 import com.jef.justenoughfakepixel.features.diana.GuiDianaOverlayEditor;
-import com.jef.justenoughfakepixel.features.general.GyroWandOverlay;
-import com.jef.justenoughfakepixel.features.mining.FetchurOverlay;
-import com.jef.justenoughfakepixel.features.mining.PowderOverlay;
-import com.jef.justenoughfakepixel.features.mining.PowderStats;
+import com.jef.justenoughfakepixel.features.qol.GyroWandOverlay;
+import com.jef.justenoughfakepixel.features.mining.fetchur.FetchurOverlay;
+import com.jef.justenoughfakepixel.features.mining.powder.PowderOverlay;
+import com.jef.justenoughfakepixel.features.mining.powder.PowderStats;
 import com.jef.justenoughfakepixel.features.dungeons.DungeonStats;
-import com.jef.justenoughfakepixel.features.dungeons.DungeonRoomOverlay;
-import com.jef.justenoughfakepixel.features.misc.CurrentPetOverlay;
+import com.jef.justenoughfakepixel.features.dungeons.rooms.DungeonRoomOverlay;
+import com.jef.justenoughfakepixel.features.misc.pet.CurrentPetOverlay;
 import com.jef.justenoughfakepixel.features.misc.PerformanceHUD;
 import com.jef.justenoughfakepixel.features.scoreboard.CustomScoreboard;
 import com.jef.justenoughfakepixel.features.waypoints.WaypointGroupGui;
@@ -31,6 +30,7 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -52,6 +52,12 @@ public class JefConfig {
             Keyboard.KEY_P,
             "JustEnoughFakepixel"
     );
+
+    private static boolean isKeyOrMouseDown(int keyCode) {
+        if (keyCode == Keyboard.KEY_NONE) return false;
+        if (keyCode < 0) return Mouse.isButtonDown(keyCode + 100);
+        return Keyboard.isKeyDown(keyCode);
+    }
 
     public static GuiScreen screenToOpen = null;
     private static int screenTicks = 0;
@@ -242,13 +248,13 @@ public class JefConfig {
         GyroWandOverlay overlay = GyroWandOverlay.getInstance();
         if (overlay == null) return;
         screenToOpen = new GuiPositionEditor(
-                feature.general.gyroWandPos,
+                feature.qol.gyroWandPos,
                 overlay::getOverlayWidth,
                 overlay::getOverlayHeight,
                 () -> overlay.render(true),
                 JefConfig::saveConfig,
                 JefConfig::saveConfig
-        ).withOverlayScale(feature.general.gyroWandScale)
+        ).withOverlayScale(feature.qol.gyroWandScale)
                 .withParent(Minecraft.getMinecraft().currentScreen);
     }
 
@@ -321,24 +327,19 @@ public class JefConfig {
         if (openGuiKey.isPressed() && Minecraft.getMinecraft().currentScreen == null) openGui();
 
         boolean managerKeyDown = feature != null
-                && feature.waypoints.waypointManagerKey != org.lwjgl.input.Keyboard.KEY_NONE
-                && org.lwjgl.input.Keyboard.isKeyDown(feature.waypoints.waypointManagerKey);
-
+                && isKeyOrMouseDown(feature.waypoints.waypointManagerKey);
         if (managerKeyDown && !waypointManagerKeyWasDown && Minecraft.getMinecraft().currentScreen == null)
             openWaypointGroupGui();
-
         waypointManagerKeyWasDown = managerKeyDown;
 
         if (feature != null
-                && feature.mining.powderToggleKey != org.lwjgl.input.Keyboard.KEY_NONE
-                && org.lwjgl.input.Keyboard.isKeyDown(feature.mining.powderToggleKey)
+                && isKeyOrMouseDown(feature.mining.powderToggleKey)
                 && !powderToggleKeyWasDown
                 && Minecraft.getMinecraft().currentScreen == null) {
             PowderStats.getInstance().toggleTracking();
         }
 
         powderToggleKeyWasDown = feature != null
-                && feature.mining.powderToggleKey != org.lwjgl.input.Keyboard.KEY_NONE
-                && org.lwjgl.input.Keyboard.isKeyDown(feature.mining.powderToggleKey);
+                && isKeyOrMouseDown(feature.mining.powderToggleKey);
     }
 }

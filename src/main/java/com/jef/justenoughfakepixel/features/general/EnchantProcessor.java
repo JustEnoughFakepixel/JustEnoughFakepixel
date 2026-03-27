@@ -1,4 +1,4 @@
-package com.jef.justenoughfakepixel.features.general;
+package com.jef.justenoughfakepixel.features.qol;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -36,7 +36,7 @@ public class EnchantProcessor {
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onTooltip(ItemTooltipEvent event) {
         if (event == null || event.itemStack == null || event.toolTip == null || JefConfig.feature == null) return;
-        if (!JefConfig.feature.general.enchantHighlight) return;
+        if (!JefConfig.feature.qol.enchantHighlight) return;
 
         ensureLoaded();
         if (BY_LORE.isEmpty()) return;
@@ -215,7 +215,7 @@ public class EnchantProcessor {
 
     private List<String> buildLayout(List<FormattedEnchant> enchants, boolean hasLore, int maxWidth) {
         List<String> out = new ArrayList<>();
-        int layout = JefConfig.feature.general.enchantLayout;
+        int layout = JefConfig.feature.qol.enchantLayout;
 
         if (layout == 1 && enchants.size() > 1) {
             FontRenderer fr = Minecraft.getMinecraft().fontRendererObj;
@@ -272,15 +272,15 @@ public class EnchantProcessor {
 
     private String formatColor(EnchantMeta meta, int level) {
         String color;
-        if (meta.sortType == 0) color = JefConfig.feature.general.enchantUltimateColor;
-        else if (level >= meta.maxLevel) color = JefConfig.feature.general.enchantPerfectColor;
-        else if (level > meta.goodLevel) color = JefConfig.feature.general.enchantGreatColor;
-        else if (level == meta.goodLevel) color = JefConfig.feature.general.enchantGoodColor;
-        else color = JefConfig.feature.general.enchantPoorColor;
+        if (meta.sortType == 0) color = JefConfig.feature.qol.enchantUltimateColor;
+        else if (level >= meta.maxLevel) color = JefConfig.feature.qol.enchantPerfectColor;
+        else if (level > meta.goodLevel) color = JefConfig.feature.qol.enchantGreatColor;
+        else if (level == meta.goodLevel) color = JefConfig.feature.qol.enchantGoodColor;
+        else color = JefConfig.feature.qol.enchantPoorColor;
 
         int argb = ChromaColour.specialToSimpleRGB(color);
         String prefix = nearestMcColor(argb);
-        if (JefConfig.feature.general.enchantChroma && ChromaColour.getSpeed(color) > 0) prefix += "§z";
+        if (JefConfig.feature.qol.enchantChroma && ChromaColour.getSpeed(color) > 0) prefix += "§z";
         if (meta.sortType == 0) prefix += "§l";
         return prefix;
     }
@@ -331,7 +331,7 @@ public class EnchantProcessor {
         }
 
         private String formatted() {
-            String lvl = JefConfig.feature.general.romanNumerals ? Integer.toString(level) : toRoman(level);
+            String lvl = JefConfig.feature.qol.romanNumerals ? Integer.toString(level) : toRoman(level);
             return formatColor(meta, level) + meta.loreName + " " + lvl;
         }
 

@@ -1,16 +1,16 @@
-package com.jef.justenoughfakepixel.features.general;
+package com.jef.justenoughfakepixel.features.qol;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import com.jef.justenoughfakepixel.utils.JefOverlay;
+import com.jef.justenoughfakepixel.utils.overlay.Overlay;
 
 import java.util.Collections;
 import java.util.List;
 
 @RegisterEvents
-public class GyroWandOverlay extends JefOverlay {
+public class GyroWandOverlay extends Overlay {
 
     private static final long COOLDOWN_MS = 30_000L;
 
@@ -24,15 +24,15 @@ public class GyroWandOverlay extends JefOverlay {
 
     public static GyroWandOverlay getInstance() { return instance; }
 
-    @Override public Position getPosition()     { return JefConfig.feature.general.gyroWandPos; }
-    @Override public float    getScale()        { return JefConfig.feature.general.gyroWandScale; }
-    @Override public int      getBgColor()      { return ChromaColour.specialToChromaRGB(JefConfig.feature.general.gyroWandBgColor); }
-    @Override public int      getCornerRadius() { return JefConfig.feature.general.gyroWandCornerRadius; }
+    @Override public Position getPosition()     { return JefConfig.feature.qol.gyroWandPos; }
+    @Override public float    getScale()        { return JefConfig.feature.qol.gyroWandScale; }
+    @Override public int      getBgColor()      { return ChromaColour.specialToChromaRGB(JefConfig.feature.qol.gyroWandBgColor); }
+    @Override public int      getCornerRadius() { return JefConfig.feature.qol.gyroWandCornerRadius; }
 
     @Override
     protected boolean isEnabled() {
-        return JefConfig.feature.general.gyroWandTimer
-                && (GyroWandHelper.isHoldingGyroStatic() || JefConfig.feature.general.gyroWandTimerAlways);
+        return JefConfig.feature.qol.gyroWandTimer
+                && (GyroWandHelper.isHoldingGyroStatic() || JefConfig.feature.qol.gyroWandTimerAlways);
     }
 
     @Override

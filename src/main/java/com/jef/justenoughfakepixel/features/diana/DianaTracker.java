@@ -1,8 +1,8 @@
 package com.jef.justenoughfakepixel.features.diana;
 
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import com.jef.justenoughfakepixel.utils.ChatUtils;
-import com.jef.justenoughfakepixel.utils.ScoreboardUtils;
+import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
+import com.jef.justenoughfakepixel.utils.data.SkyblockData;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -34,7 +34,7 @@ public class DianaTracker {
     private final Minecraft mc = Minecraft.getMinecraft();
 
     private static boolean isInHub() {
-        return ScoreboardUtils.getCurrentLocation() == ScoreboardUtils.Location.HUB;
+        return SkyblockData.getCurrentLocation() == SkyblockData.Location.HUB;
     }
 
     @SubscribeEvent
@@ -65,9 +65,9 @@ public class DianaTracker {
 
         if (LOOT_SHARE.matcher(msg).find() && isInHub()) {
             stats.onLootshare();
-            if (DianaMobDetect.wasInqKilledByOther()) {
+            if (LootshareDetect.wasInqKilledByOther()) {
                 stats.getData().totalInqsLootshared++;
-                DianaMobDetect.clearInqDisappear();
+                LootshareDetect.clearInqDisappear();
             }
         }
 
@@ -99,7 +99,7 @@ public class DianaTracker {
             case "Minos Hunter":
             case "Gaia Construct":
             case "Siamese Lynxes":
-                DianaMobDetect.onNonInqMobDug();
+                LootshareDetect.onNonInqMobDug();
         }
     }
 
@@ -119,23 +119,23 @@ public class DianaTracker {
                 break;
             case "Minotaur":
                 d.mobsSinceInq++; d.minotaursSinceStick++; d.totalMinotaurs++;
-                DianaMobDetect.onNonInqMobDug();
+                LootshareDetect.onNonInqMobDug();
                 break;
             case "Minos Champion":
                 d.mobsSinceInq++; d.champsSinceRelic++; d.totalChamps++;
-                DianaMobDetect.onNonInqMobDug();
+                LootshareDetect.onNonInqMobDug();
                 break;
             case "Gaia Construct":
                 d.mobsSinceInq++; d.totalGaiaConstructs++;
-                DianaMobDetect.onNonInqMobDug();
+                LootshareDetect.onNonInqMobDug();
                 break;
             case "Minos Hunter":
                 d.mobsSinceInq++; d.totalMinosHunters++;
-                DianaMobDetect.onNonInqMobDug();
+                LootshareDetect.onNonInqMobDug();
                 break;
             case "Siamese Lynxes":
                 d.mobsSinceInq++; d.totalSiameseLynxes++;
-                DianaMobDetect.onNonInqMobDug();
+                LootshareDetect.onNonInqMobDug();
                 break;
             default:
                 d.mobsSinceInq++;

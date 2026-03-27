@@ -2,7 +2,7 @@ package com.jef.justenoughfakepixel.features.misc;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import com.jef.justenoughfakepixel.utils.ScoreboardUtils;
+import com.jef.justenoughfakepixel.utils.data.SkyblockData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.renderer.GlStateManager;
@@ -38,13 +38,13 @@ public class BrewingStandHelper {
     private int tickCounter = 0;
 
     private static boolean isOnPrivateIsland() {
-        return ScoreboardUtils.getCurrentLocation() == ScoreboardUtils.Location.PRIVATE_ISLAND;
+        return SkyblockData.getCurrentLocation() == SkyblockData.Location.PRIVATE_ISLAND;
     }
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.START) return;
-        if (JefConfig.feature == null || !JefConfig.feature.general.colorBrewingStands) return;
+        if (JefConfig.feature == null || !JefConfig.feature.qol.colorBrewingStands) return;
         if (mc.theWorld == null) return;
         if (!isOnPrivateIsland()) return;
         if (++tickCounter % 100 != 0) return;
@@ -58,7 +58,7 @@ public class BrewingStandHelper {
 
     @SubscribeEvent
     public void onPlayerInteract(PlayerInteractEvent event) {
-        if (JefConfig.feature == null || !JefConfig.feature.general.colorBrewingStands) return;
+        if (JefConfig.feature == null || !JefConfig.feature.qol.colorBrewingStands) return;
         if (!isOnPrivateIsland()) return;
         if (event.action != PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK) return;
         if (mc.theWorld == null) return;
@@ -68,7 +68,7 @@ public class BrewingStandHelper {
 
     @SubscribeEvent
     public void onGuiDraw(GuiScreenEvent.DrawScreenEvent.Pre event) {
-        if (JefConfig.feature == null || !JefConfig.feature.general.colorBrewingStands) return;
+        if (JefConfig.feature == null || !JefConfig.feature.qol.colorBrewingStands) return;
         if (!isOnPrivateIsland()) return;
         if (lastBrewingStand == null) return;
         if (!(event.gui instanceof GuiChest)) return;
@@ -101,7 +101,7 @@ public class BrewingStandHelper {
 
     @SubscribeEvent
     public void onRenderWorld(RenderWorldLastEvent event) {
-        if (JefConfig.feature == null || !JefConfig.feature.general.colorBrewingStands) return;
+        if (JefConfig.feature == null || !JefConfig.feature.qol.colorBrewingStands) return;
         if (!isOnPrivateIsland()) return;
         if (mc.theWorld == null || mc.thePlayer == null) return;
 

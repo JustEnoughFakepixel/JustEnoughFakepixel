@@ -1,6 +1,6 @@
 package com.jef.justenoughfakepixel.mixins;
 
-import com.jef.justenoughfakepixel.features.farming.LockMouse;
+import com.jef.justenoughfakepixel.features.farming.mouse.LockMouse;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.MouseHelper;
 import org.spongepowered.asm.mixin.Mixin;

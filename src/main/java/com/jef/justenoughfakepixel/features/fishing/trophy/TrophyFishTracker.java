@@ -2,7 +2,6 @@ package com.jef.justenoughfakepixel.features.fishing.trophy;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import com.jef.justenoughfakepixel.utils.ChatUtils;
 import com.jef.justenoughfakepixel.utils.ColorUtils;
 import com.jef.justenoughfakepixel.utils.ItemUtils;
 import net.minecraft.client.Minecraft;
@@ -18,7 +17,6 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,36 +25,47 @@ public class TrophyFishTracker {
 
     private static final Minecraft mc = Minecraft.getMinecraft();
     private static final String ODGER_TITLE = "Trophy Fishing";
+
+    /**
+     * REGEX-TEST: §6♔ §r§6§lTROPHY FISH! §r§fYou caught a §r§9Lavahorse §r§6§lGOLD§r§f!
+     * REGEX-TEST: §6♔ §r§6§lTROPHY FISH! §r§fYou caught a §r§5Soul Fish §r§8§lBRONZE§r§f!
+     * REGEX-TEST: §6♔ §r§6§lTROPHY FISH! §r§fYou caught a §r§9Mana Ray §r§8§lBRONZE§r§f!
+     * REGEX-TEST: §6♔ §r§6§lTROPHY FISH! §r§fYou caught a §r§fBlobfish §r§7§lSILVER§r§f!
+     * REGEX-TEST: §6♔ §r§6§lTROPHY FISH! §r§fYou caught an §r§6Golden Fish §r§7§lSILVER§r§f!
+     */
     private static final Pattern TROPHY_CHAT = Pattern.compile(
-        "§6♔ §r§6§lTROPHY FISH! §r§fYou caught an? §r" +
-        "(?<displayName>§[0-9a-fA-F](?:§k)?[\\w -]+?) §r" +
-        "(?<displayRarity>§[0-9a-fA-F]§l\\w+)§r§f!"
+            "§6♔ §r§6§lTROPHY FISH! §r§fYou caught an? §r" +
+                    "(?<displayName>§[0-9a-fA-F](?:§k)?[\\w -]+) §r" +
+                    "(?<displayRarity>§[0-9a-fA-F]§l\\w+)§r§f!"
     );
 
+    /**
+     * REGEX-TEST: §8Bronze §a✔§7
+     * REGEX-TEST: §5§o§6Gold §a✔§7
+     */
     private static final Pattern RANK_CAUGHT = Pattern.compile(
-        "^(?:§5§o)?§.([A-Za-z]+) §a✔§7 \\((\\d+)\\)$"
+            "^(?:§5§o)?§.([A-Za-z]+) §a[✔✓](?:§7 \\((\\d+)\\))?$"
     );
 
     private static final Pattern RANK_EMPTY = Pattern.compile(
-        "^(?:§5§o)?§.([A-Za-z]+) §c✖$"
+            "^(?:§5§o)?§.([A-Za-z]+) §c[✖✗✘]$"
     );
     private static final Pattern DISCOVERED = Pattern.compile("§aDiscovered");
+
     private static final Pattern BRONZE_LINE = Pattern.compile("^(?:§5§o)?§8Bronze.*");
+
 
     @SubscribeEvent
     public void onChat(ClientChatReceivedEvent event) {
-        if (!ChatUtils.isFromServer(event)) return;
         if (JefConfig.feature == null) return;
 
         Matcher m = TROPHY_CHAT.matcher(event.message.getFormattedText());
         if (!m.find()) return;
 
-        String coloredName   = m.group("displayName");    // e.g. "§9Lavahorse"
-        String coloredRarity = m.group("displayRarity");  // e.g. "§6§lGOLD"
+        String fishName  = ColorUtils.stripColor(m.group("displayName").replace("§k", "")).trim();
+        String rarityRaw = ColorUtils.stripColor(m.group("displayRarity")).trim();
 
-        String fishName  = ColorUtils.stripColor(coloredName).trim();
-        String rarityStr = ColorUtils.stripColor(coloredRarity).trim();
-
+        String rarityStr = rarityRaw.charAt(0) + rarityRaw.substring(1).toLowerCase();
         TrophyRarity rarity = TrophyRarity.fromDisplayName(rarityStr);
         if (rarity == null) return;
 
@@ -80,7 +89,10 @@ public class TrophyFishTracker {
                 ? "§c§lFIRST! §r"
                 : "§7" + newCount + ordinal(newCount) + " §r";
 
-        String newMsg = "§6♔ §6§lTROPHY FISH! " + countPart
+        String coloredRarity = rarity.formatCode + "§l" + rarity.displayName.toUpperCase();
+        String coloredName   = rarity.formatCode + fishName;
+
+        String newMsg = "§6§lTROPHY FISH! " + countPart
                 + coloredRarity + " " + coloredName
                 + " §7(§e" + String.format("%,d", total) + " total§7)";
 
@@ -120,7 +132,7 @@ public class TrophyFishTracker {
                     hasRarityLine = true;
                     TrophyRarity rarity = TrophyRarity.fromDisplayName(caught.group(1));
                     if (rarity == null) continue;
-                    int amount = Integer.parseInt(caught.group(2));
+                    int amount = caught.group(2) != null ? Integer.parseInt(caught.group(2)) : 1;
                     if (storage.getCount(fishName, rarity) != amount) {
                         storage.setCount(fishName, rarity, amount);
                         changed = true;
@@ -149,13 +161,13 @@ public class TrophyFishTracker {
         if (changed) storage.save();
     }
 
+
     @SubscribeEvent
     public void onTooltip(ItemTooltipEvent event) {
         if (JefConfig.feature == null || !JefConfig.feature.fishing.trophyOdgerTotal) return;
         if (!ODGER_TITLE.equals(getOpenContainerName())) return;
         if (event.toolTip == null || event.itemStack == null) return;
 
-        // Only enrich tooltips for discovered trophy fish
         List<String> lore = ItemUtils.getLoreLines(event.itemStack);
         boolean discovered = lore.stream().anyMatch(l -> DISCOVERED.matcher(l).find());
         if (!discovered) return;
@@ -179,7 +191,6 @@ public class TrophyFishTracker {
         }
     }
 
-
     private static ContainerChest getChestContainer(GuiScreen gui) {
         if (!(gui instanceof GuiChest)) return null;
         GuiChest chest = (GuiChest) gui;
@@ -200,9 +211,9 @@ public class TrophyFishTracker {
     private static String ordinal(int n) {
         if (n % 100 >= 11 && n % 100 <= 13) return "th";
         switch (n % 10) {
-            case 1: return "st";
-            case 2: return "nd";
-            case 3: return "rd";
+            case 1:  return "st";
+            case 2:  return "nd";
+            case 3:  return "rd";
             default: return "th";
         }
     }

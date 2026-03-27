@@ -4,9 +4,9 @@ import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import com.jef.justenoughfakepixel.utils.JefOverlay;
-import com.jef.justenoughfakepixel.utils.ChatUtils;
-import com.jef.justenoughfakepixel.utils.ScoreboardUtils;
+import com.jef.justenoughfakepixel.utils.overlay.Overlay;
+import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
+import com.jef.justenoughfakepixel.utils.data.SkyblockData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
@@ -24,7 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @RegisterEvents
-public class DungeonStats extends JefOverlay {
+public class DungeonStats extends Overlay {
 
     private static final Minecraft mc = Minecraft.getMinecraft();
     private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -145,7 +145,7 @@ public class DungeonStats extends JefOverlay {
         if (mc.thePlayer == null) return;
 
         if (!inDungeon) {
-            for (String line : ScoreboardUtils.getCleanScoreboardLines()) {
+            for (String line : SkyblockData.getCleanScoreboardLines()) {
                 if (TIME_ELAPSED.matcher(line).find()) {
                     inDungeon = true;
                     runStart  = System.currentTimeMillis();
@@ -157,13 +157,13 @@ public class DungeonStats extends JefOverlay {
 
         if (runEnded) return;
 
-        for (String line : ScoreboardUtils.getScoreboardLines()) {
+        for (String line : SkyblockData.getScoreboardLines()) {
             Matcher m = FLOOR_PAT.matcher(line);
             if (m.find()) { currentFloor = DungeonFloor.fromString(m.group(1)); break; }
         }
 
         if (clearedTime == 0 && bossTime == 0) {
-            for (String line : ScoreboardUtils.getCleanScoreboardLines()) {
+            for (String line : SkyblockData.getCleanScoreboardLines()) {
                 if (!line.startsWith("Dungeon Cleared: ")) continue;
                 try {
                     int pct = Integer.parseInt(line.replace("Dungeon Cleared: ", "").replace("%", "").trim());
