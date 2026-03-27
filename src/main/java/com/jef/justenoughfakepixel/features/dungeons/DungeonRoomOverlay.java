@@ -37,7 +37,8 @@ public class DungeonRoomOverlay extends JefOverlay {
 
     @Override
     protected boolean extraGuard() {
-        return ScoreboardUtils.getCurrentLocation() == ScoreboardUtils.Location.DUNGEON;
+        return ScoreboardUtils.getCurrentLocation() == ScoreboardUtils.Location.DUNGEON
+                && !DungeonStats.isInBossFight();
     }
 
     @Override
