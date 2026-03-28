@@ -1,4 +1,4 @@
-package com.jef.justenoughfakepixel.features.dungeons;
+package com.jef.justenoughfakepixel.features.dungeons.utils;
 
 import java.util.Arrays;
 

@@ -36,6 +36,18 @@ public class Misc {
     public boolean hudShowPing = true;
 
     @Expose
+    @ConfigOption(name = "Show Coordinates", desc = "Show your current X / Y / Z coordinates")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 3)
+    public boolean hudShowCoords = false;
+
+    @Expose
+    @ConfigOption(name = "Show Rotation", desc = "Show your current yaw and pitch")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 3)
+    public boolean hudShowRotation = false;
+
+    @Expose
     @ConfigOption(name = "Vertical", desc = "Stack entries vertically, otherwise horizontal")
     @ConfigEditorBoolean
     @ConfigAccordionId(id = 3)

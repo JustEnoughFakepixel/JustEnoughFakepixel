@@ -92,7 +92,7 @@ public class TrophyFishTracker {
         String coloredRarity = rarity.formatCode + "§l" + rarity.displayName.toUpperCase();
         String coloredName   = rarity.formatCode + fishName;
 
-        String newMsg = "§6§lTROPHY FISH! " + countPart
+        String newMsg = "§6♔ §r§6§lTROPHY FISH! " + countPart
                 + coloredRarity + " " + coloredName
                 + " §7(§e" + String.format("%,d", total) + " total§7)";
 

@@ -5,7 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.jef.justenoughfakepixel.core.JefConfig;
-import com.jef.justenoughfakepixel.features.dungeons.DungeonStats;
+import com.jef.justenoughfakepixel.features.dungeons.overlays.DungeonStats;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.data.SkyblockData;
 import net.minecraft.block.Block;

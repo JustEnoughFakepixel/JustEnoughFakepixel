@@ -1,7 +1,7 @@
 package com.jef.justenoughfakepixel.utils.chat;
 
 import com.jef.justenoughfakepixel.features.diana.DianaTracker;
-import com.jef.justenoughfakepixel.features.dungeons.DungeonStats;
+import com.jef.justenoughfakepixel.features.dungeons.overlays.DungeonStats;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;

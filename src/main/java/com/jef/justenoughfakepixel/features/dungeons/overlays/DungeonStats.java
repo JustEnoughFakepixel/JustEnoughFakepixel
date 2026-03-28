@@ -1,8 +1,9 @@
-package com.jef.justenoughfakepixel.features.dungeons;
+package com.jef.justenoughfakepixel.features.dungeons.overlays;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
+import com.jef.justenoughfakepixel.features.dungeons.utils.DungeonFloor;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.overlay.Overlay;
 import com.jef.justenoughfakepixel.utils.chat.ChatUtils;

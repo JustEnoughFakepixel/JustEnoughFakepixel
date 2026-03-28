@@ -115,6 +115,28 @@ public class PerformanceHUD extends Overlay {
             out.add(C_LABEL + "TPS: "  + C_VAL + (preview ? "20.0" : String.format("%.1f", currentTps)));
         if (JefConfig.feature.misc.hudShowPing)
             out.add(C_LABEL + "Ping: " + C_VAL + (preview ? "42ms" : formatPing()));
+        if (JefConfig.feature.misc.hudShowCoords) {
+            if (preview) {
+                out.add(C_LABEL + "XYZ: " + C_VAL + "0 / 64 / 0");
+            } else {
+                net.minecraft.entity.player.EntityPlayer p = Minecraft.getMinecraft().thePlayer;
+                if (p != null)
+                    out.add(C_LABEL + "XYZ: " + C_VAL
+                            + (int) Math.floor(p.posX) + " / "
+                            + (int) Math.floor(p.posY) + " / "
+                            + (int) Math.floor(p.posZ));
+            }
+        }
+        if (JefConfig.feature.misc.hudShowRotation) {
+            if (preview) {
+                out.add(C_LABEL + "Yaw: " + C_VAL + "180.0  " + C_LABEL + "Pitch: " + C_VAL + "0.0");
+            } else {
+                net.minecraft.entity.player.EntityPlayer p = Minecraft.getMinecraft().thePlayer;
+                if (p != null)
+                    out.add(C_LABEL + "Yaw: " + C_VAL + String.format("%.1f", p.rotationYaw)
+                            + "  " + C_LABEL + "Pitch: " + C_VAL + String.format("%.1f", p.rotationPitch));
+            }
+        }
         return out;
     }
 
