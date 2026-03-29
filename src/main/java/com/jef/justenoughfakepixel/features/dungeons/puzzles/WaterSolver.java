@@ -10,6 +10,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockColored;
 import net.minecraft.block.BlockLever;
 import net.minecraft.block.BlockPistonExtension;
+import net.minecraft.block.BlockStone;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
@@ -124,50 +125,52 @@ public class WaterSolver {
         double vx = mc.getRenderManager().viewerPosX;
         double vy = mc.getRenderManager().viewerPosY;
         double vz = mc.getRenderManager().viewerPosZ;
-        
-        List<int[]> pending = new ArrayList<>(); // [leverIndex, tickTime]
+
+        // Build pending list as (BlockPos, tickOffset) pairs.
+        // "water" is resolved to waterLeverPos directly — avoids indexOf("water")==0 bug
+        // that was mapping water entries to quartz_block position.
+        List<Object[]> pending = new ArrayList<>(); // [BlockPos, Integer tickOffset]
         for (Map.Entry<String, int[]> entry : solutions.entrySet()) {
             String key = entry.getKey();
-            int clicks = clickCounts.getOrDefault(key, 0);
             int[] times = entry.getValue();
-            for (int i = clicks; i < times.length; i++)
-                pending.add(new int[]{ indexOf(key), times[i] });
+            if (key.equals("water")) {
+                // Water lever: only show until it has been activated
+                if (openedWaterTick == -1 && waterLeverPos != null) {
+                    for (int t : times)
+                        pending.add(new Object[]{ waterLeverPos, t });
+                }
+            } else {
+                BlockPos pos = leverPositions.get(key);
+                if (pos == null) continue;
+                int done = clickCounts.getOrDefault(key, 0);
+                for (int i = done; i < times.length; i++)
+                    pending.add(new Object[]{ pos, times[i] });
+            }
         }
-        pending.sort(Comparator.comparingInt(a -> a[1]));
+        pending.sort(Comparator.comparingInt(a -> (int) a[1]));
 
-        // Boxes for all pending levers
+        // Boxes for all pending positions
         WorldRenderUtils.beginWorldRender(2f);
         GL11.glPushMatrix();
         GL11.glTranslated(-vx, -vy, -vz);
-        for (int[] pair : pending) {
-            BlockPos pos = leverPositions.get(LEVER_KEYS[pair[0]]);
-            if (pos == null) continue;
-            boolean isNext = pending.get(0) == pair;
+        for (int i = 0; i < pending.size(); i++) {
+            BlockPos pos = (BlockPos) pending.get(i)[0];
             WorldRenderUtils.drawEspBox(pos.getX(), pos.getY(), pos.getZ(),
-                    isNext ? java.awt.Color.GREEN : java.awt.Color.YELLOW);
-        }
-        // Water lever box if all regular levers done
-        if (pending.isEmpty() && waterLeverPos != null && openedWaterTick == -1) {
-            WorldRenderUtils.drawEspBox(
-                    waterLeverPos.getX(), waterLeverPos.getY(), waterLeverPos.getZ(),
-                    java.awt.Color.GREEN);
+                    i == 0 ? java.awt.Color.GREEN : java.awt.Color.YELLOW);
         }
         GL11.glPopMatrix();
         WorldRenderUtils.endWorldRender();
 
-        // Tracer to the next lever
+        // Tracer to the next target
         if (!pending.isEmpty()) {
-            BlockPos nextPos = leverPositions.get(LEVER_KEYS[pending.get(0)[0]]);
-            if (nextPos != null)
-                WorldRenderUtils.drawTracer(
-                        new Vec3(nextPos.getX() + 0.5, nextPos.getY() + 0.5, nextPos.getZ() + 0.5),
-                        event.partialTicks, java.awt.Color.GREEN);
-        } else if (waterLeverPos != null && openedWaterTick == -1) {
+            BlockPos nextPos = (BlockPos) pending.get(0)[0];
             WorldRenderUtils.drawTracer(
-                    new Vec3(waterLeverPos.getX() + 0.5, waterLeverPos.getY() + 0.5, waterLeverPos.getZ() + 0.5),
+                    new Vec3(nextPos.getX() + 0.5, nextPos.getY() + 0.5, nextPos.getZ() + 0.5),
                     event.partialTicks, java.awt.Color.GREEN);
         }
 
+        // Disable lighting so §colour codes render correctly (endWorldRender re-enables it)
+        GL11.glDisable(GL11.GL_LIGHTING);
         GL11.glPushMatrix();
         GL11.glTranslated(-vx, -vy, -vz);
         for (Map.Entry<String, int[]> entry : solutions.entrySet()) {
@@ -184,6 +187,7 @@ public class WaterSolver {
             }
         }
         GL11.glPopMatrix();
+        GL11.glEnable(GL11.GL_LIGHTING);
     }
 
     private String buildLabel(int targetTick, int rank) {
@@ -291,10 +295,16 @@ public class WaterSolver {
             String name = Block.blockRegistry
                     .getNameForObject(mc.theWorld.getBlockState(behind).getBlock()).toString();
 
-            if (isTargetBlock(name))
+            if (isTargetBlock(name)) {
                 result.put(name, pos);
-            else if (name.equals("minecraft:stone"))
-                waterLeverPos = pos;
+            } else if (facing == EnumFacing.UP) {
+                // Water lever sits on top of smooth andesite, facing up
+                IBlockState belowState = mc.theWorld.getBlockState(behind);
+                if (belowState.getBlock() == Blocks.stone
+                        && belowState.getValue(BlockStone.VARIANT) == BlockStone.EnumType.ANDESITE_SMOOTH) {
+                    waterLeverPos = pos;
+                }
+            }
         }
         return result;
     }
