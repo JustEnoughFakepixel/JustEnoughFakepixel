@@ -1,6 +1,7 @@
 package com.jef.justenoughfakepixel.features.mining.hotm;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
+import com.jef.justenoughfakepixel.features.mining.hotm.CoreOfTheMountainData;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.ColorUtils;
 import net.minecraft.client.Minecraft;
@@ -37,6 +38,15 @@ public class HotmPowderDisplay {
         if (!HOTM_TITLE.equals(getContainerName())) return;
 
         String displayName = ColorUtils.stripColor(event.itemStack.getDisplayName());
+
+        // TODO: Uncomment when Core of the Mountain is updated
+        /*
+        if (CoreOfTheMountainData.GUI_NAME.equals(displayName)) {
+            handleCotm(event.toolTip);
+            return;
+        }
+        */
+
         HotmPerkData perk = HotmPerkData.findByGuiName(displayName);
         if (perk == null) return;
 
@@ -73,6 +83,57 @@ public class HotmPowderDisplay {
         }
     }
 
+    // TODO: Uncomment when Core of the Mountain is updated
+    /*
+    private void handleCotm(List<String> tip) {
+        int rawLevel = parseRawLevel(tip);
+        if (rawLevel < 0) return;
+        rawLevel = Math.min(rawLevel, CoreOfTheMountainData.MAX_LEVEL);
+
+        if (JefConfig.feature.mining.hotmPowderSpent) {
+            java.util.Map<HotmPerkData.PowderType, Long> spent = CoreOfTheMountainData.cumulativeCost(rawLevel);
+            boolean isMax = rawLevel >= CoreOfTheMountainData.MAX_LEVEL;
+            java.util.Map<HotmPerkData.PowderType, Long> max   = CoreOfTheMountainData.cumulativeCost(CoreOfTheMountainData.MAX_LEVEL);
+
+            int insertPos = 2;
+            for (HotmPerkData.PowderType type : HotmPerkData.PowderType.values()) {
+                long spentAmt = spent.getOrDefault(type, 0L);
+                long maxAmt   = max.getOrDefault(type, 0L);
+                if (maxAmt == 0) continue;
+                String label = "§7" + type.displayName + " spent: ";
+                String line;
+                if (isMax) {
+                    line = label + "§e" + formatNumber(spentAmt) + " §7(§aMax level§7)";
+                } else {
+                    line = label + "§e" + formatNumber(spentAmt) + "§7/§e" + formatNumber(maxAmt);
+                }
+                tip.add(insertPos++, line);
+            }
+        }
+
+        if (JefConfig.feature.mining.hotmPowderFor10Levels && rawLevel < CoreOfTheMountainData.MAX_LEVEL) {
+            int costIndex = indexOfCostLine(tip);
+            if (!Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) && !Keyboard.isKeyDown(Keyboard.KEY_RSHIFT)) {
+                if (!tip.contains(SHIFT_HINT)) tip.add(SHIFT_HINT);
+            } else {
+                tip.remove(SHIFT_HINT);
+                int targetLevel = Math.min(rawLevel + 10, CoreOfTheMountainData.MAX_LEVEL);
+                int levels      = targetLevel - rawLevel;
+                String levelWord = levels == 1 ? "level" : "levels";
+                java.util.Map<HotmPerkData.PowderType, Long> range = CoreOfTheMountainData.rangeCost(rawLevel, targetLevel);
+                int insertAt = costIndex >= 0 ? costIndex + 2 : tip.size();
+                for (HotmPerkData.PowderType type : HotmPerkData.PowderType.values()) {
+                    long cost = range.getOrDefault(type, 0L);
+                    if (cost == 0) continue;
+                    String line = "§7" + type.displayName + " for " + levels + " " + levelWord + ": §e" + formatNumber(cost);
+                    if (insertAt > tip.size()) insertAt = tip.size();
+                    tip.add(insertAt++, line);
+                }
+            }
+        }
+    }
+    */
+
     private static String buildSpentLine(HotmPerkData perk, int rawLevel) {
         long spent   = perk.calculateTotalCost(rawLevel);
         long max     = perk.totalCostMaxLevel;
@@ -90,7 +151,7 @@ public class HotmPowderDisplay {
                 return isMax
                         ? label + "§e" + formatNumber(max) + " §7(§aMax level§7)"
                         : label + "§e" + formatNumber(spent) + "§7/§e" + formatNumber(max)
-                                + "§7 (§e" + fmt2(pct) + "%§7)";
+                        + "§7 (§e" + fmt2(pct) + "%§7)";
             default:
                 return isMax
                         ? label + "§e" + formatNumber(max) + " §7(§aMax level§7)"

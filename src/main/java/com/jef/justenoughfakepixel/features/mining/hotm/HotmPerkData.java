@@ -38,7 +38,15 @@ public enum HotmPerkData {
     GIFTS_FROM_THE_DEPARTED("Gifts from the Departed",100, PowderType.GLACITE, 2.45),
     MINING_MASTER         ("Mining Master",           10,  PowderType.GLACITE, -1), // special base: (level+7)^5
     DEAD_MANS_CHEST       ("Dead Man's Chest",        50,  PowderType.GLACITE, 3.2),
-    VANGUARD_SEEKER       ("Vanguard Seeker",         50,  PowderType.GLACITE, 3.1);
+    VANGUARD_SEEKER       ("Vanguard Seeker",         50,  PowderType.GLACITE, 3.1),
+
+    // When fakepixel updates cotm replace this entry with
+    // the data from CoreOfTheMountainData and uncomment handleCotm() in HotmPowderDisplay
+    CORE_OF_THE_MOUNTAIN  ("Core of the Mountain",    7,   PowderType.MITHRIL,  -3),
+
+    // Linear cost: cost(level) = 200 + 18*level
+    DAILY_GRIND           ("Daily Grind",            100, PowderType.GEMSTONE, -2),
+    DAILY_POWDER          ("Daily Powder",           100, PowderType.GEMSTONE, -2);
 
     public final String guiName;
     public final int maxLevel;
@@ -57,8 +65,14 @@ public enum HotmPerkData {
     }
 
     public long cost(int level) {
-        if (this == MINING_MASTER) {
+        if (exponent == -1) { // MINING_MASTER
             return (long) Math.pow(level + 7.0, 5.0);
+        }
+        if (exponent == -2) { // DAILY_GRIND, DAILY_POWDER
+            return 182L + 18L * level;
+        }
+        if (exponent == -3) { // CORE_OF_THE_MOUNTAIN — 25,000 * level
+            return 25_000L * level;
         }
         return (long) Math.pow(level + 1.0, exponent);
     }
