@@ -4,6 +4,7 @@ import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.data.ApiHandler;
 import com.jef.justenoughfakepixel.features.invbuttons.InventoryButtonStorage;
 import com.jef.justenoughfakepixel.features.invbuttons.SkyblockItemCache;
+import com.jef.justenoughfakepixel.features.itemlist.ItemRegistry;
 import com.jef.justenoughfakepixel.features.misc.pet.CurrentPetTracker;
 import com.jef.justenoughfakepixel.features.misc.pet.PetCache;
 import com.jef.justenoughfakepixel.features.scoreboard.MaxwellPowerSync;
@@ -21,6 +22,8 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 
+import java.util.logging.Logger;
+
 @Mod(
         modid = JefMod.MODID,
         name = JefMod.NAME,
@@ -35,11 +38,13 @@ public class JefMod {
     public static final String VERSION = "1.2.4";
 
     public static JefConfig config;
+    public static Logger logger;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         JefConfig.init();
         JefRepo.init();
+        logger = Logger.getLogger("[JEF] ");
         WaypointStorage.getInstance().initFile(JefConfig.configDirectory);
         InventoryButtonStorage.getInstance().initFile(JefConfig.configDirectory);
         DianaStats.getInstance().initFile(JefConfig.configDirectory);
@@ -62,6 +67,7 @@ public class JefMod {
         PetCache.getInstance().load();
         CurrentPetTracker.getInstance().load();
         TrophyFishStorage.getInstance().load();
+        ItemRegistry.initialise();
 
         if (JefConfig.feature.misc.showCurrentPet)
             PetCache.getInstance().warmupTextures();
