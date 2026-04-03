@@ -212,6 +212,23 @@ public class Misc {
     public int invButtonTooltipDelay = 600;
 
     @Expose
+    @ConfigOption(name = "Item List", desc = "The internal item list used for various purposes.")
+    @ConfigEditorAccordion(id = 31)
+    public boolean itemListAccordian = false;
+
+    @Expose
+    @ConfigOption(name = "Enable", desc = "Enable/Disable loading the itemlist on startup, affects startup times")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 31)
+    public boolean enableItemList = true;
+
+    @Expose
+    @ConfigOption(name = "Reload Itemlist", desc = "Force Reload and refetch all the items from github repo.")
+    @ConfigEditorButton(runnableId = "reloadItemList", buttonText = "Reload")
+    @ConfigAccordionId(id = 31)
+    public boolean reloadItemList = false;
+
+    @Expose
     @ConfigOption(name = "Item Stack Tips", desc = "Shows enchant levels on books and floor numbers on Catacombs passes")
     @ConfigEditorBoolean
     public boolean itemStackTips = true;

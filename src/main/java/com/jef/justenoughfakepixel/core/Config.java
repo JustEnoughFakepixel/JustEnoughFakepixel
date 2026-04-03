@@ -3,6 +3,7 @@ package com.jef.justenoughfakepixel.core;
 import com.google.gson.annotations.Expose;
 import com.jef.justenoughfakepixel.core.features.*;
 import com.jef.justenoughfakepixel.core.config.gui.config.ConfigAnnotations.*;
+import com.jef.justenoughfakepixel.features.itemlist.ItemRegistry;
 
 import java.awt.Desktop;
 import java.net.URI;
@@ -16,6 +17,11 @@ public class Config {
     @Expose
     @Category(name = "Quality of life", desc = "QOL features")
     public final Qol qol = new Qol();
+
+
+    @Expose
+    @Category(name = "Storage Overlay", desc = "Settings about the storage overlay")
+    public final Storage storage = new Storage();
 
     @Expose
     @Category(name = "Scoreboard", desc = "Custom scoreboard panel")
@@ -56,7 +62,7 @@ public class Config {
     public void executeRunnable(String runnableId) {
         switch (runnableId) {
             // ── runnables ───────────────────────────────────────────
-            case "openScoreboardEditor":         JefConfig.openScoreboardEditor();          break;
+            case "openScoreboardEditor":          JefConfig.openScoreboardEditor();          break;
             case "openWaypointGroupGui":          JefConfig.openWaypointGroupGui();          break;
             case "openStatsEditor":               JefConfig.openStatsEditor();               break;
             case "openHudEditor":                 JefConfig.openHudEditor();                 break;
@@ -72,6 +78,7 @@ public class Config {
             case "openDungeonBreakerEditor":      JefConfig.openDungeonBreakerEditor();      break;
             case "openTrophyFishEditor":          JefConfig.openTrophyFishEditor();          break;
             case "openDungeonRoomOverlayEditor":  JefConfig.openDungeonRoomOverlayEditor();  break;
+            case "reloadItemList":                ItemRegistry.initialise(true);                 break;
 
             // ── About: links ─────────────────────────────────────────────────
             case "openDiscord":  openUrl("https://discord.gg/tdMFbmhFTb");                           break;

@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
 import com.jef.justenoughfakepixel.JefMod;
+import com.jef.justenoughfakepixel.core.JefConfig;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,7 +28,11 @@ public class ItemRegistry {
     public static ConcurrentHashMap<String,String> itemData = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<String, SkyblockItem> skyblockItems = new ConcurrentHashMap<>();
 
-    public static void initialise(){
+
+    public static void initialise(boolean force){
+        if(!force){
+            if(!JefConfig.feature.misc.enableItemList) return;
+        }
         itemData.clear();
         skyblockItems.clear();
 
@@ -64,6 +69,9 @@ public class ItemRegistry {
         });
         itemData.clear();
         JefMod.logger.info("Loaded " + skyblockItems.size() + " items from repo.");
+    }
+    public static void initialise(){
+        initialise(false);
     }
 
     public static void loadJEFItems(){
