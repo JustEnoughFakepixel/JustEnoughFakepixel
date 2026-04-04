@@ -77,6 +77,21 @@ public class ItemUtils {
         return skull;
     }
 
+
+    public static String getEffectiveItemId(@Nullable ItemStack item) {
+        if (item == null || !item.hasTagCompound()) return "";
+        NBTTagCompound extra = item.getTagCompound().getCompoundTag("ExtraAttributes");
+        String baseId = extra.hasKey("id") ? extra.getString("id") : "";
+        if (!"ENCHANTED_BOOK".equals(baseId)) return baseId;
+        if (!extra.hasKey("enchantments")) return baseId;
+        NBTTagCompound enchants = extra.getCompoundTag("enchantments");
+        for (String key : enchants.getKeySet()) {
+            int level = enchants.getInteger(key);
+            return key + "_" + level;
+        }
+        return baseId;
+    }
+
     public static boolean isSkyblockItem(@Nullable ItemStack item) {
         if (item == null || !item.hasTagCompound()) return false;
         return item.getTagCompound().getCompoundTag("ExtraAttributes").hasKey("id");

@@ -27,4 +27,9 @@ public class Debug {
     @ConfigOption(name = "Room Overlay: Show Hash", desc = "Show room hash in the dungeon room overlay when the room is not detected")
     @ConfigEditorBoolean
     public boolean dungeonRoomDebug = false;
+
+    @Expose
+    @ConfigOption(name = "Enable debug features", desc = "DO NOT TURN ON UNLESS YOU KNOW WHAT YOURE DOING!")
+    @ConfigEditorBoolean
+    public boolean enableDebug = false;
 }

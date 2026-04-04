@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Dungeons {
-    
+
 
     @Expose
     @ConfigOption(name = "Blood Mob Highlight", desc = "Highlight blood room mobs. Box = bounding box, Outline = body glow, Off = disabled")
@@ -201,4 +201,39 @@ public class Dungeons {
     public void setPb(String key, long ms) {
         floorPbs.put(key, ms);
     }
+
+    @Expose
+    @ConfigOption(name = "Chest Case Opening", desc = "CS:GO style animation when opening dungeon chests")
+    @ConfigEditorAccordion(id = 44)
+    public boolean caseOpeningAccordion = false;
+
+    @Expose
+    @ConfigOption(name = "Enable", desc = "Play the case opening animation when opening Obsidian or Bedrock chests")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 44)
+    public boolean caseOpeningAnimation = false;
+
+    @Expose
+    @ConfigOption(name = "Show Item Names", desc = "Show item names below each slot in the carousel")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 44)
+    public boolean caseOpeningAllowText = true;
+
+    @Expose
+    @ConfigOption(name = "Text Scale", desc = "Scale of the item name text in the carousel")
+    @ConfigEditorSliderAnnotation(minValue = 0.3f, maxValue = 2f, minStep = 0.1f)
+    @ConfigAccordionId(id = 44)
+    public float caseOpeningTextScale = 0.5f;
+
+    @Expose
+    @ConfigOption(name = "Slow Time", desc = "Time in seconds to decelerate from the slow point to the reward slot")
+    @ConfigEditorSliderAnnotation(minValue = 0.5f, maxValue = 10f, minStep = 0.5f)
+    @ConfigAccordionId(id = 44)
+    public float caseOpeningSlowTime = 3f;
+
+    @Expose
+    @ConfigOption(name = "Slow Distance", desc = "Number of slots before the reward where the carousel starts to slow down")
+    @ConfigEditorSliderAnnotation(minValue = 1f, maxValue = 20f, minStep = 1f)
+    @ConfigAccordionId(id = 44)
+    public int caseOpeningSlowDistance = 8;
 }

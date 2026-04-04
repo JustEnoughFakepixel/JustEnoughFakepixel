@@ -88,6 +88,7 @@ public class DungeonStats extends Overlay {
     private static final String C_NEWPB    = EnumChatFormatting.LIGHT_PURPLE.toString();
 
     private DungeonFloor currentFloor = DungeonFloor.NONE;
+    public DungeonFloor getCurrentFloor() { return currentFloor; }
     private boolean inDungeon  = false;
     private boolean runFailed  = false;
     private boolean runEnded   = false;
