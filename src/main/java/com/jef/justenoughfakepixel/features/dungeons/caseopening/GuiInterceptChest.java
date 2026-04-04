@@ -51,13 +51,28 @@ public class GuiInterceptChest extends GuiContainer {
         }
     }
 
+    private static final int REWARD_SLOT_START = 10;
+    private static final int REWARD_SLOT_END   = 16;
+
     private void scanForReward() {
         IInventory lower = container.getLowerChestInventory();
+        int size = lower.getSizeInventory();
         int dropCount = DungeonDropData.getDrops(material, floor).size();
         DebugLogger.log("[GuiInterceptChest] Scanning — floor=" + floor
-                + ", material=" + material + ", possible drops=" + dropCount);
+                + ", material=" + material + ", possible drops=" + dropCount
+                + ", inventory size=" + size);
 
-        for (int i = 10; i <= 16; i++) {
+        if (com.jef.justenoughfakepixel.core.JefConfig.feature.debug.enableDebug) {
+            for (int i = 0; i < size; i++) {
+                ItemStack s = lower.getStackInSlot(i);
+                if (s == null || s.getItem() == null) continue;
+                String id = ItemUtils.getEffectiveItemId(s);
+                DebugLogger.log("[GuiInterceptChest] [ALL] Slot " + i + ": "
+                        + s.getDisplayName() + " (id=" + id + ")");
+            }
+        }
+
+        for (int i = REWARD_SLOT_START; i <= REWARD_SLOT_END; i++) {
             ItemStack stack = lower.getStackInSlot(i);
             if (stack == null || stack.getItem() == null) continue;
 
