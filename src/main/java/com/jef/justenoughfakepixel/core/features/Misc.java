@@ -212,7 +212,7 @@ public class Misc {
     public int invButtonTooltipDelay = 600;
 
     @Expose
-    @ConfigOption(name = "Item List", desc = "The internal item list used for various purposes.")
+    @ConfigOption(name = "Item List", desc = "A gui element showing a list of all skyblock items")
     @ConfigEditorAccordion(id = 31)
     public boolean itemListAccordian = false;
 
@@ -221,6 +221,24 @@ public class Misc {
     @ConfigEditorBoolean
     @ConfigAccordionId(id = 31)
     public boolean enableItemList = true;
+
+    @Expose
+    @ConfigOption(name = "itemlist scale", desc = "How many items should be in each row")
+    @ConfigEditorSliderAnnotation(minValue = 1f, maxValue = 10f, minStep = 1f)
+    @ConfigAccordionId(id = 31)
+    public float itemListScale = 6f;
+
+    @Expose
+    @ConfigOption(name = "itemlist slot scale", desc = "Size of items in itemlist")
+    @ConfigEditorSliderAnnotation(minValue = 16f, maxValue = 64f, minStep = 1f)
+    @ConfigAccordionId(id = 31)
+    public float itemListScalePx = 16f;
+
+    @Expose
+    @ConfigOption(name = "Itemlist BG color", desc = "Background color of the Itemlist (alpha controls opacity)")
+    @ConfigEditorColour
+    @ConfigAccordionId(id = 31)
+    public String itemListBgColor = "0:136:0:0:0";
 
     @Expose
     @ConfigOption(name = "Reload Itemlist", desc = "Force Reload and refetch all the items from github repo.")

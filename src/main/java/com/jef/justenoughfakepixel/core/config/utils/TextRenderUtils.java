@@ -108,4 +108,16 @@ public final class TextRenderUtils {
         GlStateManager.enableRescaleNormal();
         GlStateManager.disableLighting();
     }
+
+    public static void drawHoveringText(List<String> textLines, int mouseX, int mouseY, FontRenderer font) {
+        net.minecraft.client.gui.ScaledResolution sr =
+                new net.minecraft.client.gui.ScaledResolution(net.minecraft.client.Minecraft.getMinecraft());
+        drawHoveringText(textLines, mouseX, mouseY, sr.getScaledWidth(), sr.getScaledHeight(), -1, font);
+    }
+
+    public static void drawHoveringText(String text, int mouseX, int mouseY, FontRenderer font) {
+        java.util.List<String> lines = new java.util.ArrayList<>();
+        lines.add(text);
+        drawHoveringText(lines, mouseX, mouseY, font);
+    }
 }

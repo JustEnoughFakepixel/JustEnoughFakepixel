@@ -272,6 +272,7 @@ public class JefConfig {
         ).withOverlayScale(feature.mining.powderOverlayScale)
                 .withParent(Minecraft.getMinecraft().currentScreen);
     }
+
     public static void openDungeonBreakerEditor() {
         if (feature == null) return;
         DungeonBreakerOverlay overlay = DungeonBreakerOverlay.getInstance();
@@ -304,6 +305,10 @@ public class JefConfig {
                 JefConfig::saveConfig
         ).withOverlayScale(feature.fishing.trophyFishScale)
                 .withParent(Minecraft.getMinecraft().currentScreen);
+    }
+
+    public static void reloadItemList() {
+        new Thread(() -> com.jef.justenoughfakepixel.features.itemlist.ItemRegistry.initialise(true)).start();
     }
 
     public static void resetPowderTracker() {

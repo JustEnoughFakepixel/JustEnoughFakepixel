@@ -72,16 +72,15 @@ public class Config {
             case "openGyroWandEditor":            JefConfig.openGyroWandEditor();            break;
             case "openPowderEditor":              JefConfig.openPowderEditor();              break;
             case "openInvButtonEditor":           JefConfig.openInvButtonEditor();           break;
+            case "reloadItemList":       JefConfig.reloadItemList();                break;
             case "resetPowderTracker":            JefConfig.resetPowderTracker();            break;
             case "openDungeonBreakerEditor":      JefConfig.openDungeonBreakerEditor();      break;
             case "openTrophyFishEditor":          JefConfig.openTrophyFishEditor();          break;
             case "openDungeonRoomOverlayEditor":  JefConfig.openDungeonRoomOverlayEditor();  break;
 
-            // ── About: links ─────────────────────────────────────────────────
             case "openDiscord":  openUrl("https://discord.gg/tdMFbmhFTb");                           break;
             case "openGithub":   openUrl("https://github.com/hamlook/justenoughfakepixel");          break;
 
-            // ── About: used software ─────────────────────────────────────────
             case "openLicenseForge":         openUrl("https://github.com/MinecraftForge/MinecraftForge");        break;
             case "openLicenseMixin":         openUrl("https://github.com/SpongePowered/Mixin/");                 break;
             case "openLicenseMoulConfig":    openUrl("https://github.com/NotEnoughUpdates/MoulConfig");          break;
