@@ -16,15 +16,14 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.Color;
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CustomDropAnimationGui extends GuiScreen {
 
-    private static final ResourceLocation FADE_SIDE =
-            new ResourceLocation("justenoughfakepixel", "textures/dungeons/caseopening/gui/fade_side.png");
+    private static final ResourceLocation FADE_SIDE = new ResourceLocation("justenoughfakepixel", "textures/dungeons/caseopening/gui/fade_side.png");
     private static final ResourceLocation AUDIO = new ResourceLocation("gui.button.press");
 
     private final Minecraft mc = Minecraft.getMinecraft();
@@ -36,31 +35,26 @@ public class CustomDropAnimationGui extends GuiScreen {
     private final List<DungeonDropData.Rule> carouselItems = new ArrayList<>();
     private final int itemCount = 50;
     private final int rewardSlot = 44;
-
+    private final long guiOpenStartTime;
+    private final long animationDuration = 300_000_000L;
+    private final float randstop;
+    private final float randslow;
+    private final boolean resultHandled = false;
     private int scaleFactor, screenWidth, screenHeight;
     private int lastScaleFactor = -1, lastScreenWidth = -1, lastScreenHeight = -1;
     private float lastSpacing = -1f;
-
     private Framebuffer frameBufferLayer1, frameBufferLayer2;
     private ShaderGroup blurShader;
-
     private long lastFrameTime = 0L;
-    private final long guiOpenStartTime;
-    private final long animationDuration = 300_000_000L;
-
     private float currentScrollSpeed;
     private float offsetX = 0f;
     private float itemBoxWidth, itemBoxHeight, itemBoxPadding, spacing;
     private float centerX, centerY;
     private float stopPoint, slowPoint;
-    private final float randstop;
-    private final float randslow;
     private int lastBoxDistance = 0;
     private boolean hasShownResult = false;
-    private final boolean resultHandled  = false;
 
-    public CustomDropAnimationGui(DungeonDropData.Rule rewardItem, DungeonDropData.Floor floor,
-                                  DungeonDropData.CaseMaterial material) {
+    public CustomDropAnimationGui(DungeonDropData.Rule rewardItem, DungeonDropData.Floor floor, DungeonDropData.CaseMaterial material) {
         this.mc.getSoundHandler().playSound(PositionedSoundRecord.create(AUDIO, 1.0F));
         this.floatFont = new FloatFontRenderer(mc.fontRendererObj);
         this.rewardItem = rewardItem;
@@ -71,6 +65,13 @@ public class CustomDropAnimationGui extends GuiScreen {
         this.guiOpenStartTime = System.nanoTime();
         this.lastFrameTime = System.nanoTime();
         buildCarousel(rewardItem);
+    }
+
+    private static double randStopPoint() {
+        double rand = ThreadLocalRandom.current().nextDouble(0, 100);
+        if (rand < 40) return ThreadLocalRandom.current().nextDouble(0, 0.2);
+        if (rand < 60) return ThreadLocalRandom.current().nextDouble(0.2, 0.8);
+        return ThreadLocalRandom.current().nextDouble(0.8, 1.0);
     }
 
     private void buildCarousel(DungeonDropData.Rule rewardItem) {
@@ -87,9 +88,15 @@ public class CustomDropAnimationGui extends GuiScreen {
 
         int rolls = itemCount - 1;
         for (int i = 0; i < 6; i++) {
-            if (buckets.get(i).isEmpty()) { amount.add(0); continue; }
+            if (buckets.get(i).isEmpty()) {
+                amount.add(0);
+                continue;
+            }
             int count = 0;
-            if (i < 3 && checkRepeat.get(i)) { amount.add(0); continue; }
+            if (i < 3 && checkRepeat.get(i)) {
+                amount.add(0);
+                continue;
+            }
             for (int j = 0; j < rolls; j++) {
                 if (Math.random() < (float) weight.get(i) / rollsize) {
                     count++;
@@ -105,13 +112,11 @@ public class CustomDropAnimationGui extends GuiScreen {
             if (buckets.get(i).isEmpty()) continue;
             if (i == 6) {
                 for (int j = 0; j < rolls; j++)
-                    carouselItems.add(buckets.get(i).get(
-                            ThreadLocalRandom.current().nextInt(buckets.get(i).size())));
+                    carouselItems.add(buckets.get(i).get(ThreadLocalRandom.current().nextInt(buckets.get(i).size())));
             } else if (i < 3 && amount.get(i) > 0) {
                 int x = ThreadLocalRandom.current().nextInt(0, 90);
                 int slot = (int) ((Math.exp(0.04605 * x) * (-1) + 100) / 100 * carouselItems.size() - 1);
-                carouselItems.add(slot, buckets.get(i).get(
-                        ThreadLocalRandom.current().nextInt(buckets.get(i).size())));
+                carouselItems.add(slot, buckets.get(i).get(ThreadLocalRandom.current().nextInt(buckets.get(i).size())));
             } else {
                 for (int j = 0; j < amount.get(i); j++) {
                     int slot = ThreadLocalRandom.current().nextInt(carouselItems.size() - 1);
@@ -123,14 +128,6 @@ public class CustomDropAnimationGui extends GuiScreen {
         }
         carouselItems.add(rewardSlot, rewardItem);
     }
-
-    private static double randStopPoint() {
-        double rand = ThreadLocalRandom.current().nextDouble(0, 100);
-        if (rand < 40) return ThreadLocalRandom.current().nextDouble(0, 0.2);
-        if (rand < 60) return ThreadLocalRandom.current().nextDouble(0.2, 0.8);
-        return ThreadLocalRandom.current().nextDouble(0.8, 1.0);
-    }
-
 
     private double velocityFromX(double distanceToStop) {
         double X = Math.max(stopPoint - slowPoint, spacing);
@@ -190,9 +187,7 @@ public class CustomDropAnimationGui extends GuiScreen {
     public void initGui() {
         super.initGui();
         try {
-            blurShader = new ShaderGroup(mc.getTextureManager(), mc.getResourceManager(),
-                    mc.getFramebuffer(),
-                    new ResourceLocation("justenoughfakepixel", "shaders/post/blur.json"));
+            blurShader = new ShaderGroup(mc.getTextureManager(), mc.getResourceManager(), mc.getFramebuffer(), new ResourceLocation("justenoughfakepixel", "shaders/post/blur.json"));
             blurShader.createBindFramebuffers(mc.displayWidth, mc.displayHeight);
         } catch (Exception e) {
             e.printStackTrace();
@@ -233,15 +228,27 @@ public class CustomDropAnimationGui extends GuiScreen {
         if (hasShownResult) {
             String sound;
             switch (rewardItem.rarity) {
-                case 7: sound = "dig.grass"; break;
-                case 6: sound = "liquid.splash"; break;
-                case 5: sound = "random.orb"; break;
-                case 4: sound = "fireworks.launch"; break;
+                case 7:
+                    sound = "dig.grass";
+                    break;
+                case 6:
+                    sound = "liquid.splash";
+                    break;
+                case 5:
+                    sound = "random.orb";
+                    break;
+                case 4:
+                    sound = "fireworks.launch";
+                    break;
                 case 3:
                 case 1:
-                    sound = "random.levelup"; break;
-                case 2: sound = "mob.wither.spawn"; break;
-                default: return;
+                    sound = "random.levelup";
+                    break;
+                case 2:
+                    sound = "mob.wither.spawn";
+                    break;
+                default:
+                    return;
             }
 
             mc.getSoundHandler().playSound(PositionedSoundRecord.create(new ResourceLocation("minecraft", sound), 1.0F));
@@ -314,8 +321,7 @@ public class CustomDropAnimationGui extends GuiScreen {
             drawRect((int) x, (int) y1, (int) (x + itemBoxWidth * size), (int) y2, boxColor);
             GlStateManager.enableBlend();
             GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            drawGradientRect((int) x, (int) (y2 - itemBoxHeight * size), (int) (x + itemBoxWidth * size),
-                    (int) y2, (boxColor & 0x00FFFFFF), (boxColor & 0x00FFFFFF) | 0xCC000000);
+            drawGradientRect((int) x, (int) (y2 - itemBoxHeight * size), (int) (x + itemBoxWidth * size), (int) y2, (boxColor & 0x00FFFFFF), (boxColor & 0x00FFFFFF) | 0xCC000000);
             GlStateManager.disableBlend();
 
             renderItemImage(i, x, y, size);
@@ -326,8 +332,7 @@ public class CustomDropAnimationGui extends GuiScreen {
                 float textY = y + itemBoxHeight * size * 3 / 4;
                 GL11.glPushMatrix();
                 GL11.glScalef(textScale, textScale, 1f);
-                floatFont.drawCenteredString(normalizeString(carouselItems.get(i).item.name()),
-                        textX / textScale, textY / textScale, boxColor, true);
+                floatFont.drawCenteredString(normalizeString(carouselItems.get(i).item.name()), textX / textScale, textY / textScale, boxColor, true);
                 GL11.glPopMatrix();
             }
         }
@@ -346,36 +351,44 @@ public class CustomDropAnimationGui extends GuiScreen {
         float imageX = x + (itemBoxWidth * size) / 2 - imageSize / 2;
         float imageY = y + (itemBoxHeight * size) / 2 - imageSize / 2;
 
-        try { mc.getTextureManager().bindTexture(tex.getRl()); }
-        catch (Exception e) { mc.getTextureManager().bindTexture(TextureMap.LOCATION_MISSING_TEXTURE); }
+        try {
+            mc.getTextureManager().bindTexture(tex.getRl());
+        } catch (Exception e) {
+            mc.getTextureManager().bindTexture(TextureMap.LOCATION_MISSING_TEXTURE);
+        }
 
         GlStateManager.color(1f, 1f, 1f, 1f);
-        drawScaledCustomSizeModalRect((int) imageX, (int) imageY, 0, v, 16, 16,
-                (int) imageSize, (int) imageSize, 16f, frameHeight * tex.getFrames());
+        drawScaledCustomSizeModalRect((int) imageX, (int) imageY, 0, v, 16, 16, (int) imageSize, (int) imageSize, 16f, frameHeight * tex.getFrames());
     }
 
     private void renderJudgementLine() {
         float lineWidth = screenWidth / 512f;
         float lineHeight = screenHeight / 4f;
-        drawRect((int) (centerX - lineWidth / 2), (int) (centerY - lineHeight / 3 * 2.5),
-                (int) (centerX + lineWidth), (int) (centerY + lineHeight), 0xFFFFA500);
+        drawRect((int) (centerX - lineWidth / 2), (int) (centerY - lineHeight / 3 * 2.5), (int) (centerX + lineWidth), (int) (centerY + lineHeight), 0xFFFFA500);
 
         int boxDistance = (int) offsetX % (int) spacing;
-        if (boxDistance < lastBoxDistance)
-            mc.getSoundHandler().playSound(PositionedSoundRecord.create(AUDIO, 1.0F));
+        if (boxDistance < lastBoxDistance) mc.getSoundHandler().playSound(PositionedSoundRecord.create(AUDIO, 1.0F));
         lastBoxDistance = boxDistance;
     }
 
     private int getBoxColor(DropRarity rarity) {
         switch (rarity) {
-            case PRAYTORNG: return getRainbowColor();
-            case DIVINE:    return 0xFF4EEBEB;
-            case MYTHIC:    return 0xFFF953F9;
-            case LEGENDARY: return 0xFFEF9E01;
-            case EPIC:      return 0xFFAA00AA;
-            case FISH:      return 0xFF4C4BE2;
-            case COMMON:    return 0xFFE0DFE0;
-            default:        return 0xFF000000;
+            case PRAYTORNG:
+                return getRainbowColor();
+            case DIVINE:
+                return 0xFF4EEBEB;
+            case MYTHIC:
+                return 0xFFF953F9;
+            case LEGENDARY:
+                return 0xFFEF9E01;
+            case EPIC:
+                return 0xFFAA00AA;
+            case FISH:
+                return 0xFF4C4BE2;
+            case COMMON:
+                return 0xFFE0DFE0;
+            default:
+                return 0xFF000000;
         }
     }
 
@@ -385,10 +398,8 @@ public class CustomDropAnimationGui extends GuiScreen {
         return 0xFF000000 | (rgb & 0xFFFFFF);
     }
 
-    private void drawCircleMask(float cx, float cy, float radius, int color
-    ) {
-        float a = (color >> 24 & 255) / 255f, r = (color >> 16 & 255) / 255f,
-                g = (color >> 8 & 255) / 255f, b = (color & 255) / 255f;
+    private void drawCircleMask(float cx, float cy, float radius, int color) {
+        float a = (color >> 24 & 255) / 255f, r = (color >> 16 & 255) / 255f, g = (color >> 8 & 255) / 255f, b = (color & 255) / 255f;
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glColor4f(r, g, b, a);
         GL11.glDisable(GL11.GL_CULL_FACE);
@@ -407,8 +418,7 @@ public class CustomDropAnimationGui extends GuiScreen {
         StringBuilder result = new StringBuilder();
         for (String part : input.split("_")) {
             if (part.isEmpty()) continue;
-            result.append(Character.toUpperCase(part.charAt(0)))
-                    .append(part.substring(1).toLowerCase()).append(" ");
+            result.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1).toLowerCase()).append(" ");
         }
         return result.toString().trim();
     }
@@ -428,5 +438,7 @@ public class CustomDropAnimationGui extends GuiScreen {
     }
 
     @Override
-    public boolean doesGuiPauseGame() { return false; }
+    public boolean doesGuiPauseGame() {
+        return false;
+    }
 }

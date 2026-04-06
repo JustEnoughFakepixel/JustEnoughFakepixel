@@ -11,9 +11,9 @@ public class TextureData {
     private final int frames;
 
     public TextureData(ResourceLocation rl, int frameTime, int frames) {
-        this.rl        = rl;
+        this.rl = rl;
         this.frameTime = frameTime;
-        this.frames    = frames;
+        this.frames = frames;
     }
 
 }

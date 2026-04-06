@@ -7,40 +7,33 @@ import net.minecraft.client.gui.GuiScreen;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.Color;
+import java.awt.*;
 import java.io.IOException;
 import java.util.HashMap;
 
 
 public class StorageOverlay extends GuiScreen {
 
-    public boolean isHorizontal = true;
-
     private static final int BASE_BOX_WIDTH = 1536;
     private static final int BASE_BOX_HEIGHT = BASE_BOX_WIDTH * 9 / 16;
     private static final int BASE_CONTAINER_WIDTH = 450;
     private static final int BASE_CONTAINER_HEIGHT = BASE_CONTAINER_WIDTH * 9 / 16;
-
     private static final int BASE_PADDING = 30;
-
+    public boolean isHorizontal = true;
+    public double scrollOffset = 0;
+    public double offset = 0;
+    public HashMap<String, StorageContainer> containers = new HashMap<>();
+    public String activeContainer = "";
     private int boxX, boxY, boxWidth, boxHeight;
     private int cWidth, cHeight, pX, pY;
     private int startX, startY;
-
     private double SCROLL_SPEED = 100;
-    public double scrollOffset = 0;
-    public double offset = 0;
-
     private double maxScroll = 0;
     private double totalElements = 0;
     private double visibleElements = 0;
-
-    public HashMap<String,StorageContainer> containers = new HashMap<>();
-    public String activeContainer = "";
-
     private boolean isDraggingScreen = false;
     private boolean isDraggingScrollbar = false;
-    private int lastMouseX,lastMouseY;
+    private int lastMouseX, lastMouseY;
     private int draggedDistance = 0;
     private int scrollbarDragOffset = 0;
 
@@ -58,9 +51,7 @@ public class StorageOverlay extends GuiScreen {
         int pageCounter = 1;
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < cols; x++) {
-                containers.put("echest-" + pageCounter, new StorageContainer(
-                        new HashMap<>(), ContainerType.ECHEST, pageCounter, x, y
-                ));
+                containers.put("echest-" + pageCounter, new StorageContainer(new HashMap<>(), ContainerType.ECHEST, pageCounter, x, y));
                 pageCounter++;
             }
         }
@@ -108,12 +99,11 @@ public class StorageOverlay extends GuiScreen {
         clampScroll();
 
         offset = this.scrollOffset;
-        if(!JefConfig.feature.storage.smoothScroll){
+        if (!JefConfig.feature.storage.smoothScroll) {
             offset = Math.round(this.scrollOffset);
         }
 
-        this.drawCenteredString(mc.fontRendererObj, "Offset: " + String.format("%.2f", offset),
-                boxX + (boxWidth / 2), boxY - 15, new Color(255, 255, 255).getRGB());
+        this.drawCenteredString(mc.fontRendererObj, "Offset: " + String.format("%.2f", offset), boxX + (boxWidth / 2), boxY - 15, new Color(255, 255, 255).getRGB());
 
         drawRect(boxX - 2, boxY - 2, boxX + boxWidth + 4, boxY + boxHeight + 4, new Color(0, 0, 0, 150).getRGB());
 
@@ -131,11 +121,15 @@ public class StorageOverlay extends GuiScreen {
             int SCROLLBAR_MARGIN = 5;
 
             if (isHorizontal) {
-                trackX = boxX; trackY = boxY + boxHeight + SCROLLBAR_MARGIN;
-                trackW = boxWidth; trackH = SCROLLBAR_SIZE;
+                trackX = boxX;
+                trackY = boxY + boxHeight + SCROLLBAR_MARGIN;
+                trackW = boxWidth;
+                trackH = SCROLLBAR_SIZE;
             } else {
-                trackX = boxX + boxWidth + SCROLLBAR_MARGIN; trackY = boxY;
-                trackW = SCROLLBAR_SIZE; trackH = boxHeight;
+                trackX = boxX + boxWidth + SCROLLBAR_MARGIN;
+                trackY = boxY;
+                trackW = SCROLLBAR_SIZE;
+                trackH = boxHeight;
             }
 
             double trackLen = isHorizontal ? trackW : trackH;
@@ -144,9 +138,15 @@ public class StorageOverlay extends GuiScreen {
             double thumbStart = (isHorizontal ? trackX : trackY) + progress * (trackLen - thumbLen);
 
             if (isHorizontal) {
-                thumbX = (int) thumbStart; thumbY = trackY; thumbW = (int) thumbLen; thumbH = trackH;
+                thumbX = (int) thumbStart;
+                thumbY = trackY;
+                thumbW = (int) thumbLen;
+                thumbH = trackH;
             } else {
-                thumbX = trackX; thumbY = (int) thumbStart; thumbW = trackW; thumbH = (int) thumbLen;
+                thumbX = trackX;
+                thumbY = (int) thumbStart;
+                thumbW = trackW;
+                thumbH = (int) thumbLen;
             }
 
             drawRect(trackX, trackY, trackX + trackW, trackY + trackH, new Color(30, 30, 30, 200).getRGB());
@@ -161,12 +161,7 @@ public class StorageOverlay extends GuiScreen {
         int scaleFactor = ResolutionUtils.getFactor();
         int displayHeight = mc.displayHeight;
 
-        GL11.glScissor(
-                x * scaleFactor,
-                displayHeight - ((y + height) * scaleFactor),
-                width * scaleFactor,
-                height * scaleFactor
-        );
+        GL11.glScissor(x * scaleFactor, displayHeight - ((y + height) * scaleFactor), width * scaleFactor, height * scaleFactor);
     }
 
     public boolean canDraw(int gridPos) {
@@ -174,7 +169,7 @@ public class StorageOverlay extends GuiScreen {
     }
 
     public boolean isHovering(int mouseX, int mouseY, StorageContainer container) {
-        if(container == null) return false;
+        if (container == null) return false;
         if (mouseX < boxX || mouseX > boxX + boxWidth || mouseY < boxY || mouseY > boxY + boxHeight) {
             return false;
         }
@@ -182,8 +177,7 @@ public class StorageOverlay extends GuiScreen {
         double renderX = startX + ((container.xGrid - (isHorizontal ? offset : 0)) * (cWidth + pX));
         double renderY = startY + ((container.yGrid - (!isHorizontal ? offset : 0)) * (cHeight + pY));
 
-        return mouseX >= renderX && mouseX <= renderX + cWidth &&
-                mouseY >= renderY && mouseY <= renderY + cHeight;
+        return mouseX >= renderX && mouseX <= renderX + cWidth && mouseY >= renderY && mouseY <= renderY + cHeight;
     }
 
     @Override
@@ -195,7 +189,7 @@ public class StorageOverlay extends GuiScreen {
         isDraggingScrollbar = false;
         if (maxScroll > 0) {
             if (mouseX >= thumbX && mouseX <= thumbX + thumbW && mouseY >= thumbY && mouseY <= thumbY + thumbH) {
-                if(JefConfig.feature.storage.barScroll) {
+                if (JefConfig.feature.storage.barScroll) {
                     isDraggingScrollbar = true;
                     scrollbarDragOffset = isHorizontal ? mouseX - thumbX : mouseY - thumbY;
                     return;
@@ -211,15 +205,15 @@ public class StorageOverlay extends GuiScreen {
 
                 scrollOffset = progress * maxScroll;
                 clampScroll();
-                if(JefConfig.feature.storage.barScroll) {
+                if (JefConfig.feature.storage.barScroll) {
                     isDraggingScrollbar = true;
                 }
-                scrollbarDragOffset = (int)(thumbLen / 2);
+                scrollbarDragOffset = (int) (thumbLen / 2);
                 return;
             }
 
 
-            if(!JefConfig.feature.storage.dragScroll){
+            if (!JefConfig.feature.storage.dragScroll) {
                 if (activeContainer != null && !activeContainer.isEmpty() && containers.containsKey(activeContainer)) {
                     if (isHovering(mouseX, mouseY, containers.get(activeContainer))) {
                         containers.get(activeContainer).mouseClicked(mouseX, mouseY, mouseButton);
@@ -234,7 +228,7 @@ public class StorageOverlay extends GuiScreen {
             }
 
             if (mouseX >= boxX && mouseX <= boxX + boxWidth && mouseY >= boxY && mouseY <= boxY + boxHeight) {
-                if(JefConfig.feature.storage.dragScroll) {
+                if (JefConfig.feature.storage.dragScroll) {
                     isDraggingScreen = true;
                 }
             }
@@ -302,21 +296,9 @@ public class StorageOverlay extends GuiScreen {
         double renderX = startX + ((container.xGrid - (isHorizontal ? offset : 0)) * (cWidth + pX));
         double renderY = startY + ((container.yGrid - (!isHorizontal ? offset : 0)) * (cHeight + pY));
 
-        drawRect(
-                (int) renderX,
-                (int) renderY,
-                (int) renderX + cWidth,
-                (int) renderY + cHeight,
-                new Color(150, 150, 150, 200).getRGB()
-        );
+        drawRect((int) renderX, (int) renderY, (int) renderX + cWidth, (int) renderY + cHeight, new Color(150, 150, 150, 200).getRGB());
 
-        this.drawCenteredString(
-                mc.fontRendererObj,
-                String.valueOf(container.page),
-                (int) renderX + (cWidth / 2),
-                (int) renderY + (cHeight / 2) - 4,
-                new Color(255, 255, 255).getRGB()
-        );
+        this.drawCenteredString(mc.fontRendererObj, String.valueOf(container.page), (int) renderX + (cWidth / 2), (int) renderY + (cHeight / 2) - 4, new Color(255, 255, 255).getRGB());
     }
 
     private void clampScroll() {
@@ -327,7 +309,7 @@ public class StorageOverlay extends GuiScreen {
     @Override
     public void handleMouseInput() throws IOException {
         int scroll = Mouse.getDWheel();
-        if(scroll != 0){
+        if (scroll != 0) {
             int direction = Integer.signum(scroll);
             this.scrollOffset -= direction * (SCROLL_SPEED / 100.0);
             clampScroll();

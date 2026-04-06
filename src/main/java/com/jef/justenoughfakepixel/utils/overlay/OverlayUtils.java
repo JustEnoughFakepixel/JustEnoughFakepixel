@@ -11,7 +11,6 @@ public class OverlayUtils {
     public static boolean shouldHide() {
         if (mc.gameSettings.showDebugInfo) return true;
         if (Keyboard.isKeyDown(mc.gameSettings.keyBindPlayerList.getKeyCode())) return true;
-        if (mc.currentScreen instanceof GuiChat) return true;
-        return false;
+        return mc.currentScreen instanceof GuiChat;
     }
 }

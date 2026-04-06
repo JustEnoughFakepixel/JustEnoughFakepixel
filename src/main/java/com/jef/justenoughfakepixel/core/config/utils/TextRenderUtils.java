@@ -9,32 +9,28 @@ import java.util.List;
 
 public final class TextRenderUtils {
 
-    private TextRenderUtils() {}
+    private TextRenderUtils() {
+    }
 
-    public static void drawStringScaledMaxWidth(String str, FontRenderer fr, float x, float y,
-                                                boolean shadow, int len, int colour) {
+    public static void drawStringScaledMaxWidth(String str, FontRenderer fr, float x, float y, boolean shadow, int len, int colour) {
         float factor = Math.min(1, len / (float) fr.getStringWidth(str));
         drawStringScaled(str, fr, x, y, shadow, colour, factor);
     }
 
-    public static void drawStringScaled(String str, FontRenderer fr, float x, float y,
-                                        boolean shadow, int colour, float factor) {
+    public static void drawStringScaled(String str, FontRenderer fr, float x, float y, boolean shadow, int colour, float factor) {
         GlStateManager.scale(factor, factor, 1);
         fr.drawString(str, x / factor, y / factor, colour, shadow);
         GlStateManager.scale(1 / factor, 1 / factor, 1);
     }
 
-    public static void drawStringCenteredScaledMaxWidth(String str, FontRenderer fr, float x, float y,
-                                                        boolean shadow, int len, int colour) {
+    public static void drawStringCenteredScaledMaxWidth(String str, FontRenderer fr, float x, float y, boolean shadow, int len, int colour) {
         int strLen = fr.getStringWidth(str);
         float factor = Math.min(1, len / (float) strLen);
         int newLen = Math.min(strLen, len);
         drawStringScaled(str, fr, x - newLen / 2f, y - 8 * factor / 2f, shadow, colour, factor);
     }
 
-    public static void drawHoveringText(List<String> textLines, int mouseX, int mouseY,
-                                        int screenWidth, int screenHeight, int maxTextWidth,
-                                        FontRenderer font) {
+    public static void drawHoveringText(List<String> textLines, int mouseX, int mouseY, int screenWidth, int screenHeight, int maxTextWidth, FontRenderer font) {
         if (textLines.isEmpty()) {
             GlStateManager.disableLighting();
             return;
@@ -70,7 +66,10 @@ public final class TextRenderUtils {
             for (int i = 0; i < textLines.size(); i++) {
                 List<String> wl = font.listFormattedStringToWidth(textLines.get(i), tooltipTextWidth);
                 if (i == 0) titleLinesCount = wl.size();
-                for (String l : wl) { wrappedWidth = Math.max(wrappedWidth, font.getStringWidth(l)); wrapped.add(l); }
+                for (String l : wl) {
+                    wrappedWidth = Math.max(wrappedWidth, font.getStringWidth(l));
+                    wrapped.add(l);
+                }
             }
             tooltipTextWidth = wrappedWidth;
             textLines = wrapped;
@@ -78,23 +77,22 @@ public final class TextRenderUtils {
         }
 
         int tooltipY = mouseY - 12;
-        int tooltipHeight = 8 + (textLines.size() > 1 ? (textLines.size() - 1) * 10 : 0)
-                + (textLines.size() > titleLinesCount ? 2 : 0);
+        int tooltipHeight = 8 + (textLines.size() > 1 ? (textLines.size() - 1) * 10 : 0) + (textLines.size() > titleLinesCount ? 2 : 0);
         if (tooltipY + tooltipHeight + 6 > screenHeight) tooltipY = screenHeight - tooltipHeight - 6;
 
         final int z = 300, bg = 0xF0100010;
-        RenderUtils.drawGradientRect(z, tooltipX - 3, tooltipY - 4,       tooltipX + tooltipTextWidth + 3, tooltipY - 3,           bg, bg);
+        RenderUtils.drawGradientRect(z, tooltipX - 3, tooltipY - 4, tooltipX + tooltipTextWidth + 3, tooltipY - 3, bg, bg);
         RenderUtils.drawGradientRect(z, tooltipX - 3, tooltipY + tooltipHeight + 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 4, bg, bg);
-        RenderUtils.drawGradientRect(z, tooltipX - 3, tooltipY - 3,       tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, bg, bg);
-        RenderUtils.drawGradientRect(z, tooltipX - 4, tooltipY - 3,       tooltipX - 3,                   tooltipY + tooltipHeight + 3, bg, bg);
+        RenderUtils.drawGradientRect(z, tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, bg, bg);
+        RenderUtils.drawGradientRect(z, tooltipX - 4, tooltipY - 3, tooltipX - 3, tooltipY + tooltipHeight + 3, bg, bg);
         RenderUtils.drawGradientRect(z, tooltipX + tooltipTextWidth + 3, tooltipY - 3, tooltipX + tooltipTextWidth + 4, tooltipY + tooltipHeight + 3, bg, bg);
 
         final int borderStart = 0x505000FF;
-        final int borderEnd   = (borderStart & 0xFEFEFE) >> 1 | borderStart & 0xFF000000;
-        RenderUtils.drawGradientRect(z, tooltipX - 3,                   tooltipY - 3 + 1,       tooltipX - 2,                   tooltipY + tooltipHeight + 2, borderStart, borderEnd);
-        RenderUtils.drawGradientRect(z, tooltipX + tooltipTextWidth + 2, tooltipY - 3 + 1,      tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 2, borderStart, borderEnd);
-        RenderUtils.drawGradientRect(z, tooltipX - 3,                   tooltipY - 3,           tooltipX + tooltipTextWidth + 3, tooltipY - 2,                 borderStart, borderStart);
-        RenderUtils.drawGradientRect(z, tooltipX - 3,                   tooltipY + tooltipHeight + 2, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, borderEnd, borderEnd);
+        final int borderEnd = (borderStart & 0xFEFEFE) >> 1 | borderStart & 0xFF000000;
+        RenderUtils.drawGradientRect(z, tooltipX - 3, tooltipY - 3 + 1, tooltipX - 2, tooltipY + tooltipHeight + 2, borderStart, borderEnd);
+        RenderUtils.drawGradientRect(z, tooltipX + tooltipTextWidth + 2, tooltipY - 3 + 1, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 2, borderStart, borderEnd);
+        RenderUtils.drawGradientRect(z, tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY - 2, borderStart, borderStart);
+        RenderUtils.drawGradientRect(z, tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, borderEnd, borderEnd);
 
         for (int i = 0; i < textLines.size(); i++) {
             font.drawStringWithShadow(textLines.get(i), tooltipX, tooltipY, -1);
@@ -110,8 +108,7 @@ public final class TextRenderUtils {
     }
 
     public static void drawHoveringText(List<String> textLines, int mouseX, int mouseY, FontRenderer font) {
-        net.minecraft.client.gui.ScaledResolution sr =
-                new net.minecraft.client.gui.ScaledResolution(net.minecraft.client.Minecraft.getMinecraft());
+        net.minecraft.client.gui.ScaledResolution sr = new net.minecraft.client.gui.ScaledResolution(net.minecraft.client.Minecraft.getMinecraft());
         drawHoveringText(textLines, mouseX, mouseY, sr.getScaledWidth(), sr.getScaledHeight(), -1, font);
     }
 

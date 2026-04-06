@@ -2,7 +2,6 @@ package com.jef.justenoughfakepixel.features.scoreboard;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.init.RegisterInstance;
 import com.jef.justenoughfakepixel.utils.ColorUtils;
 import net.minecraft.client.Minecraft;
@@ -18,24 +17,23 @@ import java.io.*;
 
 public class MaxwellPowerSync {
 
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     @RegisterInstance
     private static MaxwellPowerSync INSTANCE;
+    private File file = null;
+    private PowerData data = new PowerData();
+    private MaxwellPowerSync() {
+    }
 
     public static MaxwellPowerSync getInstance() {
         if (INSTANCE == null) INSTANCE = new MaxwellPowerSync();
         return INSTANCE;
     }
 
-    private MaxwellPowerSync() {}
-
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private File file = null;
-
-    private static class PowerData {
-        String power = null;
+    public static String getPower() {
+        if (INSTANCE == null) return null;
+        return INSTANCE.data.power;
     }
-
-    private PowerData data = new PowerData();
 
     public void initFile(File configDir) {
         this.file = new File(configDir, "maxwell_power.json");
@@ -58,11 +56,6 @@ public class MaxwellPowerSync {
         } catch (Exception e) {
             System.err.println("[JEF/Maxwell] Failed to save maxwell_power.json: " + e.getMessage());
         }
-    }
-
-    public static String getPower() {
-        if (INSTANCE == null) return null;
-        return INSTANCE.data.power;
     }
 
     @SubscribeEvent
@@ -95,15 +88,18 @@ public class MaxwellPowerSync {
 
     private boolean hasSelectedLine(ItemStack item) {
         try {
-            NBTTagList lore = item.getTagCompound()
-                    .getCompoundTag("display")
-                    .getTagList("Lore", 8);
+            NBTTagList lore = item.getTagCompound().getCompoundTag("display").getTagList("Lore", 8);
             for (int i = 0; i < lore.tagCount(); i++) {
                 if (ColorUtils.stripColor(lore.getStringTagAt(i)).trim().equals("Power is selected!")) {
                     return true;
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return false;
+    }
+
+    private static class PowerData {
+        String power = null;
     }
 }

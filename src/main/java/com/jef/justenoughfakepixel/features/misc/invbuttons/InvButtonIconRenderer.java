@@ -1,4 +1,4 @@
-package com.jef.justenoughfakepixel.features.invbuttons;
+package com.jef.justenoughfakepixel.features.misc.invbuttons;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -25,15 +25,15 @@ public class InvButtonIconRenderer {
     private static final HashMap<String, ItemStack> skullMap = new HashMap<>();
     private static final HashMap<String, ItemStack> stackCache = new HashMap<>();
 
-    private InvButtonIconRenderer() {}
+    private InvButtonIconRenderer() {
+    }
 
     public static void renderIcon(String icon, int x, int y) {
         if (icon == null || icon.isEmpty()) return;
 
         if (icon.startsWith("extra:")) {
             String name = icon.substring("extra:".length());
-            ResourceLocation loc = new ResourceLocation("justenoughfakepixel",
-                    "invbuttons/extraicons/" + name + ".png");
+            ResourceLocation loc = new ResourceLocation("justenoughfakepixel", "invbuttons/extraicons/" + name + ".png");
             Minecraft.getMinecraft().getTextureManager().bindTexture(loc);
             GlStateManager.color(1, 1, 1, 1);
             Utils.drawTexturedRect(x, y, 16, 16);
@@ -80,10 +80,6 @@ public class InvButtonIconRenderer {
         return null;
     }
 
-    /**
-     * Direct port of NEU's NEUManager.jsonToStack — builds an ItemStack from a NEU repo item JSON.
-     * JSON fields: itemid, damage, nbttag, displayname, lore
-     */
     public static ItemStack jsonToStack(JsonObject json) {
         if (json == null) return null;
 
@@ -104,7 +100,8 @@ public class InvButtonIconRenderer {
             try {
                 NBTTagCompound tag = JsonToNBT.getTagFromJson(json.get("nbttag").getAsString());
                 stack.setTagCompound(tag);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         if (json.has("lore")) {
@@ -133,17 +130,16 @@ public class InvButtonIconRenderer {
         return nbtLore;
     }
 
-    /** Builds a skull ItemStack from a texture hash — same as NEU's GuiInvButtonEditor.getStack */
     private static ItemStack buildSkullStack(String hash) {
-        ItemStack render       = new ItemStack(Items.skull, 1, 3);
-        NBTTagCompound nbt     = new NBTTagCompound();
-        NBTTagCompound owner   = new NBTTagCompound();
-        NBTTagCompound props   = new NBTTagCompound();
-        NBTTagList     texs    = new NBTTagList();
-        NBTTagCompound tex0    = new NBTTagCompound();
+        ItemStack render = new ItemStack(Items.skull, 1, 3);
+        NBTTagCompound nbt = new NBTTagCompound();
+        NBTTagCompound owner = new NBTTagCompound();
+        NBTTagCompound props = new NBTTagCompound();
+        NBTTagList texs = new NBTTagList();
+        NBTTagCompound tex0 = new NBTTagCompound();
 
         String uuid = UUID.nameUUIDFromBytes(hash.getBytes()).toString();
-        owner.setString("Id",   uuid);
+        owner.setString("Id", uuid);
         owner.setString("Name", uuid);
 
         String json = "{\"textures\":{\"SKIN\":{\"url\":\"http://textures.minecraft.net/texture/" + hash + "\"}}}";
@@ -156,7 +152,6 @@ public class InvButtonIconRenderer {
         return render;
     }
 
-    /** Exact port of NEU's Utils.drawItemStack */
     public static void drawItemStack(ItemStack stack, int x, int y) {
         if (stack == null) return;
         net.minecraft.client.renderer.entity.RenderItem ri = Minecraft.getMinecraft().getRenderItem();

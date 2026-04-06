@@ -5,37 +5,29 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.StringUtils;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.List;
 
 public final class WorldRenderUtils {
 
     private static final Minecraft mc = Minecraft.getMinecraft();
 
-    private WorldRenderUtils() {}
+    private WorldRenderUtils() {
+    }
 
     public static void drawEspBox(double x, double y, double z, Color color) {
-        drawEspBox(x, y, z,
-                color.getRed()   / 255f,
-                color.getGreen() / 255f,
-                color.getBlue()  / 255f,
-                color.getAlpha() / 255f);
+        drawEspBox(x, y, z, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
     }
 
     public static void drawEspBox(double x, double y, double z, float r, float g, float b, float a) {
-        final double[][] edges = {
-                {0,0,0,1,0,0},{0,0,1,1,0,1},{0,0,0,0,0,1},{1,0,0,1,0,1},
-                {0,1,0,1,1,0},{0,1,1,1,1,1},{0,1,0,0,1,1},{1,1,0,1,1,1},
-                {0,0,0,0,1,0},{1,0,0,1,1,0},{0,0,1,0,1,1},{1,0,1,1,1,1}
-        };
+        final double[][] edges = {{0, 0, 0, 1, 0, 0}, {0, 0, 1, 1, 0, 1}, {0, 0, 0, 0, 0, 1}, {1, 0, 0, 1, 0, 1}, {0, 1, 0, 1, 1, 0}, {0, 1, 1, 1, 1, 1}, {0, 1, 0, 0, 1, 1}, {1, 1, 0, 1, 1, 1}, {0, 0, 0, 0, 1, 0}, {1, 0, 0, 1, 1, 0}, {0, 0, 1, 0, 1, 1}, {1, 0, 1, 1, 1, 1}};
 
-        int ri = (int)(r * 255), gi = (int)(g * 255), bi = (int)(b * 255), ai = (int)(a * 255);
+        int ri = (int) (r * 255), gi = (int) (g * 255), bi = (int) (b * 255), ai = (int) (a * 255);
 
         Tessellator tess = Tessellator.getInstance();
         WorldRenderer wr = tess.getWorldRenderer();
@@ -95,7 +87,7 @@ public final class WorldRenderUtils {
         GL11.glPushMatrix();
         GL11.glTranslated(x, y, z);
         GL11.glRotatef(-mc.getRenderManager().playerViewY, 0f, 1f, 0f);
-        GL11.glRotatef( mc.getRenderManager().playerViewX, 1f, 0f, 0f);
+        GL11.glRotatef(mc.getRenderManager().playerViewX, 1f, 0f, 0f);
         GL11.glScalef(-scale, -scale, scale);
         GL11.glDisable(GL11.GL_DEPTH_TEST);
         mc.fontRendererObj.drawStringWithShadow(text, -w / 2f, 0f, 0xFFFFFF);
@@ -128,20 +120,32 @@ public final class WorldRenderUtils {
         WorldRenderer wr = tess.getWorldRenderer();
         wr.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
         // Bottom face
-        wr.pos(x0,y0,z0).color(r,g,b,a).endVertex(); wr.pos(x1,y0,z0).color(r,g,b,a).endVertex();
-        wr.pos(x1,y0,z0).color(r,g,b,a).endVertex(); wr.pos(x1,y0,z1).color(r,g,b,a).endVertex();
-        wr.pos(x1,y0,z1).color(r,g,b,a).endVertex(); wr.pos(x0,y0,z1).color(r,g,b,a).endVertex();
-        wr.pos(x0,y0,z1).color(r,g,b,a).endVertex(); wr.pos(x0,y0,z0).color(r,g,b,a).endVertex();
+        wr.pos(x0, y0, z0).color(r, g, b, a).endVertex();
+        wr.pos(x1, y0, z0).color(r, g, b, a).endVertex();
+        wr.pos(x1, y0, z0).color(r, g, b, a).endVertex();
+        wr.pos(x1, y0, z1).color(r, g, b, a).endVertex();
+        wr.pos(x1, y0, z1).color(r, g, b, a).endVertex();
+        wr.pos(x0, y0, z1).color(r, g, b, a).endVertex();
+        wr.pos(x0, y0, z1).color(r, g, b, a).endVertex();
+        wr.pos(x0, y0, z0).color(r, g, b, a).endVertex();
         // Top face
-        wr.pos(x0,y1,z0).color(r,g,b,a).endVertex(); wr.pos(x1,y1,z0).color(r,g,b,a).endVertex();
-        wr.pos(x1,y1,z0).color(r,g,b,a).endVertex(); wr.pos(x1,y1,z1).color(r,g,b,a).endVertex();
-        wr.pos(x1,y1,z1).color(r,g,b,a).endVertex(); wr.pos(x0,y1,z1).color(r,g,b,a).endVertex();
-        wr.pos(x0,y1,z1).color(r,g,b,a).endVertex(); wr.pos(x0,y1,z0).color(r,g,b,a).endVertex();
+        wr.pos(x0, y1, z0).color(r, g, b, a).endVertex();
+        wr.pos(x1, y1, z0).color(r, g, b, a).endVertex();
+        wr.pos(x1, y1, z0).color(r, g, b, a).endVertex();
+        wr.pos(x1, y1, z1).color(r, g, b, a).endVertex();
+        wr.pos(x1, y1, z1).color(r, g, b, a).endVertex();
+        wr.pos(x0, y1, z1).color(r, g, b, a).endVertex();
+        wr.pos(x0, y1, z1).color(r, g, b, a).endVertex();
+        wr.pos(x0, y1, z0).color(r, g, b, a).endVertex();
         // Verticals
-        wr.pos(x0,y0,z0).color(r,g,b,a).endVertex(); wr.pos(x0,y1,z0).color(r,g,b,a).endVertex();
-        wr.pos(x1,y0,z0).color(r,g,b,a).endVertex(); wr.pos(x1,y1,z0).color(r,g,b,a).endVertex();
-        wr.pos(x1,y0,z1).color(r,g,b,a).endVertex(); wr.pos(x1,y1,z1).color(r,g,b,a).endVertex();
-        wr.pos(x0,y0,z1).color(r,g,b,a).endVertex(); wr.pos(x0,y1,z1).color(r,g,b,a).endVertex();
+        wr.pos(x0, y0, z0).color(r, g, b, a).endVertex();
+        wr.pos(x0, y1, z0).color(r, g, b, a).endVertex();
+        wr.pos(x1, y0, z0).color(r, g, b, a).endVertex();
+        wr.pos(x1, y1, z0).color(r, g, b, a).endVertex();
+        wr.pos(x1, y0, z1).color(r, g, b, a).endVertex();
+        wr.pos(x1, y1, z1).color(r, g, b, a).endVertex();
+        wr.pos(x0, y0, z1).color(r, g, b, a).endVertex();
+        wr.pos(x0, y1, z1).color(r, g, b, a).endVertex();
         tess.draw();
 
         GL11.glPopMatrix();
@@ -254,8 +258,7 @@ public final class WorldRenderUtils {
     }
 
     public static void drawFilledBlock(BlockPos pos, Color color) {
-        AxisAlignedBB aabb = new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ(),
-                pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
+        AxisAlignedBB aabb = new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
         drawFilledBlocks(java.util.Collections.singletonList(aabb), color);
     }
 

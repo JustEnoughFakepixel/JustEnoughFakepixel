@@ -11,17 +11,16 @@ import net.minecraft.item.ItemStack;
 public class GuiInterceptChest extends GuiContainer {
 
     private static final int SCAN_DELAY = 3;
-
+    private static final int REWARD_SLOT_START = 10;
+    private static final int REWARD_SLOT_END = 16;
+    private final ContainerChest container;
+    private final DungeonDropData.Floor floor;
+    private final DungeonDropData.CaseMaterial material;
     private int tickCount = 0;
     private boolean doneCollectingReward = false;
     private DungeonDropData.Rule rewardToOpen = null;
 
-    private final ContainerChest container;
-    private final DungeonDropData.Floor floor;
-    private final DungeonDropData.CaseMaterial material;
-
-    public GuiInterceptChest(ContainerChest container, DungeonDropData.Floor floor,
-                             DungeonDropData.CaseMaterial material) {
+    public GuiInterceptChest(ContainerChest container, DungeonDropData.Floor floor, DungeonDropData.CaseMaterial material) {
         super(container);
         this.container = container;
         this.floor = floor;
@@ -43,32 +42,25 @@ public class GuiInterceptChest extends GuiContainer {
 
         if (rewardToOpen != null) {
             DebugLogger.log("[GuiInterceptChest] Launching animation for: " + rewardToOpen.item.name());
-            Minecraft.getMinecraft().displayGuiScreen(
-                    new CustomDropAnimationGui(rewardToOpen, floor, material));
+            Minecraft.getMinecraft().displayGuiScreen(new CustomDropAnimationGui(rewardToOpen, floor, material));
         } else {
             DebugLogger.log("[GuiInterceptChest] No matching reward found — returning to chest GUI");
             Minecraft.getMinecraft().displayGuiScreen(ChestListener.originalGui);
         }
     }
 
-    private static final int REWARD_SLOT_START = 10;
-    private static final int REWARD_SLOT_END   = 16;
-
     private void scanForReward() {
         IInventory lower = container.getLowerChestInventory();
         int size = lower.getSizeInventory();
         int dropCount = DungeonDropData.getDrops(material, floor).size();
-        DebugLogger.log("[GuiInterceptChest] Scanning — floor=" + floor
-                + ", material=" + material + ", possible drops=" + dropCount
-                + ", inventory size=" + size);
+        DebugLogger.log("[GuiInterceptChest] Scanning — floor=" + floor + ", material=" + material + ", possible drops=" + dropCount + ", inventory size=" + size);
 
         if (com.jef.justenoughfakepixel.core.JefConfig.feature.debug.enableDebug) {
             for (int i = 0; i < size; i++) {
                 ItemStack s = lower.getStackInSlot(i);
                 if (s == null || s.getItem() == null) continue;
                 String id = ItemUtils.getEffectiveItemId(s);
-                DebugLogger.log("[GuiInterceptChest] [ALL] Slot " + i + ": "
-                        + s.getDisplayName() + " (id=" + id + ")");
+                DebugLogger.log("[GuiInterceptChest] [ALL] Slot " + i + ": " + s.getDisplayName() + " (id=" + id + ")");
             }
         }
 
@@ -80,28 +72,38 @@ public class GuiInterceptChest extends GuiContainer {
             if (itemId.isEmpty()) continue;
             DebugLogger.log("[GuiInterceptChest] Slot " + i + ": " + itemId);
 
-            DungeonDropData.Rule found = DungeonDropData.getDrops(material, floor).stream()
-                    .filter(r -> r.item.name().equals(itemId))
-                    .findFirst()
-                    .orElse(null);
+            DungeonDropData.Rule found = DungeonDropData.getDrops(material, floor).stream().filter(r -> r.item.name().equals(itemId)).findFirst().orElse(null);
 
             if (found == null) continue;
 
-            if (rewardToOpen == null
-                    || found.rarity < rewardToOpen.rarity
-                    || (found.rarity == rewardToOpen.rarity
-                    && found.item.name().compareTo(rewardToOpen.item.name()) < 0)) {
+            if (rewardToOpen == null || found.rarity < rewardToOpen.rarity || (found.rarity == rewardToOpen.rarity && found.item.name().compareTo(rewardToOpen.item.name()) < 0)) {
                 rewardToOpen = found;
-                DebugLogger.log("[GuiInterceptChest] New best reward: "
-                        + rewardToOpen.item.name() + " (rarity " + rewardToOpen.rarity + ")");
+                DebugLogger.log("[GuiInterceptChest] New best reward: " + rewardToOpen.item.name() + " (rarity " + rewardToOpen.rarity + ")");
             }
         }
     }
 
-    @Override public void drawScreen(int mouseX, int mouseY, float partialTicks) {}
-    @Override protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {}
-    @Override protected void mouseClicked(int mouseX, int mouseY, int mouseButton) {}
-    @Override protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {}
-    @Override protected void mouseReleased(int mouseX, int mouseY, int state) {}
-    @Override public void handleMouseInput() {}
+    @Override
+    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+    }
+
+    @Override
+    protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+    }
+
+    @Override
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) {
+    }
+
+    @Override
+    protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+    }
+
+    @Override
+    protected void mouseReleased(int mouseX, int mouseY, int state) {
+    }
+
+    @Override
+    public void handleMouseInput() {
+    }
 }

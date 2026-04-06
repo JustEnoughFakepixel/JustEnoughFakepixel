@@ -14,7 +14,8 @@ public class SkullTextureCache {
 
     private static final Map<String, ResourceLocation> cache = new HashMap<>();
 
-    private SkullTextureCache() {}
+    private SkullTextureCache() {
+    }
 
     public static void load(String textureValue) {
         if (textureValue == null || textureValue.isEmpty()) return;

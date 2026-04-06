@@ -2,14 +2,14 @@ package com.jef.justenoughfakepixel.features.dungeons.mobhighlights;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
+import com.jef.justenoughfakepixel.events.RenderEntityModelEvent;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.data.SkyblockData;
-import com.jef.justenoughfakepixel.events.RenderEntityModelEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
@@ -21,7 +21,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -29,15 +29,9 @@ import java.util.regex.Pattern;
 @RegisterEvents
 public class BloodMobHighlight {
 
-    private static final Pattern MOB_NAME = Pattern.compile(
-            ".*(?:Putrid|Reaper|Vader|Frost|Cannibal|Revoker|Tear|Mr\\.? Dead|Skull|Walker|Psycho|Ooze|Freak|Flamer|Mute|Leech|Parasite).*"
-    );
-    private static final Pattern DYING1 = Pattern.compile(
-            "^§.\\[§.Lv\\d+§.\\] §.+ (?:§.)+0§f/.+§c❤$"
-    );
-    private static final Pattern DYING2 = Pattern.compile(
-            "^.+ (?:§.)+0§c❤$"
-    );
+    private static final Pattern MOB_NAME = Pattern.compile(".*(?:Putrid|Reaper|Vader|Frost|Cannibal|Revoker|Tear|Mr\\.? Dead|Skull|Walker|Psycho|Ooze|Freak|Flamer|Mute|Leech|Parasite).*");
+    private static final Pattern DYING1 = Pattern.compile("^§.\\[§.Lv\\d+§.\\] §.+ (?:§.)+0§f/.+§c❤$");
+    private static final Pattern DYING2 = Pattern.compile("^.+ (?:§.)+0§c❤$");
 
     private static final Minecraft mc = Minecraft.getMinecraft();
     private volatile Set<EntityLivingBase> bloodMobs = new HashSet<>();
@@ -63,11 +57,7 @@ public class BloodMobHighlight {
             String name = entity.getName();
             if (name == null || !MOB_NAME.matcher(name).matches()) continue;
 
-            EntityLivingBase mob = mc.theWorld.getEntitiesWithinAABB(
-                    EntityLivingBase.class,
-                    entity.getEntityBoundingBox().expand(0.5, 3.0, 0.5),
-                    e -> e != null && !(e instanceof EntityArmorStand) && e != mc.thePlayer
-            ).stream().findFirst().orElse(null);
+            EntityLivingBase mob = mc.theWorld.getEntitiesWithinAABB(EntityLivingBase.class, entity.getEntityBoundingBox().expand(0.5, 3.0, 0.5), e -> e != null && !(e instanceof EntityArmorStand) && e != mc.thePlayer).stream().findFirst().orElse(null);
 
             if (mob != null && !isDying(mob)) found.add(mob);
         }
@@ -89,8 +79,7 @@ public class BloodMobHighlight {
         if (snapshot.isEmpty() || mc.thePlayer == null) return;
 
         Color c = getColor();
-        float r = c.getRed() / 255f, g = c.getGreen() / 255f,
-                b = c.getBlue() / 255f, a = c.getAlpha() / 255f;
+        float r = c.getRed() / 255f, g = c.getGreen() / 255f, b = c.getBlue() / 255f, a = c.getAlpha() / 255f;
 
         double vx = mc.getRenderManager().viewerPosX;
         double vy = mc.getRenderManager().viewerPosY;
@@ -120,12 +109,7 @@ public class BloodMobHighlight {
 
     private Color getColor() {
         int argb = ChromaColour.specialToChromaRGB(JefConfig.feature.dungeons.bloodMobColor);
-        return new Color(
-                (argb >> 16) & 0xFF,
-                (argb >> 8)  & 0xFF,
-                argb        & 0xFF,
-                (argb >> 24) & 0xFF
-        );
+        return new Color((argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF, (argb >> 24) & 0xFF);
     }
 
     private boolean isDying(EntityLivingBase entity) {
@@ -149,14 +133,12 @@ public class BloodMobHighlight {
 
         GlStateManager.color(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, 0.22f);
         GlStateManager.scale(1.04f, 1.04f, 1.04f);
-        event.getModel().render(entity, event.getLimbSwing(), event.getLimbSwingAmount(),
-                event.getAgeInTicks(), event.getHeadYaw(), event.getHeadPitch(), event.getScaleFactor());
+        event.getModel().render(entity, event.getLimbSwing(), event.getLimbSwingAmount(), event.getAgeInTicks(), event.getHeadYaw(), event.getHeadPitch(), event.getScaleFactor());
 
         GlStateManager.color(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, 0.88f);
         float shrink = 1.025f / 1.04f;
         GlStateManager.scale(shrink, shrink, shrink);
-        event.getModel().render(entity, event.getLimbSwing(), event.getLimbSwingAmount(),
-                event.getAgeInTicks(), event.getHeadYaw(), event.getHeadPitch(), event.getScaleFactor());
+        event.getModel().render(entity, event.getLimbSwing(), event.getLimbSwingAmount(), event.getAgeInTicks(), event.getHeadYaw(), event.getHeadPitch(), event.getScaleFactor());
 
         GlStateManager.depthMask(true);
         GlStateManager.enableDepth();
@@ -169,27 +151,14 @@ public class BloodMobHighlight {
     }
 
     private void drawBox(AxisAlignedBB bb, float r, float g, float b, float a) {
-        double[][] edges = {
-                {bb.minX,bb.minY,bb.minZ, bb.maxX,bb.minY,bb.minZ},
-                {bb.minX,bb.minY,bb.maxZ, bb.maxX,bb.minY,bb.maxZ},
-                {bb.minX,bb.minY,bb.minZ, bb.minX,bb.minY,bb.maxZ},
-                {bb.maxX,bb.minY,bb.minZ, bb.maxX,bb.minY,bb.maxZ},
-                {bb.minX,bb.maxY,bb.minZ, bb.maxX,bb.maxY,bb.minZ},
-                {bb.minX,bb.maxY,bb.maxZ, bb.maxX,bb.maxY,bb.maxZ},
-                {bb.minX,bb.maxY,bb.minZ, bb.minX,bb.maxY,bb.maxZ},
-                {bb.maxX,bb.maxY,bb.minZ, bb.maxX,bb.maxY,bb.maxZ},
-                {bb.minX,bb.minY,bb.minZ, bb.minX,bb.maxY,bb.minZ},
-                {bb.maxX,bb.minY,bb.minZ, bb.maxX,bb.maxY,bb.minZ},
-                {bb.minX,bb.minY,bb.maxZ, bb.minX,bb.maxY,bb.maxZ},
-                {bb.maxX,bb.minY,bb.maxZ, bb.maxX,bb.maxY,bb.maxZ},
-        };
-        int ri = (int)(r*255), gi = (int)(g*255), bi = (int)(b*255), ai = (int)(a*255);
+        double[][] edges = {{bb.minX, bb.minY, bb.minZ, bb.maxX, bb.minY, bb.minZ}, {bb.minX, bb.minY, bb.maxZ, bb.maxX, bb.minY, bb.maxZ}, {bb.minX, bb.minY, bb.minZ, bb.minX, bb.minY, bb.maxZ}, {bb.maxX, bb.minY, bb.minZ, bb.maxX, bb.minY, bb.maxZ}, {bb.minX, bb.maxY, bb.minZ, bb.maxX, bb.maxY, bb.minZ}, {bb.minX, bb.maxY, bb.maxZ, bb.maxX, bb.maxY, bb.maxZ}, {bb.minX, bb.maxY, bb.minZ, bb.minX, bb.maxY, bb.maxZ}, {bb.maxX, bb.maxY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ}, {bb.minX, bb.minY, bb.minZ, bb.minX, bb.maxY, bb.minZ}, {bb.maxX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.minZ}, {bb.minX, bb.minY, bb.maxZ, bb.minX, bb.maxY, bb.maxZ}, {bb.maxX, bb.minY, bb.maxZ, bb.maxX, bb.maxY, bb.maxZ},};
+        int ri = (int) (r * 255), gi = (int) (g * 255), bi = (int) (b * 255), ai = (int) (a * 255);
         Tessellator tess = Tessellator.getInstance();
         WorldRenderer wr = tess.getWorldRenderer();
         wr.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
         for (double[] e : edges) {
-            wr.pos(e[0],e[1],e[2]).color(ri,gi,bi,ai).endVertex();
-            wr.pos(e[3],e[4],e[5]).color(ri,gi,bi,ai).endVertex();
+            wr.pos(e[0], e[1], e[2]).color(ri, gi, bi, ai).endVertex();
+            wr.pos(e[3], e[4], e[5]).color(ri, gi, bi, ai).endVertex();
         }
         tess.draw();
     }

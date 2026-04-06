@@ -7,6 +7,7 @@ import com.jef.justenoughfakepixel.features.diana.DianaStats;
 import com.jef.justenoughfakepixel.features.diana.LootshareDetect;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.overlay.Overlay;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @RegisterEvents
 public class InquisitorOverlay extends Overlay {
+    @Getter
     private static InquisitorOverlay instance;
 
     public InquisitorOverlay() {
@@ -21,14 +23,35 @@ public class InquisitorOverlay extends Overlay {
         instance = this;
     }
 
-    public static InquisitorOverlay getInstance() { return instance; }
+    @Override
+    protected int getBaseWidth() {
+        return 160;
+    }
 
-    @Override protected int     getBaseWidth()    { return 160; }
-    @Override public Position   getPosition()     { return JefConfig.feature.diana.inqHealthPos; }
-    @Override public float      getScale()        { return JefConfig.feature.diana.inqScale; }
-    @Override public int        getBgColor()      { return ChromaColour.specialToChromaRGB(JefConfig.feature.diana.inqBgColor); }
-    @Override public int        getCornerRadius() { return JefConfig.feature.diana.inqCornerRadius; }
-    @Override protected boolean extraGuard()      { return DianaStats.getInstance().isTracking(); }
+    @Override
+    public Position getPosition() {
+        return JefConfig.feature.diana.inqHealthPos;
+    }
+
+    @Override
+    public float getScale() {
+        return JefConfig.feature.diana.inqScale;
+    }
+
+    @Override
+    public int getBgColor() {
+        return ChromaColour.specialToChromaRGB(JefConfig.feature.diana.inqBgColor);
+    }
+
+    @Override
+    public int getCornerRadius() {
+        return JefConfig.feature.diana.inqCornerRadius;
+    }
+
+    @Override
+    protected boolean extraGuard() {
+        return DianaStats.getInstance().isTracking();
+    }
 
     @Override
     protected boolean isEnabled() {
@@ -37,8 +60,7 @@ public class InquisitorOverlay extends Overlay {
 
     @Override
     public List<String> getLines(boolean preview) {
-        if (preview)
-            return Collections.singletonList("\u00a7dMinos Inquisitor \u00a7c1,200,000\u00a7f/\u00a7a2,000,000HP");
+        if (preview) return Collections.singletonList("§dMinos Inquisitor §c1,200,000§f/§a2,000,000HP");
 
         String raw = LootshareDetect.getClosestInqName();
         if (raw == null) return new ArrayList<>();

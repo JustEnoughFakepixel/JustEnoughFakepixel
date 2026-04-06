@@ -10,24 +10,26 @@ import com.jef.justenoughfakepixel.repo.RepoHandler;
 import com.jef.justenoughfakepixel.utils.ColorUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.input.Keyboard;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @RegisterEvents
 public class MissingEnchants {
 
-    private static final String[] RARITY_PREFIXES = {
-        "§f§l", "§a§l", "§9§l", "§5§l", "§6§l", "§d§l", "§b§l", "§c§l"
-    };
+    private static final String[] RARITY_PREFIXES = {"§f§l", "§a§l", "§9§l", "§5§l", "§6§l", "§d§l", "§b§l", "§c§l"};
+
+    private static String toTitleCase(String s) {
+        StringBuilder sb = new StringBuilder();
+        for (String word : s.split(" ")) {
+            if (!word.isEmpty())
+                sb.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1).toLowerCase()).append(" ");
+        }
+        return sb.toString().trim();
+    }
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onTooltip(ItemTooltipEvent event) {
@@ -77,10 +79,14 @@ public class MissingEnchants {
                 Set<String> poolSet = new HashSet<>();
                 for (JsonElement e : pool) poolSet.add(e.getAsString());
                 for (String id : poolSet) {
-                    if (enchantIds.contains(id)) { ignored.addAll(poolSet); break; }
+                    if (enchantIds.contains(id)) {
+                        ignored.addAll(poolSet);
+                        break;
+                    }
                 }
             }
-        } catch (Exception ignored2) {}
+        } catch (Exception ignored2) {
+        }
         return ignored;
     }
 
@@ -92,7 +98,10 @@ public class MissingEnchants {
             String rarityLine = "";
             for (int i = lore.size() - 1; i >= 0; i--) {
                 String clean = ColorUtils.stripColor(lore.get(i)).trim();
-                if (!clean.isEmpty()) { rarityLine = clean; break; }
+                if (!clean.isEmpty()) {
+                    rarityLine = clean;
+                    break;
+                }
             }
 
             if (rarityLine.isEmpty()) return null;
@@ -102,7 +111,8 @@ public class MissingEnchants {
                     return entry.getValue().getAsJsonArray();
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return null;
     }
 
@@ -113,7 +123,10 @@ public class MissingEnchants {
             boolean lineHasEnch = false;
             for (String id : enchantIds) {
                 String name = toTitleCase(id.replace("_", " "));
-                if (line.contains(name)) { lineHasEnch = true; break; }
+                if (line.contains(name)) {
+                    lineHasEnch = true;
+                    break;
+                }
             }
             if (lineHasEnch) {
                 gotToEnchants = true;
@@ -127,27 +140,18 @@ public class MissingEnchants {
     private List<String> buildMissingLines(List<String> missing) {
         List<String> result = new ArrayList<>();
         result.add("");
-        StringBuilder current = new StringBuilder("\u00A7cMissing: \u00A77");
+        StringBuilder current = new StringBuilder("§cMissing: §7");
         for (int i = 0; i < missing.size(); i++) {
             String name = toTitleCase(missing.get(i).replace("_", " "));
             String separator = (i < missing.size() - 1) ? ", " : "";
             if (current.length() > 10 && ColorUtils.stripColor(current.toString()).length() + name.length() > 40) {
                 result.add(current.toString());
-                current = new StringBuilder("\u00A77" + name + separator);
+                current = new StringBuilder("§7" + name + separator);
             } else {
                 current.append(name).append(separator);
             }
         }
         if (current.length() > 0) result.add(current.toString());
         return result;
-    }
-
-    private static String toTitleCase(String s) {
-        StringBuilder sb = new StringBuilder();
-        for (String word : s.split(" ")) {
-            if (!word.isEmpty())
-                sb.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1).toLowerCase()).append(" ");
-        }
-        return sb.toString().trim();
     }
 }

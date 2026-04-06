@@ -25,11 +25,11 @@ public class ResolutionUtils {
         return x / 1920f;
     }
 
-    public static float getXStatic(int x){
+    public static float getXStatic(int x) {
         return getWidth() * getXRatio(x);
     }
 
-    public static float getYStatic(int y){
+    public static float getYStatic(int y) {
         return getHeight() * getYRatio(y);
     }
 

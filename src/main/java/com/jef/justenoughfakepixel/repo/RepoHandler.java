@@ -18,45 +18,24 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class RepoHandler {
 
+    public static final Gson GSON = new GsonBuilder().create();
     private static final int TIMEOUT_MS = 5000;
     private static final String USER_AGENT = "JEF/1.0 (Minecraft 1.8.9)";
-    public static final Gson GSON = new GsonBuilder().create();
-
-    private static final ExecutorService IO = new ThreadPoolExecutor(
-            1, 2, 30, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(32),
-            r -> { Thread t = new Thread(r, "JefRepo-IO"); t.setDaemon(true); return t; },
-            new ThreadPoolExecutor.DiscardOldestPolicy()
-    );
+    private static final ExecutorService IO = new ThreadPoolExecutor(1, 2, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<>(32), r -> {
+        Thread t = new Thread(r, "JefRepo-IO");
+        t.setDaemon(true);
+        return t;
+    }, new ThreadPoolExecutor.DiscardOldestPolicy());
 
     private static final ConcurrentMap<String, SourceState> SOURCES = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, ConcurrentMap<Type, ParsedCache>> PARSED = new ConcurrentHashMap<>();
 
-    private static final class SourceState {
-        final String url;
-        final AtomicReference<String> json = new AtomicReference<>();
-        final AtomicBoolean loading = new AtomicBoolean();
-        volatile String etag;
-        volatile long lastFetch;
-
-        SourceState(String url) { this.url = url; }
+    private RepoHandler() {
     }
-
-    // Parsed object cache keyed by (repoKey, Type)
-    private static final class ParsedCache {
-        volatile Object parsed;
-        volatile String lastJsonRef;
-    }
-
-    private static final ConcurrentMap<String, ConcurrentMap<Type, ParsedCache>> PARSED =
-            new ConcurrentHashMap<>();
 
     private static ParsedCache cacheFor(String key, Type type) {
-        return PARSED
-                .computeIfAbsent(key, k -> new ConcurrentHashMap<>())
-                .computeIfAbsent(type, t -> new ParsedCache());
+        return PARSED.computeIfAbsent(key, k -> new ConcurrentHashMap<>()).computeIfAbsent(type, t -> new ParsedCache());
     }
-
-    private RepoHandler() {}
 
     public static void register(String key, String url) {
         SOURCES.put(key, new SourceState(url));
@@ -68,9 +47,13 @@ public class RepoHandler {
             fetchAsync(key);
         }
     }
+
     public static void refresh(String key) {
         SourceState s = SOURCES.get(key);
-        if (s != null) { s.lastFetch = 0; fetchAsync(key); }
+        if (s != null) {
+            s.lastFetch = 0;
+            fetchAsync(key);
+        }
     }
 
     public static String getJson(String key) {
@@ -100,12 +83,13 @@ public class RepoHandler {
             }
         }
 
-        @SuppressWarnings("unchecked")
-        T result = (T) pc.parsed;
+        @SuppressWarnings("unchecked") T result = (T) pc.parsed;
         return result != null ? result : fallback;
     }
 
-    public static void shutdown() { IO.shutdownNow(); }
+    public static void shutdown() {
+        IO.shutdownNow();
+    }
 
     private static void fetchAsync(String key) {
         SourceState s = SOURCES.get(key);
@@ -137,12 +121,29 @@ public class RepoHandler {
     }
 
     private static String readAll(HttpURLConnection conn) throws Exception {
-        try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
             StringBuilder sb = new StringBuilder();
             String line;
             while ((line = br.readLine()) != null) sb.append(line).append('\n');
             return sb.toString();
         }
+    }
+
+    private static final class SourceState {
+        final String url;
+        final AtomicReference<String> json = new AtomicReference<>();
+        final AtomicBoolean loading = new AtomicBoolean();
+        volatile String etag;
+        volatile long lastFetch;
+
+        SourceState(String url) {
+            this.url = url;
+        }
+    }
+
+    // Parsed object cache keyed by (repoKey, Type)
+    private static final class ParsedCache {
+        volatile Object parsed;
+        volatile String lastJsonRef;
     }
 }

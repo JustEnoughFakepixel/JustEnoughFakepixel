@@ -20,9 +20,9 @@ public class CoreOfTheMountainData {
 
 
         // Level 2
-        LEVEL_COSTS[2].put(HotmPerkData.PowderType.MITHRIL,   50_000L);
+        LEVEL_COSTS[2].put(HotmPerkData.PowderType.MITHRIL, 50_000L);
         // Level 3
-        LEVEL_COSTS[3].put(HotmPerkData.PowderType.MITHRIL,  100_000L);
+        LEVEL_COSTS[3].put(HotmPerkData.PowderType.MITHRIL, 100_000L);
         // Level 4
         LEVEL_COSTS[4].put(HotmPerkData.PowderType.GEMSTONE, 200_000L);
         // Level 5
@@ -37,11 +37,11 @@ public class CoreOfTheMountainData {
         // LEVEL_COSTS[9].put(HotmPerkData.PowderType.GLACITE, 1_000_000L);
         // LEVEL_COSTS[10].put(HotmPerkData.PowderType.GLACITE, 1_250_000L);
     }
+
     public static Map<HotmPerkData.PowderType, Long> cumulativeCost(int level) {
         Map<HotmPerkData.PowderType, Long> totals = new LinkedHashMap<>();
         for (int l = 2; l <= Math.min(level, LEVEL_COSTS.length - 1); l++) {
-            LEVEL_COSTS[l].forEach((type, cost) ->
-                    totals.merge(type, cost, Long::sum));
+            LEVEL_COSTS[l].forEach((type, cost) -> totals.merge(type, cost, Long::sum));
         }
         return totals;
     }
@@ -49,8 +49,7 @@ public class CoreOfTheMountainData {
     public static Map<HotmPerkData.PowderType, Long> rangeCost(int fromLevel, int toLevel) {
         Map<HotmPerkData.PowderType, Long> totals = new LinkedHashMap<>();
         for (int l = fromLevel + 1; l <= Math.min(toLevel, LEVEL_COSTS.length - 1); l++) {
-            LEVEL_COSTS[l].forEach((type, cost) ->
-                    totals.merge(type, cost, Long::sum));
+            LEVEL_COSTS[l].forEach((type, cost) -> totals.merge(type, cost, Long::sum));
         }
         return totals;
     }

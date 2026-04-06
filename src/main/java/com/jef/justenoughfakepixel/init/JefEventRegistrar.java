@@ -19,9 +19,7 @@ public class JefEventRegistrar {
 
     private static final String BASE_PACKAGE = "com.jef.justenoughfakepixel";
 
-    private static final Reflections REFS = new Reflections(new ConfigurationBuilder()
-            .forPackages(BASE_PACKAGE)
-            .addScanners(new TypeAnnotationsScanner(), new FieldAnnotationsScanner()));
+    private static final Reflections REFS = new Reflections(new ConfigurationBuilder().forPackages(BASE_PACKAGE).addScanners(new TypeAnnotationsScanner(), new FieldAnnotationsScanner()));
 
     public static void registerAll() {
         registerEvents();

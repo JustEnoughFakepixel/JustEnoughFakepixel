@@ -3,8 +3,8 @@ package com.jef.justenoughfakepixel.features.qol;
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.utils.RenderUtils;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
 import com.jef.justenoughfakepixel.utils.ItemUtils;
+import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -18,21 +18,21 @@ import org.lwjgl.opengl.GL11;
 @RegisterEvents
 public class GyroWandHelper {
 
-    private static final String GYRO_ID     = "GYROKINETIC_WAND";
-    private static final double    RING_RADIUS = 8.5;
-    private static final int    RING_STEPS  = 64;
+    private static final String GYRO_ID = "GYROKINETIC_WAND";
+    private static final double RING_RADIUS = 8.5;
+    private static final int RING_STEPS = 64;
     private static final double REACH = 100.0;
 
-    private static final float[] COLOR_READY    = { 0.6f, 0.1f, 0.8f, 0.6f };
-    private static final float[] COLOR_COOLDOWN = { 1.0f, 0.2f, 0.2f, 0.6f };
-
-    private boolean isEnabled() {
-        return JefConfig.feature != null && JefConfig.feature.qol.gyroWand;
-    }
+    private static final float[] COLOR_READY = {0.6f, 0.1f, 0.8f, 0.6f};
+    private static final float[] COLOR_COOLDOWN = {1.0f, 0.2f, 0.2f, 0.6f};
 
     public static boolean isHoldingGyroStatic() {
         Minecraft mc = Minecraft.getMinecraft();
         return mc.thePlayer != null && GYRO_ID.equals(ItemUtils.getInternalName(mc.thePlayer.getHeldItem()));
+    }
+
+    private boolean isEnabled() {
+        return JefConfig.feature != null && JefConfig.feature.qol.gyroWand;
     }
 
     private boolean isOnCooldown() {
@@ -43,7 +43,7 @@ public class GyroWandHelper {
     private Vec3 getTargetPos(EntityPlayer player, float partialTicks) {
         Vec3 eyes = player.getPositionEyes(partialTicks);
         Vec3 look = player.getLookVec();
-        Vec3 end  = eyes.addVector(look.xCoord * REACH, look.yCoord * REACH, look.zCoord * REACH);
+        Vec3 end = eyes.addVector(look.xCoord * REACH, look.yCoord * REACH, look.zCoord * REACH);
 
         double x = Math.floor(eyes.xCoord);
         double y = Math.floor(eyes.yCoord);

@@ -11,14 +11,12 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 @RegisterEvents
 public class SkyblockXpInChat {
 
-    private static final String PREFIX =
-            EnumChatFormatting.DARK_AQUA + "[SkyBlock XP] " + EnumChatFormatting.RESET;
+    private static final String PREFIX = EnumChatFormatting.DARK_AQUA + "[SkyBlock XP] " + EnumChatFormatting.RESET;
 
     @SubscribeEvent
     public void onXpGain(ActionBarXpGainEvent event) {
         if (JefConfig.feature == null || !JefConfig.feature.misc.skyblockXpInChat) return;
 
-        Minecraft.getMinecraft().thePlayer.addChatMessage(
-                new ChatComponentText(PREFIX + event.getFormattedText()));
+        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(PREFIX + event.getFormattedText()));
     }
 }

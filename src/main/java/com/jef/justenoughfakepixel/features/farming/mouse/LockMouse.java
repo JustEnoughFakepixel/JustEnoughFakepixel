@@ -26,10 +26,7 @@ public class LockMouse {
         JefConfig.feature.farming.lockMouse = locked;
         JefConfig.saveConfig();
         if (mc.thePlayer != null) {
-            mc.thePlayer.addChatMessage(new ChatComponentText(
-                    PREFIX + (locked
-                            ? EnumChatFormatting.GREEN + "Mouse locked."
-                            : EnumChatFormatting.RED + "Mouse unlocked.")));
+            mc.thePlayer.addChatMessage(new ChatComponentText(PREFIX + (locked ? EnumChatFormatting.GREEN + "Mouse locked." : EnumChatFormatting.RED + "Mouse unlocked.")));
         }
     }
 

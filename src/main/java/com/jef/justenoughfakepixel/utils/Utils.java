@@ -21,10 +21,10 @@ import java.util.LinkedList;
 public class Utils {
 
     private static final LinkedList<Integer> guiScales = new LinkedList<>();
-    private static ScaledResolution lastScale = new ScaledResolution(Minecraft.getMinecraft());
     //Labymod compatibility
     private static final FloatBuffer projectionMatrixOld = BufferUtils.createFloatBuffer(16);
     private static final FloatBuffer modelviewMatrixOld = BufferUtils.createFloatBuffer(16);
+    private static ScaledResolution lastScale = new ScaledResolution(Minecraft.getMinecraft());
 
     public static boolean overlayShouldRender(RenderGameOverlayEvent.ElementType type, boolean... booleans) {
         return overlayShouldRender(false, type, RenderGameOverlayEvent.ElementType.HOTBAR, booleans);
@@ -166,7 +166,6 @@ public class Utils {
     }
 
     public static void copyToClipboard(String str) {
-        Toolkit.getDefaultToolkit().getSystemClipboard()
-                .setContents(new StringSelection(str), null);
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(str), null);
     }
 }

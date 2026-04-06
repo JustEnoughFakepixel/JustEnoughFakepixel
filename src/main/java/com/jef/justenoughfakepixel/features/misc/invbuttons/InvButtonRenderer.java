@@ -1,10 +1,10 @@
-package com.jef.justenoughfakepixel.features.invbuttons;
+package com.jef.justenoughfakepixel.features.misc.invbuttons;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.events.GuiContainerRenderButtonsEvent;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import com.jef.justenoughfakepixel.utils.render.HighlightUtils;
 import com.jef.justenoughfakepixel.utils.Utils;
+import com.jef.justenoughfakepixel.utils.render.HighlightUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
@@ -25,14 +25,13 @@ import java.util.List;
 @RegisterEvents
 public class InvButtonRenderer {
 
-    private static final ResourceLocation EDITOR_TEX =
-            new ResourceLocation("justenoughfakepixel", "invbuttons/editor.png");
+    private static final ResourceLocation EDITOR_TEX = new ResourceLocation("justenoughfakepixel", "invbuttons/editor.png");
 
     private static Method drawHoveringTextMethod = null;
+
     static {
         try {
-            drawHoveringTextMethod = GuiScreen.class.getDeclaredMethod(
-                    "drawHoveringText", List.class, int.class, int.class, FontRenderer.class);
+            drawHoveringTextMethod = GuiScreen.class.getDeclaredMethod("drawHoveringText", List.class, int.class, int.class, FontRenderer.class);
             drawHoveringTextMethod.setAccessible(true);
         } catch (Exception e) {
             System.err.println("[JEF] drawHoveringText reflect failed: " + e.getMessage());
@@ -91,10 +90,7 @@ public class InvButtonRenderer {
             GlStateManager.enableDepth();
             GlStateManager.enableAlpha();
             Minecraft.getMinecraft().getTextureManager().bindTexture(EDITOR_TEX);
-            Utils.drawTexturedRect(bx, by, 18, 18,
-                    btn.backgroundIndex * 18 / 256f,
-                    (btn.backgroundIndex * 18 + 18) / 256f,
-                    18 / 256f, 36 / 256f, GL11.GL_NEAREST);
+            Utils.drawTexturedRect(bx, by, 18, 18, btn.backgroundIndex * 18 / 256f, (btn.backgroundIndex * 18 + 18) / 256f, 18 / 256f, 36 / 256f, GL11.GL_NEAREST);
             if (btn.icon != null && !btn.icon.trim().isEmpty()) {
                 GlStateManager.enableDepth();
                 InvButtonIconRenderer.renderIcon(btn.icon, bx + 1, by + 1);
@@ -104,7 +100,10 @@ public class InvButtonRenderer {
 
         InventoryButton newHovered = hitTest(mx, my, gl, gt, gw, gh, gui);
         long now = System.currentTimeMillis();
-        if (newHovered != hovered) { hovered = newHovered; hoveredSince = now; }
+        if (newHovered != hovered) {
+            hovered = newHovered;
+            hoveredSince = now;
+        }
 
         if (hovered == null) return;
 
@@ -122,10 +121,9 @@ public class InvButtonRenderer {
             GlStateManager.pushMatrix();
             GlStateManager.translate(-gl, -gt, 400);
             try {
-                drawHoveringTextMethod.invoke(gui,
-                        Collections.singletonList("\u00a77" + cmd),
-                        mx, my, Minecraft.getMinecraft().fontRendererObj);
-            } catch (Exception ignored) {}
+                drawHoveringTextMethod.invoke(gui, Collections.singletonList("\u00a77" + cmd), mx, my, Minecraft.getMinecraft().fontRendererObj);
+            } catch (Exception ignored) {
+            }
             GlStateManager.popMatrix();
         }
     }
@@ -138,7 +136,7 @@ public class InvButtonRenderer {
 
         GuiContainer gui = (GuiContainer) event.gui;
         int gl = gui.guiLeft, gt = gui.guiTop, gw = gui.xSize, gh = gui.ySize;
-        int mx = Mouse.getEventX() * event.gui.width  / Minecraft.getMinecraft().displayWidth;
+        int mx = Mouse.getEventX() * event.gui.width / Minecraft.getMinecraft().displayWidth;
         int my = event.gui.height - Mouse.getEventY() * event.gui.height / Minecraft.getMinecraft().displayHeight - 1;
 
         InventoryButton btn = hitTest(mx, my, gl, gt, gw, gh, gui);
@@ -150,7 +148,7 @@ public class InvButtonRenderer {
         }
 
         int clickType = JefConfig.feature != null ? JefConfig.feature.misc.invButtonClickType : 0;
-        boolean fire  = clickType == 0 ? Mouse.getEventButtonState() : !Mouse.getEventButtonState();
+        boolean fire = (clickType == 0) == Mouse.getEventButtonState();
         if (fire) {
             String cmd = btn.command.trim();
             if (!cmd.startsWith("/")) cmd = "/" + cmd;

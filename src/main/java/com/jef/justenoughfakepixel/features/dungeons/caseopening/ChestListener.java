@@ -3,7 +3,7 @@ package com.jef.justenoughfakepixel.features.dungeons.caseopening;
 import com.jef.justenoughfakepixel.DebugLogger;
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.utils.StringUtils;
-import com.jef.justenoughfakepixel.features.dungeons.overlays.DungeonStats;
+import com.jef.justenoughfakepixel.features.dungeons.DungeonStats;
 import com.jef.justenoughfakepixel.features.dungeons.utils.DungeonFloor;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.RomanNumeralParser;
@@ -25,21 +25,17 @@ import java.util.Map;
 @RegisterEvents
 public class ChestListener {
 
+    private static final String[] ROMAN = {"I", "II", "III", "IV", "V", "VI", "VII"};
     public static GuiChest originalGui;
-
     private static WorldClient lastWorld = null;
-
+    private final Map<Integer, Boolean> crOpenedChestOb = new HashMap<>();
+    private final Map<Integer, Boolean> crOpenedChestBr = new HashMap<>();
     private boolean isCroesus = false;
     private boolean isCatacombsChestList = false;
     private int chestID = -1;
-
-    private final Map<Integer, Boolean> crOpenedChestOb = new HashMap<>();
-    private final Map<Integer, Boolean> crOpenedChestBr = new HashMap<>();
     private boolean openedChestOb = false;
     private boolean openedChestBr = false;
-
     private DungeonDropData.Floor curFloor;
-    private static final String[] ROMAN = {"I", "II", "III", "IV", "V", "VI", "VII"};
 
     @SubscribeEvent
     public void onGuiOpen(GuiOpenEvent event) {
@@ -80,11 +76,11 @@ public class ChestListener {
                     String key = (isMaster ? "M" : "") + ROMAN[num - 1];
                     detected = DungeonDropData.Floor.valueOf(key);
                     break;
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
             }
             curFloor = detected;
-            DebugLogger.log("[ChestListener] Catacombs chest list: floor=" + curFloor
-                    + ", master=" + isMaster + ", raw name=\"" + name + "\"");
+            DebugLogger.log("[ChestListener] Catacombs chest list: floor=" + curFloor + ", master=" + isMaster + ", raw name=\"" + name + "\"");
             return;
         }
 
@@ -93,19 +89,17 @@ public class ChestListener {
         String materialName = name.substring(0, name.length() - " Chest".length()).trim();
         DungeonDropData.CaseMaterial parsedMaterial = null;
         try {
-            parsedMaterial = DungeonDropData.CaseMaterial.valueOf(
-                    materialName.toUpperCase().replace(" ", "_"));
-        } catch (IllegalArgumentException ignored) {}
+            parsedMaterial = DungeonDropData.CaseMaterial.valueOf(materialName.toUpperCase().replace(" ", "_"));
+        } catch (IllegalArgumentException ignored) {
+        }
 
-        if (parsedMaterial != DungeonDropData.CaseMaterial.OBSIDIAN
-                && parsedMaterial != DungeonDropData.CaseMaterial.BEDROCK) {
+        if (parsedMaterial != DungeonDropData.CaseMaterial.OBSIDIAN && parsedMaterial != DungeonDropData.CaseMaterial.BEDROCK) {
             DebugLogger.log("[ChestListener] Chest \"" + name + "\" not Obsidian/Bedrock, skipping");
             return;
         }
 
         DungeonDropData.CaseMaterial curMaterial = parsedMaterial;
-        DebugLogger.log("[ChestListener] Chest detected: material=" + curMaterial
-                + ", isCroesus=" + isCroesus + ", curFloor=" + curFloor + ", chestID=" + chestID);
+        DebugLogger.log("[ChestListener] Chest detected: material=" + curMaterial + ", isCroesus=" + isCroesus + ", curFloor=" + curFloor + ", chestID=" + chestID);
 
         if (isCroesus) {
             if (curMaterial == DungeonDropData.CaseMaterial.BEDROCK) {
@@ -123,10 +117,16 @@ public class ChestListener {
             }
         } else {
             if (curMaterial == DungeonDropData.CaseMaterial.BEDROCK) {
-                if (openedChestBr) { DebugLogger.log("[ChestListener] Already opened BR, skipping"); return; }
+                if (openedChestBr) {
+                    DebugLogger.log("[ChestListener] Already opened BR, skipping");
+                    return;
+                }
                 openedChestBr = true;
             } else {
-                if (openedChestOb) { DebugLogger.log("[ChestListener] Already opened OB, skipping"); return; }
+                if (openedChestOb) {
+                    DebugLogger.log("[ChestListener] Already opened OB, skipping");
+                    return;
+                }
                 openedChestOb = true;
             }
             DungeonStats stats = DungeonStats.getInstance();
@@ -136,8 +136,7 @@ public class ChestListener {
         }
 
         if (curFloor == null) {
-            DebugLogger.log("[ChestListener] ERROR: floor is null! Cannot start animation. "
-                    + "Make sure you navigate through Croesus → chest list first.");
+            DebugLogger.log("[ChestListener] ERROR: floor is null! Cannot start animation. " + "Make sure you navigate through Croesus → chest list first.");
             return;
         }
 
@@ -179,8 +178,7 @@ public class ChestListener {
     public void onMouseClick(GuiScreenEvent.MouseInputEvent.Pre event) {
         if (!(event.gui instanceof GuiChest)) return;
         Slot slot = ((GuiChest) event.gui).getSlotUnderMouse();
-        if (slot != null && org.lwjgl.input.Mouse.getEventButtonState()
-                && isCroesus && !isCatacombsChestList) {
+        if (slot != null && org.lwjgl.input.Mouse.getEventButtonState() && isCroesus && !isCatacombsChestList) {
             chestID = slot.slotNumber;
             DebugLogger.log("[ChestListener] Croesus slot clicked: chestID=" + chestID);
         }

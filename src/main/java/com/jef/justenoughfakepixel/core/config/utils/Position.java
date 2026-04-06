@@ -6,21 +6,17 @@ import net.minecraft.client.gui.ScaledResolution;
 
 public class Position {
 
+    private static final int EDGE_OFFSET = 0;
     @Expose
     private int x;
-
     @Expose
     private int y;
-
     @Getter
     @Expose
     private boolean centerX;
-
     @Getter
     @Expose
     private boolean centerY;
-
-    private static final int EDGE_OFFSET = 0;
 
     public Position(int x, int y) {
         this(x, y, false, false);

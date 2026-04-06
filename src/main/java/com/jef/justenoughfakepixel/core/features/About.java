@@ -3,18 +3,11 @@ package com.jef.justenoughfakepixel.core.features;
 import com.google.gson.annotations.Expose;
 import com.jef.justenoughfakepixel.core.config.gui.config.ConfigAnnotations.*;
 
-import java.awt.Desktop;
-import java.net.URI;
-
 public class About {
-
-    // ── Version display + update check ───────────────────────────────────────
 
     @ConfigOption(name = "Current Version", desc = "The JEF version you are running")
     @ConfigEditorVersionDisplay
     public transient Void currentVersion = null;
-
-    // ── Links ────────────────────────────────────────────────────────────────
 
     @ConfigOption(name = "Discord", desc = "Join the JEF Discord server")
     @ConfigEditorButton(runnableId = "openDiscord", buttonText = "Open")
@@ -23,8 +16,6 @@ public class About {
     @ConfigOption(name = "GitHub", desc = "View the JEF source code on GitHub")
     @ConfigEditorButton(runnableId = "openGithub", buttonText = "Open")
     public boolean githubButton = false;
-
-    // ── Used Software ────────────────────────────────────────────────────────
 
     @Expose
     @ConfigOption(name = "Used Software", desc = "Libraries and projects used by JEF and their licenses")

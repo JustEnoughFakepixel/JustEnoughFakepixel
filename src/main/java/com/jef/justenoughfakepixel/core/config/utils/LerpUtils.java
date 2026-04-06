@@ -3,7 +3,12 @@ package com.jef.justenoughfakepixel.core.config.utils;
 
 public final class LerpUtils {
 
-    private LerpUtils() {}
+    private static final float SIGMOID_STR = 8;
+    private static final float SIGMOID_A = -1 / (sigmoid(-0.5f * SIGMOID_STR) - sigmoid(0.5f * SIGMOID_STR));
+    private static final float SIGMOID_B = SIGMOID_A * sigmoid(-0.5f * SIGMOID_STR);
+
+    private LerpUtils() {
+    }
 
     public static float clampZeroOne(float f) {
         return Math.max(0, Math.min(1, f));
@@ -12,10 +17,6 @@ public final class LerpUtils {
     public static float sigmoid(float val) {
         return (float) (1 / (1 + Math.exp(-val)));
     }
-
-    private static final float SIGMOID_STR = 8;
-    private static final float SIGMOID_A   = -1 / (sigmoid(-0.5f * SIGMOID_STR) - sigmoid(0.5f * SIGMOID_STR));
-    private static final float SIGMOID_B   = SIGMOID_A * sigmoid(-0.5f * SIGMOID_STR);
 
     public static float sigmoidZeroOne(float f) {
         f = clampZeroOne(f);
@@ -50,7 +51,7 @@ public final class LerpUtils {
             this.timeSpent += System.currentTimeMillis() - lastMillis;
 
             float lastDistPercent = lastTimeSpent / (float) timeToReachTarget;
-            float distPercent     = timeSpent      / (float) timeToReachTarget;
+            float distPercent = timeSpent / (float) timeToReachTarget;
             float fac = (1 - lastDistPercent) / lastDistPercent;
 
             int startValue = lerpValue - (int) ((targetValue - lerpValue) / fac);
@@ -58,9 +59,7 @@ public final class LerpUtils {
             if (dist == 0) return;
 
             int oldLerpValue = lerpValue;
-            lerpValue = distPercent >= 1
-                    ? targetValue
-                    : startValue + (int) (dist * distPercent);
+            lerpValue = distPercent >= 1 ? targetValue : startValue + (int) (dist * distPercent);
 
             if (lerpValue == oldLerpValue) {
                 timeSpent = lastTimeSpent;
@@ -69,22 +68,43 @@ public final class LerpUtils {
             }
         }
 
-        public int getTimeSpent()                              { return timeSpent; }
-        public void resetTimer()                               { timeSpent = 0; lastMillis = System.currentTimeMillis(); }
-        public void setTimeToReachTarget(int timeToReachTarget){ this.timeToReachTarget = timeToReachTarget; }
-        public void setTarget(int targetValue)                 { this.targetValue = targetValue; }
-        public void setValue(int value)                        { this.targetValue = this.lerpValue = value; }
-        public int getValue()                                  { return lerpValue; }
-        public int getTarget()                                 { return targetValue; }
+        public int getTimeSpent() {
+            return timeSpent;
+        }
+
+        public void resetTimer() {
+            timeSpent = 0;
+            lastMillis = System.currentTimeMillis();
+        }
+
+        public void setTimeToReachTarget(int timeToReachTarget) {
+            this.timeToReachTarget = timeToReachTarget;
+        }
+
+        public int getValue() {
+            return lerpValue;
+        }
+
+        public void setValue(int value) {
+            this.targetValue = this.lerpValue = value;
+        }
+
+        public int getTarget() {
+            return targetValue;
+        }
+
+        public void setTarget(int targetValue) {
+            this.targetValue = targetValue;
+        }
     }
 
     // LerpingFloat
 
     public static final class LerpingFloat {
 
+        private final int timeToReachTarget;
         private int timeSpent;
         private long lastMillis;
-        private final int timeToReachTarget;
         private float targetValue;
         private float lerpValue;
 
@@ -102,7 +122,7 @@ public final class LerpUtils {
             this.timeSpent += System.currentTimeMillis() - lastMillis;
 
             float lastDistPercent = lastTimeSpent / (float) timeToReachTarget;
-            float distPercent     = timeSpent      / (float) timeToReachTarget;
+            float distPercent = timeSpent / (float) timeToReachTarget;
             float fac = (1 - lastDistPercent) / lastDistPercent;
 
             float startValue = lerpValue - (targetValue - lerpValue) / fac;
@@ -110,9 +130,7 @@ public final class LerpUtils {
             if (dist == 0) return;
 
             float oldLerpValue = lerpValue;
-            lerpValue = distPercent >= 1
-                    ? targetValue
-                    : startValue + dist * distPercent;
+            lerpValue = distPercent >= 1 ? targetValue : startValue + dist * distPercent;
 
             if (lerpValue == oldLerpValue) {
                 timeSpent = lastTimeSpent;
@@ -121,10 +139,25 @@ public final class LerpUtils {
             }
         }
 
-        public void resetTimer()              { timeSpent = 0; lastMillis = System.currentTimeMillis(); }
-        public void setTarget(float target)   { this.targetValue = target; }
-        public void setValue(float value)     { this.targetValue = this.lerpValue = value; }
-        public float getValue()               { return lerpValue; }
-        public float getTarget()              { return targetValue; }
+        public void resetTimer() {
+            timeSpent = 0;
+            lastMillis = System.currentTimeMillis();
+        }
+
+        public float getValue() {
+            return lerpValue;
+        }
+
+        public void setValue(float value) {
+            this.targetValue = this.lerpValue = value;
+        }
+
+        public float getTarget() {
+            return targetValue;
+        }
+
+        public void setTarget(float target) {
+            this.targetValue = target;
+        }
     }
 }

@@ -1,4 +1,4 @@
-package com.jef.justenoughfakepixel.features.dungeons.overlays;
+package com.jef.justenoughfakepixel.features.dungeons;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;

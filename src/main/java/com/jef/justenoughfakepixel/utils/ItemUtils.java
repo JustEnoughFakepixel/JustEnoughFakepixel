@@ -15,7 +15,8 @@ import java.util.regex.Pattern;
 
 public class ItemUtils {
 
-    private ItemUtils() {}
+    private ItemUtils() {
+    }
 
     public static @NotNull List<String> getLoreLines(@Nullable ItemStack item) {
         if (item == null || !item.hasTagCompound()) return Collections.emptyList();
@@ -62,11 +63,11 @@ public class ItemUtils {
 
     public static ItemStack createSkullWithTexture(String textureValue) {
         ItemStack skull = new ItemStack(Items.skull, 1, 3);
-        NBTTagCompound tag        = new NBTTagCompound();
+        NBTTagCompound tag = new NBTTagCompound();
         NBTTagCompound skullOwner = new NBTTagCompound();
         skullOwner.setString("Id", UUID.randomUUID().toString());
         NBTTagCompound properties = new NBTTagCompound();
-        NBTTagList     textures   = new NBTTagList();
+        NBTTagList textures = new NBTTagList();
         NBTTagCompound textureTag = new NBTTagCompound();
         textureTag.setString("Value", textureValue);
         textures.appendTag(textureTag);

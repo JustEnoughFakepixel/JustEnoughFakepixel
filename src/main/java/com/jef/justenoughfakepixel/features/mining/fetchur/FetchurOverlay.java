@@ -5,8 +5,9 @@ import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
 import com.jef.justenoughfakepixel.features.scoreboard.CustomScoreboard;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import com.jef.justenoughfakepixel.utils.overlay.Overlay;
 import com.jef.justenoughfakepixel.utils.data.SkyblockData;
+import com.jef.justenoughfakepixel.utils.overlay.Overlay;
+import lombok.Getter;
 import net.minecraft.util.EnumChatFormatting;
 
 import java.util.Collections;
@@ -15,6 +16,7 @@ import java.util.List;
 @RegisterEvents
 public class FetchurOverlay extends Overlay {
 
+    @Getter
     private static FetchurOverlay instance;
 
     public FetchurOverlay() {
@@ -22,14 +24,35 @@ public class FetchurOverlay extends Overlay {
         instance = this;
     }
 
-    public static FetchurOverlay getInstance() { return instance; }
+    @Override
+    protected int getBaseWidth() {
+        return 160;
+    }
 
-    @Override protected int     getBaseWidth()    { return 160; }
-    @Override public Position   getPosition()     { return JefConfig.feature.mining.fetchurOverlayPos; }
-    @Override public float      getScale()        { return JefConfig.feature.mining.fetchurOverlayScale; }
-    @Override public int        getBgColor()      { return ChromaColour.specialToChromaRGB(JefConfig.feature.mining.overlayBgColor); }
-    @Override public int        getCornerRadius() { return JefConfig.feature.mining.overlayCornerRadius; }
-    @Override protected boolean extraGuard()      { return SkyblockData.isOnSkyblock() && !CustomScoreboard.isActive(); }
+    @Override
+    public Position getPosition() {
+        return JefConfig.feature.mining.fetchurOverlayPos;
+    }
+
+    @Override
+    public float getScale() {
+        return JefConfig.feature.mining.fetchurOverlayScale;
+    }
+
+    @Override
+    public int getBgColor() {
+        return ChromaColour.specialToChromaRGB(JefConfig.feature.mining.overlayBgColor);
+    }
+
+    @Override
+    public int getCornerRadius() {
+        return JefConfig.feature.mining.overlayCornerRadius;
+    }
+
+    @Override
+    protected boolean extraGuard() {
+        return SkyblockData.isOnSkyblock() && !CustomScoreboard.isActive();
+    }
 
     @Override
     protected boolean isEnabled() {
