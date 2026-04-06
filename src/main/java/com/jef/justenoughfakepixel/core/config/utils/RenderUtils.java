@@ -163,4 +163,50 @@ public final class RenderUtils {
         GlStateManager.enableAlpha();
         GlStateManager.enableTexture2D();
     }
+
+    public static int renderStringTrimWidth(String str, boolean shadow, int x, int y, int width, int color, int maxLines) {
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getMinecraft();
+        net.minecraft.client.gui.FontRenderer fr = mc.fontRendererObj;
+
+        if (str == null || str.isEmpty()) return 0;
+
+        String[] words = str.split(" ");
+        StringBuilder currentLine = new StringBuilder();
+        int linesRendered = 0;
+        int yOffset = 0;
+
+        for (String word : words) {
+            String testLine = currentLine.length() == 0 ? word : currentLine + " " + word;
+            int testWidth = fr.getStringWidth(testLine);
+
+            if (testWidth > width && currentLine.length() > 0) {
+                if (shadow) {
+                    fr.drawStringWithShadow(currentLine.toString(), x, y + yOffset, color);
+                } else {
+                    fr.drawString(currentLine.toString(), x, y + yOffset, color);
+                }
+                yOffset += fr.FONT_HEIGHT;
+                linesRendered++;
+
+                if (maxLines > 0 && linesRendered >= maxLines) {
+                    return yOffset;
+                }
+
+                currentLine = new StringBuilder(word);
+            } else {
+                currentLine = new StringBuilder(testLine);
+            }
+        }
+
+        if (currentLine.length() > 0) {
+            if (shadow) {
+                fr.drawStringWithShadow(currentLine.toString(), x, y + yOffset, color);
+            } else {
+                fr.drawString(currentLine.toString(), x, y + yOffset, color);
+            }
+            yOffset += fr.FONT_HEIGHT;
+        }
+
+        return yOffset;
+    }
 }

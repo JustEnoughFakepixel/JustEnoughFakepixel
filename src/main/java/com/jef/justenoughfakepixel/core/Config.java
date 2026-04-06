@@ -72,7 +72,6 @@ public class Config {
             case "openGyroWandEditor":            JefConfig.openGyroWandEditor();            break;
             case "openPowderEditor":              JefConfig.openPowderEditor();              break;
             case "openInvButtonEditor":           JefConfig.openInvButtonEditor();           break;
-            case "reloadItemList":       JefConfig.reloadItemList();                break;
             case "resetPowderTracker":            JefConfig.resetPowderTracker();            break;
             case "openDungeonBreakerEditor":      JefConfig.openDungeonBreakerEditor();      break;
             case "openTrophyFishEditor":          JefConfig.openTrophyFishEditor();          break;

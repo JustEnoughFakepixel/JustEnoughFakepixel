@@ -5,7 +5,6 @@ import com.jef.justenoughfakepixel.data.ApiHandler;
 import com.jef.justenoughfakepixel.features.dungeons.caseopening.CitManager;
 import com.jef.justenoughfakepixel.features.invbuttons.InventoryButtonStorage;
 import com.jef.justenoughfakepixel.features.invbuttons.SkyblockItemCache;
-import com.jef.justenoughfakepixel.features.itemlist.ItemRegistry;
 import com.jef.justenoughfakepixel.features.misc.pet.CurrentPetTracker;
 import com.jef.justenoughfakepixel.features.misc.pet.PetCache;
 import com.jef.justenoughfakepixel.features.scoreboard.MaxwellPowerSync;
@@ -68,7 +67,6 @@ public class JefMod {
         PetCache.getInstance().load();
         CurrentPetTracker.getInstance().load();
         TrophyFishStorage.getInstance().load();
-        ItemRegistry.initialise();
 
         new CitManager();
 

@@ -68,15 +68,6 @@ public class SearchBar {
     private static String lastCalcInput = "";
     private static String lastCalcResult = null;
 
-    private static boolean itemListMode = false;
-
-    public static boolean isItemListMode() { return itemListMode; }
-
-    public static boolean toggleItemListMode() {
-        itemListMode = !itemListMode;
-        return itemListMode;
-    }
-
     public static String getSearchText() { return isCalcMode() ? "" : searchText; }
 
     /** Returns true when the search text looks like a calculator expression — skip item highlighting in this case. */

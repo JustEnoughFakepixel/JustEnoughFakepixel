@@ -307,10 +307,6 @@ public class JefConfig {
                 .withParent(Minecraft.getMinecraft().currentScreen);
     }
 
-    public static void reloadItemList() {
-        new Thread(() -> com.jef.justenoughfakepixel.features.itemlist.ItemRegistry.initialise(true)).start();
-    }
-
     public static void resetPowderTracker() {
         PowderStats.getInstance().reset();
     }
