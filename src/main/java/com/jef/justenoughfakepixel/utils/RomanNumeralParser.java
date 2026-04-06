@@ -60,7 +60,7 @@ public final class RomanNumeralParser {
             String after = matcher.group(2);
             if (numeral.isEmpty() || Pattern.compile("^[\\w-']").matcher(after).find()) continue;
             int value = parse(numeral);
-            if (value == 1 && !after.equals("\u00a7") && !after.isEmpty()) continue;
+            if (value == 1 && !after.equals("§") && !after.isEmpty()) continue;
             matcher.appendReplacement(result, " " + value + "$2");
         }
         matcher.appendTail(result);

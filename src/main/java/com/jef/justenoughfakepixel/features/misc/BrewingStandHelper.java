@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 public class BrewingStandHelper {
 
     private static final Minecraft mc = Minecraft.getMinecraft();
-    private static final Pattern TIME_REGEX = Pattern.compile("\u00a7a(\\d+(?:\\.\\d)?)s");
+    private static final Pattern TIME_REGEX = Pattern.compile("§a(\\d+(?:\\.\\d)?)s");
     private final Map<BlockPos, Long> brewingStandToTimeMap = new HashMap<>();
     private TileEntityBrewingStand lastBrewingStand = null;
     private int tickCounter = 0;

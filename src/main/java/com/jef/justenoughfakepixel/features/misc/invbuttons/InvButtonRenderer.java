@@ -121,7 +121,7 @@ public class InvButtonRenderer {
             GlStateManager.pushMatrix();
             GlStateManager.translate(-gl, -gt, 400);
             try {
-                drawHoveringTextMethod.invoke(gui, Collections.singletonList("\u00a77" + cmd), mx, my, Minecraft.getMinecraft().fontRendererObj);
+                drawHoveringTextMethod.invoke(gui, Collections.singletonList("§7" + cmd), mx, my, Minecraft.getMinecraft().fontRendererObj);
             } catch (Exception ignored) {
             }
             GlStateManager.popMatrix();

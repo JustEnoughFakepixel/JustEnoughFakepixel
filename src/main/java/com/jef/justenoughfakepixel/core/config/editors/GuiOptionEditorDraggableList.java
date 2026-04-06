@@ -99,7 +99,7 @@ public class GuiOptionEditorDraggableList extends GuiOptionEditor {
                     String line = multilines[multilineIndex];
                     Utils.drawStringScaledMaxWidth(line + EnumChatFormatting.RESET, Minecraft.getMinecraft().fontRendererObj, x + 20, y + 50 + yOff + multilineIndex * 10, true, width - 20, 0xffffffff);
                 }
-                Minecraft.getMinecraft().fontRendererObj.drawString("\u2261", x + 10, y + 50 + yOff + ySize / 2 - 4, 0xffffff, true);
+                Minecraft.getMinecraft().fontRendererObj.drawString("≡", x + 10, y + 50 + yOff + ySize / 2 - 4, 0xffffff, true);
             }
 
             yOff += ySize;

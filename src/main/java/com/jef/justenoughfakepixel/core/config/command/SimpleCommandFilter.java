@@ -27,7 +27,7 @@ public class SimpleCommandFilter {
             mc.thePlayer.sendChatMessage("/" + msg);
         } else {
             mc.ingameGUI.getChatGUI().printChatMessage(
-                    new ChatComponentText("\u00a7c[JEF] \u00a77You must be in a world to use commands."));
+                    new ChatComponentText("§c[JEF] §7You must be in a world to use commands."));
         }
     }
 }
