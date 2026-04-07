@@ -18,7 +18,7 @@ import com.jef.justenoughfakepixel.features.misc.ItemPickupLog;
 import com.jef.justenoughfakepixel.features.misc.PerformanceHUD;
 import com.jef.justenoughfakepixel.features.misc.SearchBar;
 import com.jef.justenoughfakepixel.features.misc.pet.CurrentPetOverlay;
-import com.jef.justenoughfakepixel.features.qol.GyroWandOverlay;
+import com.jef.justenoughfakepixel.features.qol.ItemCooldownOverlay;
 import com.jef.justenoughfakepixel.features.scoreboard.CustomScoreboard;
 import com.jef.justenoughfakepixel.features.waypoints.WaypointGroupGui;
 import net.minecraft.client.Minecraft;
@@ -165,11 +165,11 @@ public class JefConfig {
         screenToOpen = new GuiPositionEditor(feature.misc.itemPickupLogPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.misc.itemPickupLogScale).withParent(Minecraft.getMinecraft().currentScreen);
     }
 
-    public static void openGyroWandEditor() {
+    public static void openItemCooldownEditor() {
         if (feature == null) return;
-        GyroWandOverlay overlay = GyroWandOverlay.getInstance();
+        ItemCooldownOverlay overlay = ItemCooldownOverlay.getInstance();
         if (overlay == null) return;
-        screenToOpen = new GuiPositionEditor(feature.qol.gyroWandPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.qol.gyroWandScale).withParent(Minecraft.getMinecraft().currentScreen);
+        screenToOpen = new GuiPositionEditor(feature.qol.itemCooldownPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.qol.itemCooldownScale).withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     public static void openPowderEditor() {

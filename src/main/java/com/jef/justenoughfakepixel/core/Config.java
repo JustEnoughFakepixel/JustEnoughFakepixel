@@ -93,8 +93,8 @@ public class Config {
             case "openItemPickupLogEditor":
                 JefConfig.openItemPickupLogEditor();
                 break;
-            case "openGyroWandEditor":
-                JefConfig.openGyroWandEditor();
+            case "openItemCooldownEditor":
+                JefConfig.openItemCooldownEditor();
                 break;
             case "openPowderEditor":
                 JefConfig.openPowderEditor();
