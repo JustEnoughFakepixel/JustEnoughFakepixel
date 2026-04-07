@@ -40,7 +40,7 @@ public class ItemCooldowns {
     }
 
     static {
-        CHAT_TRIGGERS.add(new ChatTrigger(Pattern.compile("Bonzo'?s? Mask.*saved your life"), "BONZO_MASK", "STARRED_BONZO_MASK"));
+        CHAT_TRIGGERS.add(new ChatTrigger(Pattern.compile("§r§r§a§aYour §r§9§9Bonzo's Mask §r§a§asaved your life!§r§r"), "BONZO_MASK", "STARRED_BONZO_MASK"));
         CHAT_TRIGGERS.add(new ChatTrigger(Pattern.compile("Spirit Mask.*saved your life"), "SPIRIT_MASK", "STARRED_SPIRIT_MASK"));
 
         ACTION_BAR_TRIGGERS.add(new ChatTrigger(Pattern.compile("Gravity Storm"), "GYROKINETIC_WAND"));
