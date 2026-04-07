@@ -4,6 +4,7 @@ import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
+import com.jef.justenoughfakepixel.utils.data.SkyblockData;
 import com.jef.justenoughfakepixel.utils.overlay.Overlay;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
@@ -47,6 +48,18 @@ public class ItemPickupLog extends Overlay {
         return copy;
     }
 
+    private boolean inventoryChanged(ItemStack[] prev, ItemStack[] curr) {
+        for (int i = 0; i < prev.length; i++) {
+            if (i == IGNORED_HOTBAR_SLOT) continue;
+            ItemStack a = prev[i], b = curr[i];
+            if (a == null && b == null) continue;
+            if (a == null || b == null) return true;
+            if (a.stackSize != b.stackSize) return true;
+            if (!a.getDisplayName().equals(b.getDisplayName())) return true;
+        }
+        return false;
+    }
+
     @Override
     public Position getPosition() {
         return JefConfig.feature.misc.itemPickupLogPos;
@@ -74,11 +87,12 @@ public class ItemPickupLog extends Overlay {
 
     @SubscribeEvent
     public void onGuiOpen(GuiOpenEvent event) {
-        if (!isEnabled()) return;
+        if (!isEnabled() || !SkyblockData.isOnSkyblock()) return;
         Minecraft mc = Minecraft.getMinecraft();
         if (mc.thePlayer == null) return;
 
         if (event.gui == null) {
+            // GUI closed — diff pre-open snapshot vs current to capture chest/NPC transactions cleanly
             if (preScreenSnapshot != null) {
                 ItemStack[] current = mc.thePlayer.inventory.mainInventory;
                 if (preScreenSnapshot.length == current.length) {
@@ -86,9 +100,10 @@ public class ItemPickupLog extends Overlay {
                 }
                 preScreenSnapshot = null;
             }
-            // Reset tick snapshot so we don't double-count on the next tick
+            // Re-arm the tick snapshot so we don't double-count on the next tick
             previousInventory = copyInventory(mc.thePlayer.inventory.mainInventory);
         } else {
+            // GUI opened — freeze a snapshot of what we had before
             preScreenSnapshot = copyInventory(mc.thePlayer.inventory.mainInventory);
             previousInventory = null;
         }
@@ -99,7 +114,7 @@ public class ItemPickupLog extends Overlay {
         if (event.phase != TickEvent.Phase.END) return;
 
         Minecraft mc = Minecraft.getMinecraft();
-        if (mc.thePlayer == null || !isEnabled()) {
+        if (mc.thePlayer == null || !isEnabled() || !SkyblockData.isOnSkyblock()) {
             previousInventory = null;
             return;
         }
@@ -110,7 +125,10 @@ public class ItemPickupLog extends Overlay {
 
         ItemStack[] current = mc.thePlayer.inventory.mainInventory;
 
-        if (previousInventory != null && previousInventory.length == current.length) {
+        // Only diff when something actually changed — prevents logging every idle tick
+        if (previousInventory != null
+                && previousInventory.length == current.length
+                && inventoryChanged(previousInventory, current)) {
             diffAndLog(previousInventory, current);
         }
 
@@ -160,7 +178,7 @@ public class ItemPickupLog extends Overlay {
         List<String> lines = new ArrayList<>();
 
         if (preview) {
-            lines.add("§a+ 1x §fAspect of the End");
+            lines.add("§a+ 1x §fWarped Aspect of the Void");
             lines.add("§c- 32x §fEnchanted Cobblestone");
             lines.add("§a+ 5x §fMithril Ore");
             lines.add("§a+ 64x §fEnchanted Oak Wood");
