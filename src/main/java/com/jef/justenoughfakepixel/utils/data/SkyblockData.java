@@ -27,6 +27,16 @@ public final class SkyblockData {
         return net.minecraft.util.StringUtils.stripControlCodes(obj.getDisplayName());
     }
 
+    public static String getScoreboardTitle() {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.theWorld == null) return null;
+        Scoreboard sb = mc.theWorld.getScoreboard();
+        if (sb == null) return null;
+        ScoreObjective obj = sb.getObjectiveInDisplaySlot(1);
+        if (obj == null) return null;
+        return obj.getDisplayName();
+    }
+
     public static Location getCurrentLocation() {
         return TablistParser.getCurrentLocation();
     }

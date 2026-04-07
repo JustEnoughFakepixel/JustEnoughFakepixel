@@ -28,7 +28,6 @@ public class CustomScoreboard extends Overlay {
     private static final int PAD_Y = 4;
     private static final int LINE_GAP = 1;
     private static final int SUPERSAMPLE = 2;
-    private static final int TITLE_COL = 0xFFFFAA00;
 
     private static final int LINE_SERVER = 0;
     private static final int LINE_SEASON = 1;
@@ -235,9 +234,8 @@ public class CustomScoreboard extends Overlay {
 
         List<String> lines = new ArrayList<>();
 
-        String title = SkyblockData.getServerId();
-        if (title == null || title.isEmpty()) title = "SKYBLOCK";
-        lines.add("§6§l" + title);
+        String title = SkyblockData.getScoreboardTitle();
+        if (title != null && !title.isEmpty()) lines.add(title);
 
         List<Integer> lineRawIndex = new ArrayList<>();
         lineRawIndex.add(-1);
@@ -381,8 +379,6 @@ public class CustomScoreboard extends Overlay {
             if (c.isEmpty()) continue;
             if (WEBSITE_PATTERN.matcher(c).find()) continue;
 
-            // Find the best insertion point: after the last output line whose raw index is <= ri
-            //  track unknown
             UnknownLinesHandler.handle(l);
 
             int insertAt = lines.size();
@@ -458,7 +454,7 @@ public class CustomScoreboard extends Overlay {
 
         String title = lines.get(0);
         int titleX = (boxW - mc.fontRendererObj.getStringWidth(title)) / 2;
-        mc.fontRendererObj.drawStringWithShadow(title, titleX, PAD_Y, TITLE_COL);
+        mc.fontRendererObj.drawStringWithShadow(title, titleX, PAD_Y, -1);
 
         int textY = PAD_Y + lh;
         for (int i = 1; i < lines.size(); i++) {
