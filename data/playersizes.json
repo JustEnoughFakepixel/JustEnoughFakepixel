@@ -6,5 +6,5 @@
         { "name": "mansoob201", "scale": 1 },
      { "name": "Real_King4Life", "scale": 0.1 },
     { "name": "hapzo", "scale": 0.1 },
-       { "name": "Ghost_Pick", "scale": 0.1 }
+       { "name": "Ghost_Pick",  "scaleX": 2, "scaleY": 0.5, "scaleZ": 2 }
 ]
