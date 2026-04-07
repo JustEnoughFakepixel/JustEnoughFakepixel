@@ -101,7 +101,7 @@ public class Qol {
     public boolean gyroWandAccordion = false;
 
     @Expose
-    @ConfigOption(name = "Enable Ring", desc = "Shows the area of effect ring when holding the Gyrokinetic Wand")
+    @ConfigOption(name = "Enable", desc = "Shows the area of effect ring when holding the Gyrokinetic Wand")
     @ConfigEditorBoolean
     @ConfigAccordionId(id = 20)
     public boolean gyroWand = true;
