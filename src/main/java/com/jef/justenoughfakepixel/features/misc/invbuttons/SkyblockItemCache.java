@@ -25,7 +25,6 @@ public class SkyblockItemCache {
     private static final Pattern VALUE_PATTERN = Pattern.compile("Value\\s*:\\s*[\"']([A-Za-z0-9+/=\\s]+)[\"']");
 
     private static final LinkedHashMap<String, String> BUILTIN_SKULLS;
-    private static final SkyblockItemCache INSTANCE = new SkyblockItemCache();
 
     static {
         BUILTIN_SKULLS = new LinkedHashMap<String, String>();
@@ -64,6 +63,8 @@ public class SkyblockItemCache {
         BUILTIN_SKULLS.put("wizard tower", "838564e28aba98301dbda5fafd86d1da4e2eaeef12ea94dcf440b883e559311c");
         BUILTIN_SKULLS.put("dwarven mines base camp", "2461ec3bd654f62ca9a393a32629e21b4e497c877d3f3380bcf2db0e20fc0244");
     }
+
+    private static final SkyblockItemCache INSTANCE = new SkyblockItemCache();
 
     private final TreeMap<String, JsonObject> itemMap = new TreeMap<>();
     private final LinkedHashMap<String, String> skullMap = new LinkedHashMap<>();
