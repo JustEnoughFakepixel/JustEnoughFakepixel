@@ -1710,6 +1710,12 @@
       "goodLevel": 5,
       "maxLevel": 6
     },
+    "piscary": {
+      "loreName": "Piscary",
+      "nbtName": "piscary",
+      "goodLevel": 5,
+      "maxLevel": 6
+    },
     "caster": {
       "loreName": "Caster",
       "nbtName": "caster",
