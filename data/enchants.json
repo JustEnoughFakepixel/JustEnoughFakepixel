@@ -1854,6 +1854,12 @@
       "goodLevel": 3,
       "maxLevel": 4
     },
+    "lapidary": {
+      "loreName": "Lapidary",
+      "nbtName": "lapidary",
+      "goodLevel": 0,
+      "maxLevel": 5
+    },
     "frail": {
       "loreName": "Frail",
       "nbtName": "frail",
