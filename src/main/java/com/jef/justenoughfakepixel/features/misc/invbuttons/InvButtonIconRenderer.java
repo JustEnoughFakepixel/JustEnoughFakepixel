@@ -4,9 +4,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.jef.justenoughfakepixel.utils.Utils;
+import com.jef.justenoughfakepixel.utils.render.ItemRenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -153,14 +153,7 @@ public class InvButtonIconRenderer {
     }
 
     public static void drawItemStack(ItemStack stack, int x, int y) {
-        if (stack == null) return;
-        net.minecraft.client.renderer.entity.RenderItem ri = Minecraft.getMinecraft().getRenderItem();
-        RenderHelper.enableGUIStandardItemLighting();
-        ri.zLevel = -145;
-        ri.renderItemAndEffectIntoGUI(stack, x, y);
-        ri.renderItemOverlayIntoGUI(Minecraft.getMinecraft().fontRendererObj, stack, x, y, null);
-        ri.zLevel = 0;
-        RenderHelper.disableStandardItemLighting();
+        ItemRenderUtils.drawItemStack(stack, x, y);
     }
 
 }

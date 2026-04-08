@@ -8,15 +8,14 @@ import com.jef.justenoughfakepixel.utils.ItemUtils;
 import com.jef.justenoughfakepixel.utils.data.SkyblockData;
 import com.jef.justenoughfakepixel.utils.overlay.Overlay;
 import com.jef.justenoughfakepixel.utils.overlay.OverlayUtils;
+import com.jef.justenoughfakepixel.utils.render.ItemRenderUtils;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 import java.util.Collections;
 import java.util.List;
@@ -116,12 +115,7 @@ public class CurrentPetOverlay extends Overlay {
         if ((bgColor >>> 24) != 0) drawRoundedRect(-PADDING, -PADDING, w, h - PADDING, getCornerRadius(), bgColor);
 
         if (skullItem != null) {
-            RenderHelper.enableGUIStandardItemLighting();
-            GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-            mc.getRenderItem().renderItemAndEffectIntoGUI(skullItem, 0, 0);
-            GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-            RenderHelper.disableStandardItemLighting();
-            GlStateManager.disableLighting();
+            ItemRenderUtils.renderItemWithEffects(mc, skullItem, 0, 0);
         } else {
             Gui.drawRect(0, 0, SKULL_SIZE, SKULL_SIZE, 0xFF555555);
         }

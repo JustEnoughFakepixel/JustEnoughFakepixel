@@ -18,7 +18,9 @@ import com.jef.justenoughfakepixel.features.misc.ItemPickupLog;
 import com.jef.justenoughfakepixel.features.misc.PerformanceHUD;
 import com.jef.justenoughfakepixel.features.misc.SearchBar;
 import com.jef.justenoughfakepixel.features.misc.pet.CurrentPetOverlay;
+import com.jef.justenoughfakepixel.features.qol.ItemAbilityTimerOverlay;
 import com.jef.justenoughfakepixel.features.qol.ItemCooldownOverlay;
+import com.jef.justenoughfakepixel.features.qol.ItemInvincibilityOverlay;
 import com.jef.justenoughfakepixel.features.scoreboard.CustomScoreboard;
 import com.jef.justenoughfakepixel.features.waypoints.WaypointGroupGui;
 import net.minecraft.client.Minecraft;
@@ -170,6 +172,20 @@ public class JefConfig {
         ItemCooldownOverlay overlay = ItemCooldownOverlay.getInstance();
         if (overlay == null) return;
         screenToOpen = new GuiPositionEditor(feature.qol.itemCooldownPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.qol.itemCooldownScale).withParent(Minecraft.getMinecraft().currentScreen);
+    }
+
+    public static void openItemAbilityTimerEditor() {
+        if (feature == null) return;
+        ItemAbilityTimerOverlay overlay = ItemAbilityTimerOverlay.getInstance();
+        if (overlay == null) return;
+        screenToOpen = new GuiPositionEditor(feature.qol.itemAbilityTimerPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.qol.itemAbilityTimerScale).withParent(Minecraft.getMinecraft().currentScreen);
+    }
+
+    public static void openItemInvincibilityEditor() {
+        if (feature == null) return;
+        ItemInvincibilityOverlay overlay = ItemInvincibilityOverlay.getInstance();
+        if (overlay == null) return;
+        screenToOpen = new GuiPositionEditor(feature.qol.itemInvincibilityPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.qol.itemInvincibilityScale).withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     public static void openPowderEditor() {

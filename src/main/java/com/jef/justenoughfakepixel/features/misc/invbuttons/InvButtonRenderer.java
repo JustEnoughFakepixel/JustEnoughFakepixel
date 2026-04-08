@@ -4,6 +4,7 @@ import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.events.GuiContainerRenderButtonsEvent;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.Utils;
+import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
 import com.jef.justenoughfakepixel.utils.render.HighlightUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -153,7 +154,7 @@ public class InvButtonRenderer {
             String cmd = btn.command.trim();
             if (!cmd.startsWith("/")) cmd = "/" + cmd;
             if (ClientCommandHandler.instance.executeCommand(Minecraft.getMinecraft().thePlayer, cmd) == 0)
-                Minecraft.getMinecraft().thePlayer.sendChatMessage(cmd);
+                ChatUtils.sendChatCommand(cmd);
         }
     }
 }

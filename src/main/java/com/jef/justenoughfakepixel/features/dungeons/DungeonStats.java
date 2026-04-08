@@ -5,11 +5,11 @@ import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
 import com.jef.justenoughfakepixel.features.dungeons.utils.DungeonFloor;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
+import com.jef.justenoughfakepixel.utils.TimeFormatter;
 import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
 import com.jef.justenoughfakepixel.utils.data.SkyblockData;
 import com.jef.justenoughfakepixel.utils.overlay.Overlay;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.event.world.WorldEvent;
@@ -18,9 +18,6 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,7 +25,6 @@ import java.util.regex.Pattern;
 public class DungeonStats extends Overlay {
 
     private static final Minecraft mc = Minecraft.getMinecraft();
-    private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     public static final int OVERLAY_WIDTH  = 160;
     public static final int OVERLAY_HEIGHT = 160;
@@ -309,7 +305,7 @@ public class DungeonStats extends Overlay {
         List<String> out = new ArrayList<>();
 
         out.add(floorCol + "Floor: " + C_VAL + (preview ? "F7" : floorName));
-        out.add(C_DUNGEON + "Dungeon: " + C_VAL + (preview ? "4:32.100" : fmt(now)));
+        out.add(C_DUNGEON + "Dungeon: " + C_VAL + (preview ? "4:32.100" : TimeFormatter.formatDungeonTime(now)));
 
         long cleared = s != null ? s.clearedTime : 0;
         long blood   = s != null ? s.bloodTime   : 0;
@@ -323,9 +319,9 @@ public class DungeonStats extends Overlay {
         if (preview || boss > 0) {
             long bossDur = dead > 0 ? dead - boss : (boss > 0 ? now - boss : 0);
             if (dead > 0)
-                out.add(C_BOSS + "Boss took: " + C_VAL + (preview ? "0:47.300" : fmt(dead - boss)));
+                out.add(C_BOSS + "Boss took: " + C_VAL + (preview ? "0:47.300" : TimeFormatter.formatDungeonTime(dead - boss)));
             else if (boss > 0)
-                out.add(C_BOSS + "Boss: " + C_VAL + fmt(bossDur));
+                out.add(C_BOSS + "Boss: " + C_VAL + TimeFormatter.formatDungeonTime(bossDur));
         }
 
         if (preview || f.isF7orM7()) {
@@ -350,15 +346,15 @@ public class DungeonStats extends Overlay {
 
     private static String line(String color, String label, long locked, long now, boolean preview, String previewVal) {
         if (preview)    return color + label + " took: " + C_VAL + previewVal;
-        if (locked > 0) return color + label + " took: " + C_VAL + fmt(locked);
-        return color + label + ": " + C_VAL + fmt(now);
+        if (locked > 0) return color + label + " took: " + C_VAL + TimeFormatter.formatDungeonTime(locked);
+        return color + label + ": " + C_VAL + TimeFormatter.formatDungeonTime(now);
     }
 
     private static void addPhase(List<String> out, String color, String name, long start, long end, long now, boolean preview, String previewVal) {
         if (preview) { out.add(color + name + " took: " + C_VAL + previewVal); return; }
         if (start == 0) return;
-        if (end > 0)    out.add(color + name + " took: " + C_VAL + fmt(end - start));
-        else            out.add(color + name + ": "      + C_VAL + fmt(now - start));
+        if (end > 0)    out.add(color + name + " took: " + C_VAL + TimeFormatter.formatDungeonTime(end - start));
+        else            out.add(color + name + ": "      + C_VAL + TimeFormatter.formatDungeonTime(now - start));
     }
 
     private void printEndStats() {
@@ -378,27 +374,27 @@ public class DungeonStats extends Overlay {
 
         for (String xp : endStats.xp) send(EnumChatFormatting.DARK_AQUA + xp);
 
-        if (clearedTime  > 0) send(C_CLEAR + "Clear took: "  + C_VAL + fmt(clearedTime)             + pbTag(floor + "_clear"));
-        if (bloodTime    > 0) send(C_BLOOD + "Blood Rush: "  + C_VAL + fmt(bloodTime)               + pbTag(floor + "_blood"));
-        if (bossTime     > 0) send(C_ENTRY + "Boss Entry: "  + C_VAL + fmt(bossTime)                + pbTag(floor + "_entry"));
+        if (clearedTime  > 0) send(C_CLEAR + "Clear took: "  + C_VAL + TimeFormatter.formatDungeonTime(clearedTime)             + pbTag(floor + "_clear"));
+        if (bloodTime    > 0) send(C_BLOOD + "Blood Rush: "  + C_VAL + TimeFormatter.formatDungeonTime(bloodTime)               + pbTag(floor + "_blood"));
+        if (bossTime     > 0) send(C_ENTRY + "Boss Entry: "  + C_VAL + TimeFormatter.formatDungeonTime(bossTime)                + pbTag(floor + "_entry"));
         if (bossDeadTime > 0 && bossTime > 0)
-            send(C_BOSS  + "Boss took: "   + C_VAL + fmt(bossDeadTime - bossTime) + pbTag(floor + "_boss"));
+            send(C_BOSS  + "Boss took: "   + C_VAL + TimeFormatter.formatDungeonTime(bossDeadTime - bossTime) + pbTag(floor + "_boss"));
 
         if (currentFloor.isF6orM6()) {
-            if (terraEnd  > 0) send(C_TERRA  + "Terracotta took: " + C_VAL + fmt(terraEnd  - terraStart)  + pbTag(floor + "_terra"));
-            if (giantsEnd > 0) send(C_GIANTS + "Giants took: "     + C_VAL + fmt(giantsEnd - giantsStart) + pbTag(floor + "_giants"));
-            if (sadanEnd  > 0) send(C_SADAN  + "Sadan took: "      + C_VAL + fmt(sadanEnd  - sadanStart)  + pbTag(floor + "_sadan"));
+            if (terraEnd  > 0) send(C_TERRA  + "Terracotta took: " + C_VAL + TimeFormatter.formatDungeonTime(terraEnd  - terraStart)  + pbTag(floor + "_terra"));
+            if (giantsEnd > 0) send(C_GIANTS + "Giants took: "     + C_VAL + TimeFormatter.formatDungeonTime(giantsEnd - giantsStart) + pbTag(floor + "_giants"));
+            if (sadanEnd  > 0) send(C_SADAN  + "Sadan took: "      + C_VAL + TimeFormatter.formatDungeonTime(sadanEnd  - sadanStart)  + pbTag(floor + "_sadan"));
         }
 
         if (currentFloor.isF7orM7()) {
-            if (maxorEnd      > 0) send(C_MAXOR  + "Maxor took: "               + C_VAL + fmt(maxorEnd     - maxorStart)    + pbTag(floor + "_p1"));
-            if (stormEnd      > 0) send(C_STORM  + "Storm took: "               + C_VAL + fmt(stormEnd     - stormStart)    + pbTag(floor + "_p2"));
-            if (goldorFight   > 0) send(C_GOLDOR + "Terminals took: "           + C_VAL + fmt(goldorFight  - terminalStart));
-            if (goldorEnd     > 0) send(C_GOLDOR + "Goldor took: "              + C_VAL + fmt(goldorEnd    - goldorFight));
+            if (maxorEnd      > 0) send(C_MAXOR  + "Maxor took: "               + C_VAL + TimeFormatter.formatDungeonTime(maxorEnd     - maxorStart)    + pbTag(floor + "_p1"));
+            if (stormEnd      > 0) send(C_STORM  + "Storm took: "               + C_VAL + TimeFormatter.formatDungeonTime(stormEnd     - stormStart)    + pbTag(floor + "_p2"));
+            if (goldorFight   > 0) send(C_GOLDOR + "Terminals took: "           + C_VAL + TimeFormatter.formatDungeonTime(goldorFight  - terminalStart));
+            if (goldorEnd     > 0) send(C_GOLDOR + "Goldor took: "              + C_VAL + TimeFormatter.formatDungeonTime(goldorEnd    - goldorFight));
             if (terminalStart > 0 && goldorEnd > 0)
-                send(C_GOLDOR + "P3 (Terminal+Goldor): "     + C_VAL + fmt(goldorEnd    - terminalStart)  + pbTag(floor + "_p3"));
-            if (necronEnd     > 0) send(C_NECRON + "Necron took: "              + C_VAL + fmt(necronEnd    - necronStart)    + pbTag(floor + "_p4"));
-            if (witherEnd     > 0) send(C_WITHER + "Wither King took: "         + C_VAL + fmt(witherEnd    - witherStart)    + pbTag(floor + "_p5"));
+                send(C_GOLDOR + "P3 (Terminal+Goldor): "     + C_VAL + TimeFormatter.formatDungeonTime(goldorEnd    - terminalStart)  + pbTag(floor + "_p3"));
+            if (necronEnd     > 0) send(C_NECRON + "Necron took: "              + C_VAL + TimeFormatter.formatDungeonTime(necronEnd    - necronStart)    + pbTag(floor + "_p4"));
+            if (witherEnd     > 0) send(C_WITHER + "Wither King took: "         + C_VAL + TimeFormatter.formatDungeonTime(witherEnd    - witherStart)    + pbTag(floor + "_p5"));
         }
         send(sep);
     }
@@ -440,18 +436,15 @@ public class DungeonStats extends Overlay {
     }
 
     private void announceNewPb(String phase, long duration) {
-        String msg = C_NEWPB + "NEW PB " + phase + ": " + C_VAL + fmt(duration);
-        send(msg);
-        scheduler.schedule(() -> {
-            if (mc.thePlayer != null)
-                mc.thePlayer.sendChatMessage("/pc NEW PB " + phase + ": " + fmt(duration));
-        }, 1500, TimeUnit.MILLISECONDS);
+        String msg = C_NEWPB + "NEW PB " + phase + ": " + C_VAL + TimeFormatter.formatDungeonTime(duration);
+        ChatUtils.sendMessage(msg);
+        ChatUtils.sendPartyMessage("NEW PB " + phase + ": " + TimeFormatter.formatDungeonTime(duration));
     }
 
     private String pbTag(String key) {
         if (JefConfig.feature == null) return "";
         long p = JefConfig.feature.dungeons.getPb(key);
-        return p > 0 ? C_PB + " (PB: " + fmt(p) + ")" : "";
+        return p > 0 ? C_PB + " (PB: " + TimeFormatter.formatDungeonTime(p) + ")" : "";
     }
 
     public static String getFormattedPb(String arg1, String arg2) {
@@ -462,12 +455,12 @@ public class DungeonStats extends Overlay {
 
         if (arg2 == null) {
             long pb = JefConfig.feature.dungeons.getPb(floor.name() + "_total");
-            return pb > 0 ? floor.name() + " PB: " + fmt(pb) : floor.name() + ": No PB";
+            return pb > 0 ? floor.name() + " PB: " + TimeFormatter.formatDungeonTime(pb) : floor.name() + ": No PB";
         }
 
         if (arg2.equalsIgnoreCase("br")) {
             long pb = JefConfig.feature.dungeons.getPb(floor.name() + "_blood");
-            return pb > 0 ? floor.name() + " blood rush PB: " + fmt(pb) : floor.name() + " blood rush: No PB";
+            return pb > 0 ? floor.name() + " blood rush PB: " + TimeFormatter.formatDungeonTime(pb) : floor.name() + " blood rush: No PB";
         }
 
         if (arg2.toLowerCase().startsWith("p")) {
@@ -475,7 +468,7 @@ public class DungeonStats extends Overlay {
             String key   = floor.name() + "_" + phase;
             long pb = JefConfig.feature.dungeons.getPb(key);
             String label = phaseLabel(phase);
-            return pb > 0 ? floor.name() + " " + label + ": " + fmt(pb) : floor.name() + " " + label + ": No PB";
+            return pb > 0 ? floor.name() + " " + label + ": " + TimeFormatter.formatDungeonTime(pb) : floor.name() + " " + label + ": No PB";
         }
 
         return "Usage: !pb <floor> | !pb <floor> br | !pb <floor> p1-p5";
@@ -505,12 +498,6 @@ public class DungeonStats extends Overlay {
 
     private long elapsed() { return runStart == 0 ? 0 : System.currentTimeMillis() - runStart; }
 
-    private static String fmt(long ms) {
-        if (ms <= 0) return "0:00.000";
-        long s = ms / 1000;
-        return (s / 60) + ":" + String.format("%02d", s % 60) + "." + String.format("%03d", ms % 1000);
-    }
-
     private static int[] getBossCoords(DungeonFloor floor) {
         int idx;
         switch (floor) {
@@ -527,7 +514,7 @@ public class DungeonStats extends Overlay {
     }
 
     private static void send(String msg) {
-        if (mc.thePlayer != null) mc.thePlayer.addChatMessage(new ChatComponentText(msg));
+        ChatUtils.sendMessage(msg);
     }
 
     private static class EndStats {

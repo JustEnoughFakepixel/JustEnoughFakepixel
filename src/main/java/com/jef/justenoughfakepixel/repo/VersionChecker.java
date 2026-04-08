@@ -1,12 +1,9 @@
-// Credit: NotEnoughFakepixel (https://github.com/davidbelesp/NotEnoughFakepixel)
-
 package com.jef.justenoughfakepixel.repo;
 
 import com.jef.justenoughfakepixel.JefMod;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.repo.data.UpdateData;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.ChatComponentText;
+import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -51,6 +48,6 @@ public class VersionChecker {
 
         String msg = EnumChatFormatting.GREEN + "[JEF] " + EnumChatFormatting.YELLOW + "Update available: " + EnumChatFormatting.WHITE + data.version + EnumChatFormatting.GRAY + " (you have " + JefMod.VERSION + ")" + (data.updateMsg != null && !data.updateMsg.isEmpty() ? "\n" + EnumChatFormatting.AQUA + data.updateMsg : "") + (data.updateUrl != null && !data.updateUrl.isEmpty() ? "\n" + EnumChatFormatting.GOLD + data.updateUrl : "");
 
-        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(msg));
+        ChatUtils.sendMultilineMessage(msg);
     }
 }

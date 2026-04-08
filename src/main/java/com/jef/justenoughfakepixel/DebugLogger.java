@@ -1,8 +1,7 @@
 package com.jef.justenoughfakepixel;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.ChatComponentText;
+import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -16,9 +15,7 @@ public final class DebugLogger {
     public static void log(String message) {
         LOG.info("[JEF DEBUG] {}", message);
         if (JefConfig.feature != null && JefConfig.feature.debug.enableDebug) {
-            Minecraft mc = Minecraft.getMinecraft();
-            if (mc != null && mc.thePlayer != null)
-                mc.thePlayer.addChatMessage(new ChatComponentText(PREFIX + message));
+            ChatUtils.sendMessage(PREFIX + message);
         }
     }
 }

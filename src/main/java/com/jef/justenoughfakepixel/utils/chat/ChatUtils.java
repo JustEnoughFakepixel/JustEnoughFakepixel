@@ -1,10 +1,13 @@
 package com.jef.justenoughfakepixel.utils.chat;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.StringUtils;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 public class ChatUtils {
 
@@ -63,5 +66,43 @@ public class ChatUtils {
     public static String getMsgSentRecipient(String msg) {
         Matcher m = MSG_SENT.matcher(msg);
         return m.matches() ? m.group(1) : null;
+    }
+
+    public static void sendMessage(String message) {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.thePlayer != null) {
+            mc.thePlayer.addChatMessage(new ChatComponentText(message));
+        }
+    }
+
+    public static void sendMultilineMessage(String message) {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.thePlayer != null) {
+            for (String line : message.split("\n")) {
+                mc.thePlayer.addChatMessage(new ChatComponentText(line));
+            }
+        }
+    }
+
+    public static void sendChatCommand(String message) {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.thePlayer != null) {
+            mc.thePlayer.sendChatMessage(message);
+        }
+    }
+
+    public static void sendPartyMessage(String message, long delayMs) {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.thePlayer == null) return;
+
+        java.util.concurrent.Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+            if (mc.thePlayer != null) {
+                mc.thePlayer.sendChatMessage("/pc " + message);
+            }
+        }, delayMs, java.util.concurrent.TimeUnit.MILLISECONDS);
+    }
+
+    public static void sendPartyMessage(String message) {
+        sendPartyMessage(message, 1500);
     }
 }

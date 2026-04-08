@@ -151,6 +151,82 @@ public class Qol {
     public Position itemCooldownPos = new Position(4, 4);
 
     @Expose
+    @ConfigOption(name = "Ability Timer Overlay", desc = "Settings for the item ability active-duration overlay")
+    @ConfigEditorAccordion(id = 24)
+    public boolean itemAbilityTimerAccordion = false;
+
+    @Expose
+    @ConfigOption(name = "Enable Overlay", desc = "Shows a timer while an item ability is active (e.g. Fire Veil Wand 5s wall)")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 24)
+    public boolean itemAbilityTimerOverlay = true;
+
+    @Expose
+    @ConfigOption(name = "Background Color", desc = "Background color of the ability timer overlay")
+    @ConfigEditorColour
+    @ConfigAccordionId(id = 24)
+    public String itemAbilityTimerBgColor = "0:136:0:0:0";
+
+    @Expose
+    @ConfigOption(name = "Corner Radius", desc = "Roundness of the overlay corners")
+    @ConfigEditorSliderAnnotation(minValue = 0f, maxValue = 12f, minStep = 1f)
+    @ConfigAccordionId(id = 24)
+    public int itemAbilityTimerCornerRadius = 4;
+
+    @Expose
+    @ConfigOption(name = "Scale", desc = "Size of the ability timer overlay")
+    @ConfigEditorSliderAnnotation(minValue = 0.5f, maxValue = 3f, minStep = 0.1f)
+    @ConfigAccordionId(id = 24)
+    public float itemAbilityTimerScale = 1f;
+
+    @Expose
+    @ConfigOption(name = "Edit Overlay Position", desc = "Drag the ability timer overlay to reposition it")
+    @ConfigEditorButton(runnableId = "openItemAbilityTimerEditor", buttonText = "Edit")
+    @ConfigAccordionId(id = 24)
+    public boolean itemAbilityTimerEditPosDummy = false;
+
+    @Expose
+    public Position itemAbilityTimerPos = new Position(4, 30);
+
+    @Expose
+    @ConfigOption(name = "Invincibility Overlay", desc = "Settings for the post-save invincibility timer overlay")
+    @ConfigEditorAccordion(id = 25)
+    public boolean itemInvincibilityAccordion = false;
+
+    @Expose
+    @ConfigOption(name = "Enable Overlay", desc = "Shows a timer for the invincibility window granted by Bonzo's Mask and Spirit Mask")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 25)
+    public boolean itemInvincibilityOverlay = true;
+
+    @Expose
+    @ConfigOption(name = "Background Color", desc = "Background color of the invincibility overlay")
+    @ConfigEditorColour
+    @ConfigAccordionId(id = 25)
+    public String itemInvincibilityBgColor = "0:136:0:0:0";
+
+    @Expose
+    @ConfigOption(name = "Corner Radius", desc = "Roundness of the overlay corners")
+    @ConfigEditorSliderAnnotation(minValue = 0f, maxValue = 12f, minStep = 1f)
+    @ConfigAccordionId(id = 25)
+    public int itemInvincibilityCornerRadius = 4;
+
+    @Expose
+    @ConfigOption(name = "Scale", desc = "Size of the invincibility overlay")
+    @ConfigEditorSliderAnnotation(minValue = 0.5f, maxValue = 3f, minStep = 0.1f)
+    @ConfigAccordionId(id = 25)
+    public float itemInvincibilityScale = 1f;
+
+    @Expose
+    @ConfigOption(name = "Edit Overlay Position", desc = "Drag the invincibility overlay to reposition it")
+    @ConfigEditorButton(runnableId = "openItemInvincibilityEditor", buttonText = "Edit")
+    @ConfigAccordionId(id = 25)
+    public boolean itemInvincibilityEditPosDummy = false;
+
+    @Expose
+    public Position itemInvincibilityPos = new Position(4, 56);
+
+    @Expose
     @ConfigOption(name = "Block Selection Overlay", desc = "Customize the block selection highlight")
     @ConfigEditorAccordion(id = 22)
     public boolean blockSelectionAccordion = false;

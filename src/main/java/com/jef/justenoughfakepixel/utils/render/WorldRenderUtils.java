@@ -175,7 +175,6 @@ public final class WorldRenderUtils {
         GlStateManager.enableBlend();
         GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-        // IMPORTANT: respect depth (no render through walls)
         GlStateManager.enableDepth();
         GL11.glDepthMask(true);
 

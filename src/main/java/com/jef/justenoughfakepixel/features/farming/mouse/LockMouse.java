@@ -3,8 +3,8 @@ package com.jef.justenoughfakepixel.features.farming.mouse;
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.utils.KeybindHelper;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
+import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -25,9 +25,7 @@ public class LockMouse {
         if (JefConfig.feature == null) return;
         JefConfig.feature.farming.lockMouse = locked;
         JefConfig.saveConfig();
-        if (mc.thePlayer != null) {
-            mc.thePlayer.addChatMessage(new ChatComponentText(PREFIX + (locked ? EnumChatFormatting.GREEN + "Mouse locked." : EnumChatFormatting.RED + "Mouse unlocked.")));
-        }
+        ChatUtils.sendMessage(PREFIX + (locked ? EnumChatFormatting.GREEN + "Mouse locked." : EnumChatFormatting.RED + "Mouse unlocked."));
     }
 
     @SubscribeEvent

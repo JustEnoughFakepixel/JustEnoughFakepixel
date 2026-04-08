@@ -18,55 +18,55 @@ import java.util.Collections;
 import java.util.List;
 
 @RegisterEvents
-public class ItemCooldownOverlay extends Overlay {
+public class ItemAbilityTimerOverlay extends Overlay {
 
     private static final int ICON_GAP = 2;
 
     @Getter
-    private static ItemCooldownOverlay instance;
+    private static ItemAbilityTimerOverlay instance;
 
-    public ItemCooldownOverlay() {
+    public ItemAbilityTimerOverlay() {
         super(90, 14);
         instance = this;
     }
 
     @Override
     public Position getPosition() {
-        return JefConfig.feature.qol.itemCooldownPos;
+        return JefConfig.feature.qol.itemAbilityTimerPos;
     }
 
     @Override
     public float getScale() {
-        return JefConfig.feature.qol.itemCooldownScale;
+        return JefConfig.feature.qol.itemAbilityTimerScale;
     }
 
     @Override
     public int getBgColor() {
-        return ChromaColour.specialToChromaRGB(JefConfig.feature.qol.itemCooldownBgColor);
+        return ChromaColour.specialToChromaRGB(JefConfig.feature.qol.itemAbilityTimerBgColor);
     }
 
     @Override
     public int getCornerRadius() {
-        return JefConfig.feature.qol.itemCooldownCornerRadius;
+        return JefConfig.feature.qol.itemAbilityTimerCornerRadius;
     }
 
     @Override
     protected boolean isEnabled() {
-        return JefConfig.feature != null && JefConfig.feature.qol.itemCooldownOverlay;
+        return JefConfig.feature != null && JefConfig.feature.qol.itemAbilityTimerOverlay;
     }
 
     @Override
     public List<String> getLines(boolean preview) {
-        if (preview) return Collections.singletonList("§5Example Item §f30.0s");
+        if (preview) return Collections.singletonList("§6Fire Veil §f4.2s");
 
-        List<String> active = ItemCooldowns.getActiveCooldowns();
+        List<String> active = ItemAbilityTimers.getActiveTimers();
         if (active.isEmpty()) return Collections.emptyList();
 
         List<String> lines = new ArrayList<>(active.size());
         for (String id : active) {
-            ItemStack stack = ItemCooldowns.findItemStack(id);
+            ItemStack stack = ItemAbilityTimers.findItemStack(id);
             if (stack == null) continue;
-            lines.add(stack.getDisplayName() + " §f" + TimeFormatter.formatTime(ItemCooldowns.getRemainingMs(id)));
+            lines.add(stack.getDisplayName() + " §f" + TimeFormatter.formatTime(ItemAbilityTimers.getRemainingMs(id)));
         }
         return lines;
     }
@@ -105,8 +105,8 @@ public class ItemCooldownOverlay extends Overlay {
 
         List<ItemStack> stacks = new ArrayList<>();
         if (!preview) {
-            for (String id : ItemCooldowns.getActiveCooldowns()) {
-                ItemStack s = ItemCooldowns.findItemStack(id);
+            for (String id : ItemAbilityTimers.getActiveTimers()) {
+                ItemStack s = ItemAbilityTimers.findItemStack(id);
                 if (s != null) stacks.add(s);
             }
         }

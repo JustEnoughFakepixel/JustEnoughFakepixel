@@ -3,8 +3,7 @@ package com.jef.justenoughfakepixel.features.misc.SkyblockExp;
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.events.ActionBarXpGainEvent;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.ChatComponentText;
+import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -17,6 +16,6 @@ public class SkyblockXpInChat {
     public void onXpGain(ActionBarXpGainEvent event) {
         if (JefConfig.feature == null || !JefConfig.feature.misc.skyblockXpInChat) return;
 
-        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(PREFIX + event.getFormattedText()));
+        ChatUtils.sendMessage(PREFIX + event.getFormattedText());
     }
 }

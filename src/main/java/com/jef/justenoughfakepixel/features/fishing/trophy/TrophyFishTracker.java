@@ -4,13 +4,13 @@ import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.ColorUtils;
 import com.jef.justenoughfakepixel.utils.ItemUtils;
+import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -112,9 +112,7 @@ public class TrophyFishTracker {
         String newMsg = "§6♔ §r§6§lTROPHY FISH! " + countPart + coloredRarity + " " + coloredName + " §7(§e" + String.format("%,d", total) + " total§7)";
 
         event.setCanceled(true);
-        if (mc.thePlayer != null) {
-            mc.thePlayer.addChatMessage(new ChatComponentText(newMsg));
-        }
+        ChatUtils.sendMessage(newMsg);
     }
 
     @SubscribeEvent

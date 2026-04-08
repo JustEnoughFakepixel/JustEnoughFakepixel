@@ -6,6 +6,7 @@ import com.jef.justenoughfakepixel.core.config.utils.Position;
 import com.jef.justenoughfakepixel.features.mining.fetchur.FetchurData;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.ColorUtils;
+import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
 import com.jef.justenoughfakepixel.utils.data.SkyblockData;
 import com.jef.justenoughfakepixel.utils.data.TablistParser;
 import com.jef.justenoughfakepixel.utils.overlay.Overlay;
@@ -14,7 +15,6 @@ import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.util.ChatComponentText;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
@@ -414,7 +414,7 @@ public class CustomScoreboard extends Overlay {
 
         boolean down = Keyboard.isKeyDown(JefConfig.feature.debug.scoreboardDebugKey);
         if (down && !wasDown && JefConfig.feature.debug.scoreboardDebug) {
-            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(CustomScoreboardAPI.toJson()));
+            ChatUtils.sendMessage(CustomScoreboardAPI.toJson());
         }
         wasDown = down;
 

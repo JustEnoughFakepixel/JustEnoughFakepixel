@@ -114,7 +114,12 @@ public class Config {
             case "openDungeonRoomOverlayEditor":
                 JefConfig.openDungeonRoomOverlayEditor();
                 break;
-
+            case "openItemInvincibilityEditor":
+                JefConfig.openItemInvincibilityEditor();
+                break;
+            case "openItemAbilityTimerEditor":
+                JefConfig.openItemAbilityTimerEditor();
+                break;
             case "openDiscord":
                 openUrl("https://discord.gg/tdMFbmhFTb");
                 break;
