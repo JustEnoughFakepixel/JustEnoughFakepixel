@@ -1,27 +1,22 @@
 package com.jef.justenoughfakepixel.features.qol;
 
+import com.jef.justenoughfakepixel.repo.JefRepo;
+import com.jef.justenoughfakepixel.repo.RepoHandler;
+import com.jef.justenoughfakepixel.repo.TimerRepo;
 import com.jef.justenoughfakepixel.utils.ItemStackFinder;
 import com.jef.justenoughfakepixel.utils.TimerManager;
 import net.minecraft.item.ItemStack;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
-/**
- * Tracks active durations for item abilities (e.g., Fire Veil Wand's 5s wall).
- */
 public class ItemAbilityTimers {
 
-    private static final Map<String, Long> DURATIONS = new LinkedHashMap<>();
-    private static final TimerManager timerManager;
+    private static final TimerManager timerManager = new TimerManager(TimerRepo.getAbilityDurations());
 
     static {
-        DURATIONS.put("FIRE_VEIL_WAND", 5_000L);
-        timerManager = new TimerManager(DURATIONS);
+        RepoHandler.addListener(JefRepo.KEY_TIMERS, () -> timerManager.updateDurations(TimerRepo.getAbilityDurations()));
     }
 
-    // Public API delegating to TimerManager
     public static void markActive(String itemId) {
         timerManager.markActive(itemId);
     }

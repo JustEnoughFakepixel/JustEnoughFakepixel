@@ -5,12 +5,16 @@ import java.util.*;
 
 public class TimerManager {
 
-    private final Map<String, Long> durations;
+    private volatile Map<String, Long> durations;
     private final Map<String, Long> endTimes;
 
     public TimerManager(Map<String, Long> durations) {
         this.durations = durations;
         this.endTimes = new HashMap<>();
+    }
+
+    public void updateDurations(Map<String, Long> durations) {
+        this.durations = durations;
     }
 
     public void markActive(String itemId) {

@@ -2,6 +2,10 @@ package com.jef.justenoughfakepixel.features.qol;
 
 import com.jef.justenoughfakepixel.events.ActionBarUpdateEvent;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
+import com.jef.justenoughfakepixel.repo.JefRepo;
+import com.jef.justenoughfakepixel.repo.RepoHandler;
+import com.jef.justenoughfakepixel.repo.TimerRepo;
+import com.jef.justenoughfakepixel.repo.data.TimerData;
 import com.jef.justenoughfakepixel.utils.ItemStackFinder;
 import com.jef.justenoughfakepixel.utils.TimerManager;
 import net.minecraft.item.ItemStack;
@@ -9,50 +13,47 @@ import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
-/**
- * Tracks item ability cooldowns triggered by chat messages and action bar updates.
- */
 @RegisterEvents
 public class ItemCooldowns {
 
-    private static final Map<String, Long> DURATIONS = new LinkedHashMap<>();
-    private static final TimerManager timerManager;
-    private static final List<ChatTrigger> CHAT_TRIGGERS = new ArrayList<>();
-    private static final List<ChatTrigger> ACTION_BAR_TRIGGERS = new ArrayList<>();
+    private static final TimerManager timerManager = new TimerManager(TimerRepo.getCooldownDurations());
+    private static List<ChatTrigger> chatTriggers = new ArrayList<>();
+    private static List<ChatTrigger> actionBarTriggers = new ArrayList<>();
 
     static {
-        DURATIONS.put("GYROKINETIC_WAND", 30_000L);
-        DURATIONS.put("ICE_SPRAY_WAND", 5_000L);
-        DURATIONS.put("FIRE_VEIL_WAND", 1_000L);
-        DURATIONS.put("ATOMSPLIT_KATANA", 5_000L);
-        DURATIONS.put("MIDAS_STAFF", 3_000L);
-        DURATIONS.put("STARRED_MIDAS_STAFF", 3_000L);
-        DURATIONS.put("RAGNAROK_AXE", 120_000L);
-        DURATIONS.put("BONZO_MASK", 360_000L);
-        DURATIONS.put("STARRED_BONZO_MASK", 360_000L);
-        DURATIONS.put("SPIRIT_MASK", 30_000L);
-        DURATIONS.put("STARRED_SPIRIT_MASK", 30_000L);
-
-        timerManager = new TimerManager(DURATIONS);
+        reloadFromRepo();
+        RepoHandler.addListener(JefRepo.KEY_TIMERS, ItemCooldowns::reloadFromRepo);
     }
 
-    static {
-        CHAT_TRIGGERS.add(new ChatTrigger(Pattern.compile("§r§r§a§aYour §r§9§9Bonzo's Mask §r§a§asaved your life!§r§r §r"), "BONZO_MASK", "STARRED_BONZO_MASK"));
-        CHAT_TRIGGERS.add(new ChatTrigger( Pattern.compile("§r§aYour §r§5Spirit Mask §r§asaved you from death!§r§r §r"), "SPIRIT_MASK", "STARRED_SPIRIT_MASK"));
+    private static void reloadFromRepo() {
+        timerManager.updateDurations(TimerRepo.getCooldownDurations());
 
-        ACTION_BAR_TRIGGERS.add(new ChatTrigger(Pattern.compile("Gravity Storm"), "GYROKINETIC_WAND"));
-        ACTION_BAR_TRIGGERS.add(new ChatTrigger(Pattern.compile("BLIZZARD!|Ice Spray"), "ICE_SPRAY_WAND"));
-        ACTION_BAR_TRIGGERS.add(new ChatTrigger(Pattern.compile("Fire Veil"), "FIRE_VEIL_WAND"));
-        ACTION_BAR_TRIGGERS.add(new ChatTrigger(Pattern.compile("Atomsplit"), "ATOMSPLIT_KATANA"));
-        ACTION_BAR_TRIGGERS.add(new ChatTrigger(Pattern.compile("Molten Wave"), "MIDAS_STAFF", "STARRED_MIDAS_STAFF"));
+        TimerData data = TimerRepo.getTimerData();
+
+        List<ChatTrigger> newChat = new ArrayList<>();
+        if (data.chatTriggers != null) {
+            for (TimerData.TriggerEntry entry : data.chatTriggers) {
+                if (entry.pattern != null && entry.itemIds != null && !entry.itemIds.isEmpty()) {
+                    newChat.add(new ChatTrigger(Pattern.compile(entry.pattern), entry.itemIds.toArray(new String[0])));
+                }
+            }
+        }
+        chatTriggers = newChat;
+
+        List<ChatTrigger> newActionBar = new ArrayList<>();
+        if (data.actionBarTriggers != null) {
+            for (TimerData.TriggerEntry entry : data.actionBarTriggers) {
+                if (entry.pattern != null && entry.itemIds != null && !entry.itemIds.isEmpty()) {
+                    newActionBar.add(new ChatTrigger(Pattern.compile(entry.pattern), entry.itemIds.toArray(new String[0])));
+                }
+            }
+        }
+        actionBarTriggers = newActionBar;
     }
 
-    // Public API delegating to TimerManager
     public static long getRemainingMs(String itemId) {
         return timerManager.getRemainingMs(itemId);
     }
@@ -81,7 +82,7 @@ public class ItemCooldowns {
     public void onChat(ClientChatReceivedEvent event) {
         if (event.type == 2) return;
         String msg = event.message.getFormattedText();
-        for (ChatTrigger t : CHAT_TRIGGERS) {
+        for (ChatTrigger t : chatTriggers) {
             if (t.pattern.matcher(msg).find()) {
                 for (String id : t.itemIds) {
                     markUsed(id);
@@ -94,7 +95,7 @@ public class ItemCooldowns {
     @SubscribeEvent
     public void onActionBar(ActionBarUpdateEvent event) {
         String msg = event.getText();
-        for (ChatTrigger t : ACTION_BAR_TRIGGERS) {
+        for (ChatTrigger t : actionBarTriggers) {
             if (t.pattern.matcher(msg).find()) {
                 for (String id : t.itemIds) {
                     markUsed(id);

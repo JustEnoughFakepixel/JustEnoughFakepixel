@@ -23,6 +23,8 @@ import com.jef.justenoughfakepixel.features.qol.ItemCooldownOverlay;
 import com.jef.justenoughfakepixel.features.qol.ItemInvincibilityOverlay;
 import com.jef.justenoughfakepixel.features.scoreboard.CustomScoreboard;
 import com.jef.justenoughfakepixel.features.waypoints.WaypointGroupGui;
+import com.jef.justenoughfakepixel.repo.JefRepo;
+import com.jef.justenoughfakepixel.repo.RepoHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.settings.KeyBinding;
@@ -95,6 +97,12 @@ public class JefConfig {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void reloadRepo() {
+        RepoHandler.refresh(JefRepo.KEY_TIMERS);
+        RepoHandler.refresh(JefRepo.KEY_PLAYERSIZES);
+        RepoHandler.refresh(JefRepo.KEY_UPDATE);
     }
 
     public static void openGui() {

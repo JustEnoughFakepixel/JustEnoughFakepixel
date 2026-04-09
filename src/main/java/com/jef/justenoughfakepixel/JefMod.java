@@ -81,6 +81,7 @@ public class JefMod {
     @SubscribeEvent
     public void onServerJoin(FMLNetworkEvent.ClientConnectedToServerEvent e) {
         RepoHandler.refresh(JefRepo.KEY_PLAYERSIZES);
+        RepoHandler.refresh(JefRepo.KEY_TIMERS);
         RepoHandler.refresh(JefRepo.KEY_UPDATE);
         ApiHandler.onServerJoin();
     }

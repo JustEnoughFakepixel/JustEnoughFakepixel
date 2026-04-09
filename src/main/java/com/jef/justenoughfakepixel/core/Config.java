@@ -66,6 +66,9 @@ public class Config {
 
     public void executeRunnable(String runnableId) {
         switch (runnableId) {
+            case "reloadRepo":
+                JefConfig.reloadRepo();
+                break;
             case "openScoreboardEditor":
                 JefConfig.openScoreboardEditor();
                 break;

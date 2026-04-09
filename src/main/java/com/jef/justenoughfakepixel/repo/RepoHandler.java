@@ -11,6 +11,7 @@ import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,6 +30,7 @@ public class RepoHandler {
 
     private static final ConcurrentMap<String, SourceState> SOURCES = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, ConcurrentMap<Type, ParsedCache>> PARSED = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, List<Runnable>> LISTENERS = new ConcurrentHashMap<>();
 
     private RepoHandler() {
     }
@@ -39,6 +41,10 @@ public class RepoHandler {
 
     public static void register(String key, String url) {
         SOURCES.put(key, new SourceState(url));
+    }
+
+    public static void addListener(String key, Runnable listener) {
+        LISTENERS.computeIfAbsent(key, k -> new CopyOnWriteArrayList<>()).add(listener);
     }
 
     public static void warmupAll() {
@@ -111,6 +117,16 @@ public class RepoHandler {
                     if (etag != null) s.etag = etag;
                     s.json.set(readAll(conn));
                     s.lastFetch = System.currentTimeMillis();
+                    List<Runnable> listeners = LISTENERS.get(key);
+                    if (listeners != null) {
+                        for (Runnable listener : listeners) {
+                            try {
+                                listener.run();
+                            } catch (Exception e) {
+                                System.err.println("[JEF] Listener error (" + key + "): " + e.getMessage());
+                            }
+                        }
+                    }
                 }
             } catch (Exception e) {
                 System.err.println("[JEF] Repo fetch failed (" + key + "): " + e.getMessage());
@@ -141,7 +157,6 @@ public class RepoHandler {
         }
     }
 
-    // Parsed object cache keyed by (repoKey, Type)
     private static final class ParsedCache {
         volatile Object parsed;
         volatile String lastJsonRef;

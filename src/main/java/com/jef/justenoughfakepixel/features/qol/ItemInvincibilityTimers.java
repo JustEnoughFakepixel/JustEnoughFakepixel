@@ -1,31 +1,24 @@
 package com.jef.justenoughfakepixel.features.qol;
 
+import com.jef.justenoughfakepixel.repo.JefRepo;
+import com.jef.justenoughfakepixel.repo.RepoHandler;
+import com.jef.justenoughfakepixel.repo.TimerRepo;
 import com.jef.justenoughfakepixel.utils.ItemStackFinder;
 import com.jef.justenoughfakepixel.utils.TimerManager;
 import net.minecraft.item.ItemStack;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
-/**
- * Tracks invincibility window durations after mask saves (Bonzo's Mask, Spirit Mask).
- */
 public class ItemInvincibilityTimers {
 
-    private static final Map<String, Long> DURATIONS = new LinkedHashMap<>();
-    private static final TimerManager timerManager;
+    private static final TimerManager timerManager = new TimerManager(TimerRepo.getInvincibilityDurations());
 
     static {
-        DURATIONS.put("BONZO_MASK", 5_000L);
-        DURATIONS.put("STARRED_BONZO_MASK", 5_000L);
-        DURATIONS.put("SPIRIT_MASK", 5_000L);
-        DURATIONS.put("STARRED_SPIRIT_MASK", 5_000L);
-
-        timerManager = new TimerManager(DURATIONS);
+        RepoHandler.addListener(JefRepo.KEY_TIMERS, () ->
+                timerManager.updateDurations(TimerRepo.getInvincibilityDurations())
+        );
     }
 
-    // Public API delegating to TimerManager
     public static void markActive(String itemId) {
         timerManager.markActive(itemId);
     }
