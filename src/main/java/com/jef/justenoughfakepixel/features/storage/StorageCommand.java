@@ -12,7 +12,7 @@ public class StorageCommand extends SimpleCommand {
 
     @Override
     public String getName() {
-        return "storage";
+        return "storage_jef";
     }
 
     @Override
