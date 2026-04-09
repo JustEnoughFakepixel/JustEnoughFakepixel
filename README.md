@@ -14,7 +14,7 @@
 </div>
 
 # features
-- A full feature list can be found [here](https://github.com/hamlook/JustEnoughFakepixel/blob/main/FEATURES.md)
+- A full feature list can be found [here](https://github.com/JustEnoughFakepixel/JustEnoughFakepixel/blob/main/FEATURES.md)
 
 # IMPORTANT
 This mod collects your **Minecraft username** and **installed mod list** on server join.
