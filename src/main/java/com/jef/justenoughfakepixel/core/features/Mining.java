@@ -99,30 +99,30 @@ public class Mining {
     @Expose
     @ConfigOption(name = "Display Lines", desc = "Choose which lines to show and drag to reorder")
     @ConfigEditorDraggableList(exampleText = {
-            "\u00a7b\u00a7lGemstone Powder Tracker",                    // 0
-            "\u00a7d420 Chests \u00a77(120/h)",                         // 1
-            "\u00a7b2x Powder: \u00a7aActive!",                         // 2
-            "\u00a7b1,337 Gemstone Powder \u00a77(2.5K/h)",             // 3
-            "\u00a7b12 Diamond Essence",                                 // 4
-            "\u00a766 Gold Essence",                                     // 5
-            "\u00a788 Oil Barrels",                                      // 6
-            "\u00a753 Ascension Ropes",                                  // 7
-            "\u00a792 Wishing Compasses",                                // 8
-            "\u00a721 Jungle Hearts",                                    // 9
-            "\u00a77512 Hard Stone \u00a78(5 compact) \u00a77(1.5K/h)", // 10
-            "\u00a751-\u00a793-\u00a7a4-\u00a7f0 \u00a7cRuby",         // 11
-            "\u00a751-\u00a793-\u00a7a4-\u00a7f0 \u00a7bSapphire",     // 12
-            "\u00a751-\u00a793-\u00a7a4-\u00a7f0 \u00a76Amber",        // 13
-            "\u00a751-\u00a793-\u00a7a4-\u00a7f0 \u00a75Amethyst",     // 14
-            "\u00a751-\u00a793-\u00a7a4-\u00a7f0 \u00a7aJade",         // 15
-            "\u00a751-\u00a793-\u00a7a4-\u00a7f0 \u00a7eTopaz",        // 16
-            "\u00a751-\u00a793-\u00a7a4-\u00a7f0 \u00a7cJasper",       // 17
-            "\u00a751-\u00a793-\u00a7a4-\u00a7f0 \u00a7fOpal",         // 18
-            "\u00a751-\u00a793-\u00a7a4-\u00a7f0 \u00a76Citrine",      // 19
-            "\u00a751-\u00a793-\u00a7a4-\u00a7f0 \u00a73Aquamarine",   // 20
-            "\u00a751-\u00a793-\u00a7a4-\u00a7f0 \u00a7aPeridot",      // 21
-            "\u00a751-\u00a793-\u00a7a4-\u00a7f0 \u00a78Onyx",         // 22
-            "\u00a733-\u00a7c2-\u00a7e1-\u00a7a1-\u00a791 \u00a7fGoblin Eggs" // 23
+            "§b§lGemstone Powder Tracker",                    // 0
+            "§d420 Chests §7(120/h)",                         // 1
+            "§b2x Powder: §aActive!",                         // 2
+            "§b1,337 Gemstone Powder §7(2.5K/h)",             // 3
+            "§b12 Diamond Essence",                                 // 4
+            "§66 Gold Essence",                                     // 5
+            "§88 Oil Barrels",                                      // 6
+            "§53 Ascension Ropes",                                  // 7
+            "§92 Wishing Compasses",                                // 8
+            "§21 Jungle Hearts",                                    // 9
+            "§7512 Hard Stone §8(5 compact) §7(1.5K/h)", // 10
+            "§51-§93-§a4-§f0 §cRuby",         // 11
+            "§51-§93-§a4-§f0 §bSapphire",     // 12
+            "§51-§93-§a4-§f0 §6Amber",        // 13
+            "§51-§93-§a4-§f0 §5Amethyst",     // 14
+            "§51-§93-§a4-§f0 §aJade",         // 15
+            "§51-§93-§a4-§f0 §eTopaz",        // 16
+            "§51-§93-§a4-§f0 §cJasper",       // 17
+            "§51-§93-§a4-§f0 §fOpal",         // 18
+            "§51-§93-§a4-§f0 §6Citrine",      // 19
+            "§51-§93-§a4-§f0 §3Aquamarine",   // 20
+            "§51-§93-§a4-§f0 §aPeridot",      // 21
+            "§51-§93-§a4-§f0 §8Onyx",         // 22
+            "§33-§c2-§e1-§a1-§91 §fGoblin Eggs" // 23
     })
     @ConfigAccordionId(id = 21)
     public List<Integer> powderDisplayLines = new ArrayList<>(

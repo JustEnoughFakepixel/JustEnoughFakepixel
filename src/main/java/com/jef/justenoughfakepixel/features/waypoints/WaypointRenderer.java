@@ -1,7 +1,7 @@
 package com.jef.justenoughfakepixel.features.waypoints;
 
-import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.JefConfig;
+import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.render.WorldRenderUtils;
 import net.minecraft.client.Minecraft;
@@ -12,7 +12,7 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.List;
 
 @RegisterEvents
@@ -20,13 +20,17 @@ public class WaypointRenderer {
 
     private static final Minecraft mc = Minecraft.getMinecraft();
 
+    private static Color argbToColor(int argb) {
+        return new Color((argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF, (argb >> 24) & 0xFF);
+    }
+
     @SubscribeEvent
     public void onRenderWorld(RenderWorldLastEvent event) {
         WaypointState state = WaypointState.getInstance();
         if (!state.enabled || !state.hasGroup()) return;
 
         if (JefConfig.feature != null) {
-            state.advanceRange   = JefConfig.feature.waypoints.advanceRange;
+            state.advanceRange = JefConfig.feature.waypoints.advanceRange;
             state.advanceDelayMs = (long) JefConfig.feature.waypoints.advanceDelayMs;
         }
 
@@ -53,15 +57,13 @@ public class WaypointRenderer {
         WorldRenderUtils.endWorldRender();
 
         // Tracer
-        WorldRenderUtils.drawTracer(
-                new Vec3(target.x + 0.5, target.y + 0.5, target.z + 0.5),
-                event.partialTicks, tracerColor());
+        WorldRenderUtils.drawTracer(new Vec3(target.x + 0.5, target.y + 0.5, target.z + 0.5), event.partialTicks, tracerColor());
 
         // Labels
         GL11.glPushMatrix();
         GL11.glTranslated(-vx, -vy, -vz);
         if (state.setupMode) drawSetupLabels(state);
-        else                 drawNormalLabels(state);
+        else drawNormalLabels(state);
         GL11.glPopMatrix();
     }
 
@@ -71,10 +73,8 @@ public class WaypointRenderer {
         if (next == null) return;
         double dist = next.distanceTo(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ);
         if (dist <= state.advanceRange) {
-            if (state.advanceTimerStart < 0)
-                state.advanceTimerStart = System.currentTimeMillis();
-            else if (System.currentTimeMillis() - state.advanceTimerStart >= state.advanceDelayMs)
-                state.advance();
+            if (state.advanceTimerStart < 0) state.advanceTimerStart = System.currentTimeMillis();
+            else if (System.currentTimeMillis() - state.advanceTimerStart >= state.advanceDelayMs) state.advance();
         } else {
             state.advanceTimerStart = -1L;
         }
@@ -94,14 +94,12 @@ public class WaypointRenderer {
 
     private void drawNormalLabels(WaypointState state) {
         WaypointPoint prev = state.getPrev();
-        WaypointPoint cur  = state.getCurrent();
-        WaypointPoint nxt  = state.getNext();
+        WaypointPoint cur = state.getCurrent();
+        WaypointPoint nxt = state.getNext();
         if (prev != null && prev != cur)
             drawLabel(prev.x + 0.5, prev.y + 2.2, prev.z + 0.5, "§7" + safeName(prev, "Prev"));
-        if (cur != null)
-            drawLabel(cur.x + 0.5, cur.y + 2.2, cur.z + 0.5,   "§a" + safeName(cur, "Current"));
-        if (nxt != null && nxt != cur)
-            drawLabel(nxt.x + 0.5, nxt.y + 2.2, nxt.z + 0.5,   "§e" + safeName(nxt, "Next"));
+        if (cur != null) drawLabel(cur.x + 0.5, cur.y + 2.2, cur.z + 0.5, "§a" + safeName(cur, "Current"));
+        if (nxt != null && nxt != cur) drawLabel(nxt.x + 0.5, nxt.y + 2.2, nxt.z + 0.5, "§e" + safeName(nxt, "Next"));
     }
 
     private void drawLabel(double wx, double wy, double wz, String text) {
@@ -140,6 +138,7 @@ public class WaypointRenderer {
         GlStateManager.enableDepth();
         GL11.glPopMatrix();
     }
+
     private String safeName(WaypointPoint wp, String fallback) {
         return (wp.name != null && !wp.name.isEmpty()) ? wp.name : fallback;
     }
@@ -156,17 +155,19 @@ public class WaypointRenderer {
 
     private int labelColor() {
         if (JefConfig.feature == null) return 0xFFFFFFFF;
-        try { return ChromaColour.specialToChromaRGB(JefConfig.feature.waypoints.labelColour); }
-        catch (Exception e) { return 0xFFFFFFFF; }
+        try {
+            return ChromaColour.specialToChromaRGB(JefConfig.feature.waypoints.labelColour);
+        } catch (Exception e) {
+            return 0xFFFFFFFF;
+        }
     }
 
     private int distanceLabelColor() {
         if (JefConfig.feature == null) return 0xFF55FFFF;
-        try { return ChromaColour.specialToChromaRGB(JefConfig.feature.waypoints.distanceLabelColour); }
-        catch (Exception e) { return 0xFF55FFFF; }
-    }
-
-    private static Color argbToColor(int argb) {
-        return new Color((argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF, (argb >> 24) & 0xFF);
+        try {
+            return ChromaColour.specialToChromaRGB(JefConfig.feature.waypoints.distanceLabelColour);
+        } catch (Exception e) {
+            return 0xFF55FFFF;
+        }
     }
 }

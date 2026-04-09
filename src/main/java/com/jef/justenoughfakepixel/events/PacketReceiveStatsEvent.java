@@ -5,5 +5,8 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 
 public class PacketReceiveStatsEvent extends Event {
     public final S37PacketStatistics packet;
-    public PacketReceiveStatsEvent(S37PacketStatistics packet) { this.packet = packet; }
+
+    public PacketReceiveStatsEvent(S37PacketStatistics packet) {
+        this.packet = packet;
+    }
 }

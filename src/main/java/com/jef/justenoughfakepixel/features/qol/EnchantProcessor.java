@@ -153,13 +153,7 @@ public class EnchantProcessor {
         for (Map.Entry<String, JsonElement> entry : bucket.entrySet()) {
             try {
                 JsonObject obj = entry.getValue().getAsJsonObject();
-                EnchantMeta meta = new EnchantMeta(
-                        obj.get("loreName").getAsString(),
-                        obj.get("nbtName").getAsString().toLowerCase(Locale.US),
-                        obj.get("goodLevel").getAsInt(),
-                        obj.get("maxLevel").getAsInt(),
-                        sortType
-                );
+                EnchantMeta meta = new EnchantMeta(obj.get("loreName").getAsString(), obj.get("nbtName").getAsString().toLowerCase(Locale.US), obj.get("goodLevel").getAsInt(), obj.get("maxLevel").getAsInt(), sortType);
                 BY_LORE.put(meta.loreName.toLowerCase(Locale.US), meta);
             } catch (Exception ignored) {
             }
@@ -177,7 +171,8 @@ public class EnchantProcessor {
     }
 
     private int accountForAndRemoveGreyEnchants(List<String> tooltip, ItemStack item) {
-        if (item == null || item.getEnchantmentTagList() == null || item.getEnchantmentTagList().tagCount() == 0) return -1;
+        if (item == null || item.getEnchantmentTagList() == null || item.getEnchantmentTagList().tagCount() == 0)
+            return -1;
         int lastGreyEnchant = -1;
         int total = 0;
         boolean removeGreyEnchants = true;
@@ -287,8 +282,7 @@ public class EnchantProcessor {
         int g = (argb >> 8) & 255;
         int b = argb & 255;
         String[] codes = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"};
-        int[] values = {0x000000, 0x0000AA, 0x00AA00, 0x00AAAA, 0xAA0000, 0xAA00AA, 0xFFAA00, 0xAAAAAA,
-                0x555555, 0x5555FF, 0x55FF55, 0x55FFFF, 0xFF5555, 0xFF55FF, 0xFFFF55, 0xFFFFFF};
+        int[] values = {0x000000, 0x0000AA, 0x00AA00, 0x00AAAA, 0xAA0000, 0xAA00AA, 0xFFAA00, 0xAAAAAA, 0x555555, 0x5555FF, 0x55FF55, 0x55FFFF, 0xFF5555, 0xFF55FF, 0xFFFF55, 0xFFFFFF};
         int best = 0;
         long bestDist = Long.MAX_VALUE;
         for (int i = 0; i < values.length; i++) {
@@ -304,7 +298,9 @@ public class EnchantProcessor {
         return "§" + codes[best];
     }
 
-    private long sq(long x) { return x * x; }
+    private long sq(long x) {
+        return x * x;
+    }
 
     private String toRoman(int number) {
         int[] values = {1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
@@ -312,9 +308,49 @@ public class EnchantProcessor {
         StringBuilder out = new StringBuilder();
         int n = Math.max(1, number);
         for (int i = 0; i < values.length; i++) {
-            while (n >= values[i]) { n -= values[i]; out.append(numerals[i]); }
+            while (n >= values[i]) {
+                n -= values[i];
+                out.append(numerals[i]);
+            }
         }
         return out.toString();
+    }
+
+    private static class EnchantMeta {
+        private final String loreName;
+        private final String nbtName;
+        private final int goodLevel;
+        private final int maxLevel;
+        private final int sortType;
+
+        private EnchantMeta(String loreName, String nbtName, int goodLevel, int maxLevel, int sortType) {
+            this.loreName = loreName;
+            this.nbtName = nbtName;
+            this.goodLevel = goodLevel;
+            this.maxLevel = maxLevel;
+            this.sortType = sortType;
+        }
+    }
+
+    private static class Cache {
+        private List<String> cachedBefore = new ArrayList<>();
+        private List<String> cachedAfter = new ArrayList<>();
+
+        private void updateBefore(List<String> loreBefore) {
+            cachedBefore = new ArrayList<>(loreBefore);
+        }
+
+        private void updateAfter(List<String> loreAfter) {
+            cachedAfter = new ArrayList<>(loreAfter);
+        }
+
+        private boolean isCached(List<String> loreBefore) {
+            if (loreBefore.size() != cachedBefore.size()) return false;
+            for (int i = 0; i < loreBefore.size(); i++) {
+                if (!Objects.equals(loreBefore.get(i), cachedBefore.get(i))) return false;
+            }
+            return true;
+        }
     }
 
     private class FormattedEnchant implements Comparable<FormattedEnchant> {
@@ -340,38 +376,6 @@ public class EnchantProcessor {
         public int compareTo(FormattedEnchant o) {
             if (this.meta.sortType != o.meta.sortType) return Integer.compare(this.meta.sortType, o.meta.sortType);
             return this.meta.loreName.compareTo(o.meta.loreName);
-        }
-    }
-
-    private static class EnchantMeta {
-        private final String loreName;
-        private final String nbtName;
-        private final int goodLevel;
-        private final int maxLevel;
-        private final int sortType;
-
-        private EnchantMeta(String loreName, String nbtName, int goodLevel, int maxLevel, int sortType) {
-            this.loreName = loreName;
-            this.nbtName = nbtName;
-            this.goodLevel = goodLevel;
-            this.maxLevel = maxLevel;
-            this.sortType = sortType;
-        }
-    }
-
-    private static class Cache {
-        private List<String> cachedBefore = new ArrayList<>();
-        private List<String> cachedAfter = new ArrayList<>();
-
-        private void updateBefore(List<String> loreBefore) { cachedBefore = new ArrayList<>(loreBefore); }
-        private void updateAfter(List<String> loreAfter) { cachedAfter = new ArrayList<>(loreAfter); }
-
-        private boolean isCached(List<String> loreBefore) {
-            if (loreBefore.size() != cachedBefore.size()) return false;
-            for (int i = 0; i < loreBefore.size(); i++) {
-                if (!Objects.equals(loreBefore.get(i), cachedBefore.get(i))) return false;
-            }
-            return true;
         }
     }
 }

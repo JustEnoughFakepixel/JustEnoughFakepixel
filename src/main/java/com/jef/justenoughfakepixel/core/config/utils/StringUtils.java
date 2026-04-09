@@ -7,7 +7,8 @@ import java.util.NavigableMap;
 
 public final class StringUtils {
 
-    private StringUtils() {}
+    private StringUtils() {
+    }
 
     public static String cleanColour(String in) {
         return ColorUtils.stripColor(in);
@@ -33,17 +34,12 @@ public final class StringUtils {
     }
 
     public static String clean(String s) {
-        return s.replace('\u00A0', ' ')
-                .replace('\u2007', ' ')
-                .replace('\u202F', ' ')
-                .trim();
+        return s.replace('\u00A0', ' ').replace('\u2007', ' ').replace('\u202F', ' ').trim();
     }
 
 
     public static <T> Map<String, T> subMapWithKeysThatAreSuffixes(String prefix, NavigableMap<String, T> map) {
-        return "".equals(prefix)
-                ? map
-                : map.subMap(prefix, true, nextString(prefix), false);
+        return "".equals(prefix) ? map : map.subMap(prefix, true, nextString(prefix), false);
     }
 
     private static String nextString(String input) {

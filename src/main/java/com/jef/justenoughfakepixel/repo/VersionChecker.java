@@ -1,12 +1,9 @@
-// Credit: NotEnoughFakepixel (https://github.com/davidbelesp/NotEnoughFakepixel)
-
 package com.jef.justenoughfakepixel.repo;
 
 import com.jef.justenoughfakepixel.JefMod;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.repo.data.UpdateData;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.ChatComponentText;
+import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -17,28 +14,7 @@ public class VersionChecker {
     private static final UpdateData FALLBACK = new UpdateData();
     private boolean notified = false;
 
-    @SubscribeEvent
-    public void onChat(ClientChatReceivedEvent event) {
-        if (notified) return;
-        if (!"Welcome to Fakepixel SkyBlock!".equals(event.message.getUnformattedText())) return;
-        notified = true;
-
-        UpdateData data = RepoHandler.get(JefRepo.KEY_UPDATE, UpdateData.class, FALLBACK);
-        if (!isNewer(JefMod.VERSION, data.version)) return;
-
-        String msg = EnumChatFormatting.GREEN + "[JEF] "
-                + EnumChatFormatting.YELLOW + "Update available: "
-                + EnumChatFormatting.WHITE  + data.version
-                + EnumChatFormatting.GRAY   + " (you have " + JefMod.VERSION + ")"
-                + (data.updateMsg != null && !data.updateMsg.isEmpty()
-                        ? "\n" + EnumChatFormatting.AQUA + data.updateMsg : "")
-                + (data.updateUrl != null && !data.updateUrl.isEmpty()
-                        ? "\n" + EnumChatFormatting.GOLD + data.updateUrl : "");
-
-        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(msg));
-    }
-
-    /** Returns true if latest is a higher semver than current. */
+    // Returns true if latest is a higher semver than current.
     static boolean isNewer(String current, String latest) {
         if (latest == null) return false;
         String[] c = current.replaceAll("[^0-9.]", "").split("\\.");
@@ -54,6 +30,24 @@ public class VersionChecker {
     }
 
     private static int parseSafe(String s) {
-        try { return Integer.parseInt(s); } catch (Exception e) { return 0; }
+        try {
+            return Integer.parseInt(s);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    @SubscribeEvent
+    public void onChat(ClientChatReceivedEvent event) {
+        if (notified) return;
+        if (!"Welcome to Fakepixel SkyBlock!".equals(event.message.getUnformattedText())) return;
+        notified = true;
+
+        UpdateData data = RepoHandler.get(JefRepo.KEY_UPDATE, UpdateData.class, FALLBACK);
+        if (!isNewer(JefMod.VERSION, data.version)) return;
+
+        String msg = EnumChatFormatting.GREEN + "[JEF] " + EnumChatFormatting.YELLOW + "Update available: " + EnumChatFormatting.WHITE + data.version + EnumChatFormatting.GRAY + " (you have " + JefMod.VERSION + ")" + (data.updateMsg != null && !data.updateMsg.isEmpty() ? "\n" + EnumChatFormatting.AQUA + data.updateMsg : "") + (data.updateUrl != null && !data.updateUrl.isEmpty() ? "\n" + EnumChatFormatting.GOLD + data.updateUrl : "");
+
+        ChatUtils.sendMultilineMessage(msg);
     }
 }

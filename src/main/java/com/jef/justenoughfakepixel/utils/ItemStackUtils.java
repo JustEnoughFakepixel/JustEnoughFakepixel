@@ -5,9 +5,6 @@ package com.jef.justenoughfakepixel.utils;
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.events.RenderItemOverlayEvent;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import com.jef.justenoughfakepixel.utils.ColorUtils;
-import com.jef.justenoughfakepixel.utils.ItemUtils;
-import com.jef.justenoughfakepixel.utils.RomanNumeralParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.inventory.GuiChest;
@@ -21,6 +18,14 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class ItemStackUtils {
 
     private static final Minecraft mc = Minecraft.getMinecraft();
+
+    private static void drawTip(String tip, int x, int y) {
+        FontRenderer fr = mc.fontRendererObj;
+        GlStateManager.disableDepth();
+        GlStateManager.disableBlend();
+        fr.drawStringWithShadow(tip, x + 17 - fr.getStringWidth(tip), y + 9, 0xFFFFFF);
+        GlStateManager.enableDepth();
+    }
 
     @SubscribeEvent
     public void onItemOverlay(RenderItemOverlayEvent event) {
@@ -56,7 +61,9 @@ public class ItemStackUtils {
         return null;
     }
 
-    /** Extracts the last word of the display name and converts it from roman numeral to integer. */
+    /**
+     * Extracts the last word of the display name and converts it from roman numeral to integer.
+     */
     private String getEnchantLevel(ItemStack stack) {
         String name = ColorUtils.stripColor(stack.getDisplayName());
         if (name.isEmpty()) return null;
@@ -114,14 +121,6 @@ public class ItemStackUtils {
         if (floorLabel == null) return null;
         if (floorLabel.equals("ENT")) return "ENT";
         return (master ? "M" : "F") + floorLabel;
-    }
-
-    private static void drawTip(String tip, int x, int y) {
-        FontRenderer fr = mc.fontRendererObj;
-        GlStateManager.disableDepth();
-        GlStateManager.disableBlend();
-        fr.drawStringWithShadow(tip, x + 17 - fr.getStringWidth(tip), y + 9, 0xFFFFFF);
-        GlStateManager.enableDepth();
     }
 
     private boolean isInContainer(String name) {

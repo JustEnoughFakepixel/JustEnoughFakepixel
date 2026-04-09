@@ -10,9 +10,11 @@ import java.util.List;
 
 public class PlayerSizeRepo {
 
-    private static final Type LIST_TYPE = new TypeToken<List<PlayerSizeData>>(){}.getType();
+    private static final Type LIST_TYPE = new TypeToken<List<PlayerSizeData>>() {
+    }.getType();
 
-    private PlayerSizeRepo() {}
+    private PlayerSizeRepo() {
+    }
 
     public static PlayerSizeData getScale(String name) {
         List<PlayerSizeData> list = RepoHandler.get(JefRepo.KEY_PLAYERSIZES, LIST_TYPE, null);

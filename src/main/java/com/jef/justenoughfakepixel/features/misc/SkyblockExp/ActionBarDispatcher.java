@@ -27,7 +27,7 @@ public class ActionBarDispatcher {
     public void onActionBar(ClientChatReceivedEvent event) {
         if (event.type != ACTION_BAR_TYPE) return;
 
-        String stripped  = StringUtils.stripControlCodes(event.message.getUnformattedText());
+        String stripped = StringUtils.stripControlCodes(event.message.getUnformattedText());
         String formatted = event.message.getFormattedText();
 
         MinecraftForge.EVENT_BUS.post(new ActionBarUpdateEvent(stripped));

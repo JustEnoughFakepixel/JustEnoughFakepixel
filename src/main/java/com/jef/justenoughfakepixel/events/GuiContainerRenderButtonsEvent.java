@@ -10,7 +10,7 @@ public class GuiContainerRenderButtonsEvent extends Event {
     public final int mouseY;
 
     public GuiContainerRenderButtonsEvent(GuiContainer gui, int mouseX, int mouseY) {
-        this.gui    = gui;
+        this.gui = gui;
         this.mouseX = mouseX;
         this.mouseY = mouseY;
     }

@@ -6,16 +6,17 @@ import org.lwjgl.input.Mouse;
 
 public final class KeybindHelper {
 
-    private KeybindHelper() {}
+    private KeybindHelper() {
+    }
 
     public static String getKeyName(int keyCode) {
         if (keyCode == 0) return "NONE";
-        if (keyCode < 0)  return "Button " + (keyCode + 101);
+        if (keyCode < 0) return "Button " + (keyCode + 101);
         try {
             String name = Keyboard.getKeyName(keyCode);
-            if (name == null)                       return "???";
-            if (name.equalsIgnoreCase("LMENU"))     return "LALT";
-            if (name.equalsIgnoreCase("RMENU"))     return "RALT";
+            if (name == null) return "???";
+            if (name.equalsIgnoreCase("LMENU")) return "LALT";
+            if (name.equalsIgnoreCase("RMENU")) return "RALT";
             return name;
         } catch (Exception e) {
             return "???";
@@ -33,8 +34,6 @@ public final class KeybindHelper {
 
     public static boolean isKeyPressed(int keyCode) {
         if (!isKeyValid(keyCode)) return false;
-        return keyCode < 0
-                ? Mouse.getEventButtonState() && Mouse.getEventButton() == keyCode + 100
-                : Keyboard.getEventKeyState() && Keyboard.getEventKey() == keyCode;
+        return keyCode < 0 ? Mouse.getEventButtonState() && Mouse.getEventButton() == keyCode + 100 : Keyboard.getEventKeyState() && Keyboard.getEventKey() == keyCode;
     }
 }

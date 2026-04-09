@@ -1,10 +1,10 @@
 package com.jef.justenoughfakepixel.core;
 
 import com.google.gson.annotations.Expose;
+import com.jef.justenoughfakepixel.core.config.gui.config.ConfigAnnotations.Category;
 import com.jef.justenoughfakepixel.core.features.*;
-import com.jef.justenoughfakepixel.core.config.gui.config.ConfigAnnotations.*;
 
-import java.awt.Desktop;
+import java.awt.*;
 import java.net.URI;
 
 public class Config {
@@ -20,6 +20,10 @@ public class Config {
     @Expose
     @Category(name = "Scoreboard", desc = "Custom scoreboard panel")
     public final Scoreboard scoreboard = new Scoreboard();
+
+    @Expose
+    @Category(name = "Storage", desc = "Custom scoreboard panel")
+    public final Storage storage = new Storage();
 
     @Expose
     @Category(name = "Misc", desc = "Misc features")
@@ -53,44 +57,100 @@ public class Config {
     @Category(name = "Debug", desc = "Debug tools")
     public final Debug debug = new Debug();
 
-    public void executeRunnable(String runnableId) {
-        switch (runnableId) {
-            // ── runnables ───────────────────────────────────────────
-            case "openScoreboardEditor":         JefConfig.openScoreboardEditor();          break;
-            case "openWaypointGroupGui":          JefConfig.openWaypointGroupGui();          break;
-            case "openStatsEditor":               JefConfig.openStatsEditor();               break;
-            case "openHudEditor":                 JefConfig.openHudEditor();                 break;
-            case "openFetchurEditor":             JefConfig.openFetchurEditor();             break;
-            case "openDianaOverlayEditor":        JefConfig.openDianaOverlayEditor();        break;
-            case "openSearchBarEditor":           JefConfig.openSearchBarEditor();           break;
-            case "openCurrentPetEditor":          JefConfig.openCurrentPetEditor();          break;
-            case "openItemPickupLogEditor":       JefConfig.openItemPickupLogEditor();       break;
-            case "openGyroWandEditor":            JefConfig.openGyroWandEditor();            break;
-            case "openPowderEditor":              JefConfig.openPowderEditor();              break;
-            case "openInvButtonEditor":           JefConfig.openInvButtonEditor();           break;
-            case "resetPowderTracker":            JefConfig.resetPowderTracker();            break;
-            case "openDungeonBreakerEditor":      JefConfig.openDungeonBreakerEditor();      break;
-            case "openTrophyFishEditor":          JefConfig.openTrophyFishEditor();          break;
-            case "openDungeonRoomOverlayEditor":  JefConfig.openDungeonRoomOverlayEditor();  break;
-
-            // ── About: links ─────────────────────────────────────────────────
-            case "openDiscord":  openUrl("https://discord.gg/tdMFbmhFTb");                           break;
-            case "openGithub":   openUrl("https://github.com/hamlook/justenoughfakepixel");          break;
-
-            // ── About: used software ─────────────────────────────────────────
-            case "openLicenseForge":         openUrl("https://github.com/MinecraftForge/MinecraftForge");        break;
-            case "openLicenseMixin":         openUrl("https://github.com/SpongePowered/Mixin/");                 break;
-            case "openLicenseMoulConfig":    openUrl("https://github.com/NotEnoughUpdates/MoulConfig");          break;
-            case "openLicenseLombok":        openUrl("https://projectlombok.org/");                              break;
-            case "openLicenseReflections":   openUrl("https://github.com/ronmamo/reflections");                  break;
-            case "openLicenseJavassist":     openUrl("https://github.com/jboss-javassist/javassist");            break;
-            case "openLicenseJbAnnotations": openUrl("https://github.com/JetBrains/java-annotations");           break;
-        }
-    }
-
     private static void openUrl(String url) {
         try {
             Desktop.getDesktop().browse(new URI(url));
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
+    }
+
+    public void executeRunnable(String runnableId) {
+        switch (runnableId) {
+            case "reloadRepo":
+                JefConfig.reloadRepo();
+                break;
+            case "openScoreboardEditor":
+                JefConfig.openScoreboardEditor();
+                break;
+            case "openWaypointGroupGui":
+                JefConfig.openWaypointGroupGui();
+                break;
+            case "openStatsEditor":
+                JefConfig.openStatsEditor();
+                break;
+            case "openHudEditor":
+                JefConfig.openHudEditor();
+                break;
+            case "openFetchurEditor":
+                JefConfig.openFetchurEditor();
+                break;
+            case "openDianaOverlayEditor":
+                JefConfig.openDianaOverlayEditor();
+                break;
+            case "openSearchBarEditor":
+                JefConfig.openSearchBarEditor();
+                break;
+            case "openCurrentPetEditor":
+                JefConfig.openCurrentPetEditor();
+                break;
+            case "openItemPickupLogEditor":
+                JefConfig.openItemPickupLogEditor();
+                break;
+            case "openItemCooldownEditor":
+                JefConfig.openItemCooldownEditor();
+                break;
+            case "openPowderEditor":
+                JefConfig.openPowderEditor();
+                break;
+            case "openInvButtonEditor":
+                JefConfig.openInvButtonEditor();
+                break;
+            case "resetPowderTracker":
+                JefConfig.resetPowderTracker();
+                break;
+            case "openDungeonBreakerEditor":
+                JefConfig.openDungeonBreakerEditor();
+                break;
+            case "openTrophyFishEditor":
+                JefConfig.openTrophyFishEditor();
+                break;
+            case "openDungeonRoomOverlayEditor":
+                JefConfig.openDungeonRoomOverlayEditor();
+                break;
+            case "openItemInvincibilityEditor":
+                JefConfig.openItemInvincibilityEditor();
+                break;
+            case "openItemAbilityTimerEditor":
+                JefConfig.openItemAbilityTimerEditor();
+                break;
+            case "openDiscord":
+                openUrl("https://discord.gg/tdMFbmhFTb");
+                break;
+            case "openGithub":
+                openUrl("https://github.com/hamlook/justenoughfakepixel");
+                break;
+
+            case "openLicenseForge":
+                openUrl("https://github.com/MinecraftForge/MinecraftForge");
+                break;
+            case "openLicenseMixin":
+                openUrl("https://github.com/SpongePowered/Mixin/");
+                break;
+            case "openLicenseMoulConfig":
+                openUrl("https://github.com/NotEnoughUpdates/MoulConfig");
+                break;
+            case "openLicenseLombok":
+                openUrl("https://projectlombok.org/");
+                break;
+            case "openLicenseReflections":
+                openUrl("https://github.com/ronmamo/reflections");
+                break;
+            case "openLicenseJavassist":
+                openUrl("https://github.com/jboss-javassist/javassist");
+                break;
+            case "openLicenseJbAnnotations":
+                openUrl("https://github.com/JetBrains/java-annotations");
+                break;
+        }
     }
 }

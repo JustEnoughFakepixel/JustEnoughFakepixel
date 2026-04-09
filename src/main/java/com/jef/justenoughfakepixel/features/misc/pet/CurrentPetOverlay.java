@@ -5,17 +5,17 @@ import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.ItemUtils;
+import com.jef.justenoughfakepixel.utils.data.SkyblockData;
 import com.jef.justenoughfakepixel.utils.overlay.Overlay;
 import com.jef.justenoughfakepixel.utils.overlay.OverlayUtils;
-import com.jef.justenoughfakepixel.utils.data.SkyblockData;
+import com.jef.justenoughfakepixel.utils.render.ItemRenderUtils;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 import java.util.Collections;
 import java.util.List;
@@ -24,8 +24,9 @@ import java.util.List;
 public class CurrentPetOverlay extends Overlay {
 
     private static final int SKULL_SIZE = 16;
-    private static final int GAP        = 4;
+    private static final int GAP = 4;
 
+    @Getter
     private static CurrentPetOverlay instance;
 
     public CurrentPetOverlay() {
@@ -33,12 +34,25 @@ public class CurrentPetOverlay extends Overlay {
         instance = this;
     }
 
-    public static CurrentPetOverlay getInstance() { return instance; }
+    @Override
+    public Position getPosition() {
+        return JefConfig.feature.misc.currentPetPos;
+    }
 
-    @Override public Position getPosition()     { return JefConfig.feature.misc.currentPetPos; }
-    @Override public float    getScale()        { return JefConfig.feature.misc.currentPetScale; }
-    @Override public int      getBgColor()      { return ChromaColour.specialToChromaRGB(JefConfig.feature.misc.currentPetBgColor); }
-    @Override public int      getCornerRadius() { return JefConfig.feature.misc.currentPetCornerRadius; }
+    @Override
+    public float getScale() {
+        return JefConfig.feature.misc.currentPetScale;
+    }
+
+    @Override
+    public int getBgColor() {
+        return ChromaColour.specialToChromaRGB(JefConfig.feature.misc.currentPetBgColor);
+    }
+
+    @Override
+    public int getCornerRadius() {
+        return JefConfig.feature.misc.currentPetCornerRadius;
+    }
 
     @Override
     protected boolean isEnabled() {
@@ -48,7 +62,7 @@ public class CurrentPetOverlay extends Overlay {
     @Override
     protected int getBaseWidth() {
         Minecraft mc = Minecraft.getMinecraft();
-        String previewName = "\u00a76[Lvl 100] Tiger";
+        String previewName = "§6[Lvl 100] Tiger";
         return SKULL_SIZE + GAP + mc.fontRendererObj.getStringWidth(previewName) + PADDING * 2;
     }
 
@@ -67,14 +81,13 @@ public class CurrentPetOverlay extends Overlay {
         ItemStack skullItem = null;
 
         if (preview) {
-            formattedName = "\u00a76[Lvl 100] Tiger";
+            formattedName = "§6[Lvl 100] Tiger";
         } else {
             String baseName = CurrentPetTracker.getInstance().getCurrentBaseName();
             if (baseName.isEmpty()) return;
 
             CachedPet cached = PetCache.getInstance().get(baseName);
-            formattedName = (cached != null && !cached.formattedName.isEmpty())
-                    ? cached.formattedName : baseName;
+            formattedName = (cached != null && !cached.formattedName.isEmpty()) ? cached.formattedName : baseName;
 
             if (cached != null && !cached.textureValue.isEmpty())
                 skullItem = ItemUtils.createSkullWithTexture(cached.textureValue);
@@ -87,28 +100,22 @@ public class CurrentPetOverlay extends Overlay {
         lastW = w;
         lastH = h;
 
-        ScaledResolution sr  = new ScaledResolution(mc);
-        Position         pos = getPosition();
-        int x = pos.getAbsX(sr, (int)(w * scale));
-        int y = pos.getAbsY(sr, (int)(h * scale));
-        if (pos.isCenterX()) x -= (int)(w * scale / 2);
-        if (pos.isCenterY()) y -= (int)(h * scale / 2);
+        ScaledResolution sr = new ScaledResolution(mc);
+        Position pos = getPosition();
+        int x = pos.getAbsX(sr, (int) (w * scale));
+        int y = pos.getAbsY(sr, (int) (h * scale));
+        if (pos.isCenterX()) x -= (int) (w * scale / 2);
+        if (pos.isCenterY()) y -= (int) (h * scale / 2);
 
         GL11.glPushMatrix();
         GL11.glTranslatef(x, y, 0);
         GL11.glScalef(scale, scale, 1f);
 
         int bgColor = getBgColor();
-        if ((bgColor >>> 24) != 0)
-            drawRoundedRect(-PADDING, -PADDING, w, h - PADDING, getCornerRadius(), bgColor);
+        if ((bgColor >>> 24) != 0) drawRoundedRect(-PADDING, -PADDING, w, h - PADDING, getCornerRadius(), bgColor);
 
         if (skullItem != null) {
-            RenderHelper.enableGUIStandardItemLighting();
-            GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-            mc.getRenderItem().renderItemAndEffectIntoGUI(skullItem, 0, 0);
-            GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-            RenderHelper.disableStandardItemLighting();
-            GlStateManager.disableLighting();
+            ItemRenderUtils.renderItemWithEffects(mc, skullItem, 0, 0);
         } else {
             Gui.drawRect(0, 0, SKULL_SIZE, SKULL_SIZE, 0xFF555555);
         }

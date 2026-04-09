@@ -2,8 +2,9 @@ package com.jef.justenoughfakepixel;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.data.ApiHandler;
-import com.jef.justenoughfakepixel.features.invbuttons.InventoryButtonStorage;
-import com.jef.justenoughfakepixel.features.invbuttons.SkyblockItemCache;
+import com.jef.justenoughfakepixel.features.dungeons.caseopening.CitManager;
+import com.jef.justenoughfakepixel.features.misc.invbuttons.InventoryButtonStorage;
+import com.jef.justenoughfakepixel.features.misc.invbuttons.SkyblockItemCache;
 import com.jef.justenoughfakepixel.features.misc.pet.CurrentPetTracker;
 import com.jef.justenoughfakepixel.features.misc.pet.PetCache;
 import com.jef.justenoughfakepixel.features.scoreboard.MaxwellPowerSync;
@@ -21,6 +22,8 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 
+import java.util.logging.Logger;
+
 @Mod(
         modid = JefMod.MODID,
         name = JefMod.NAME,
@@ -32,14 +35,16 @@ public class JefMod {
 
     public static final String MODID   = "justenoughfakepixel";
     public static final String NAME    = "JustEnoughFakepixel";
-    public static final String VERSION = "1.2.4";
+    public static final String VERSION = "1.2.5";
 
     public static JefConfig config;
+    public static Logger logger;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         JefConfig.init();
         JefRepo.init();
+        logger = Logger.getLogger("[JEF] ");
         WaypointStorage.getInstance().initFile(JefConfig.configDirectory);
         InventoryButtonStorage.getInstance().initFile(JefConfig.configDirectory);
         DianaStats.getInstance().initFile(JefConfig.configDirectory);
@@ -63,6 +68,9 @@ public class JefMod {
         CurrentPetTracker.getInstance().load();
         TrophyFishStorage.getInstance().load();
 
+        new CitManager();
+
+
         if (JefConfig.feature.misc.showCurrentPet)
             PetCache.getInstance().warmupTextures();
 
@@ -73,6 +81,7 @@ public class JefMod {
     @SubscribeEvent
     public void onServerJoin(FMLNetworkEvent.ClientConnectedToServerEvent e) {
         RepoHandler.refresh(JefRepo.KEY_PLAYERSIZES);
+        RepoHandler.refresh(JefRepo.KEY_TIMERS);
         RepoHandler.refresh(JefRepo.KEY_UPDATE);
         ApiHandler.onServerJoin();
     }

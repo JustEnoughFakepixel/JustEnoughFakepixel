@@ -7,8 +7,15 @@ import net.minecraft.command.ICommandSender;
 @RegisterCommand
 public class LockMouseCommand extends SimpleCommand {
 
-    @Override public String getName()  { return "lockyp"; }
-    @Override public String getUsage() { return "/lockyp"; }
+    @Override
+    public String getName() {
+        return "lockyp";
+    }
+
+    @Override
+    public String getUsage() {
+        return "/lockyp";
+    }
 
     @Override
     public void execute(ICommandSender sender, String[] args) {

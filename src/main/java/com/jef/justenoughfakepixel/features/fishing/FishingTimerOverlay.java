@@ -58,7 +58,8 @@ public class FishingTimerOverlay {
                 attenuationType = ISound.AttenuationType.NONE;
             }};
             Minecraft.getMinecraft().getSoundHandler().playSound(sound);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
     @SubscribeEvent
@@ -95,11 +96,7 @@ public class FishingTimerOverlay {
         float seconds = mc.thePlayer.fishEntity.ticksExisted / 20f;
         boolean alerted = seconds >= JefConfig.feature.fishing.fishingTimerAlertTime;
 
-        return ChromaColour.specialToChromaRGB(
-                alerted
-                        ? JefConfig.feature.fishing.fishingTimerAlertColor
-                        : JefConfig.feature.fishing.fishingTimerNormalColor
-        );
+        return ChromaColour.specialToChromaRGB(alerted ? JefConfig.feature.fishing.fishingTimerAlertColor : JefConfig.feature.fishing.fishingTimerNormalColor);
     }
 
     private void renderText(double x, double y, double z, String text, int color) {

@@ -2,14 +2,14 @@ package com.jef.justenoughfakepixel.features.dungeons.mobhighlights;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
+import com.jef.justenoughfakepixel.events.RenderEntityModelEvent;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.data.SkyblockData;
-import com.jef.justenoughfakepixel.events.RenderEntityModelEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
@@ -21,7 +21,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -30,24 +30,16 @@ import java.util.Set;
 @RegisterEvents
 public class BossHighlight {
 
-    private enum BossType { BONZO, SCARF, SCARF_MINION, PROFESSOR, PROFESSOR_GUARDIAN }
-
-    private volatile Map<EntityLivingBase, BossType> bossMobs = new HashMap<>();
     private static final Minecraft mc = Minecraft.getMinecraft();
+    private volatile Map<EntityLivingBase, BossType> bossMobs = new HashMap<>();
     private int tickCounter = 0;
-
-    // ── Scan ─────────────────────────────────────────────────────────────────
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         if (JefConfig.feature == null) return;
 
-        boolean anyEnabled =
-                JefConfig.feature.dungeons.bonzoHighlight != 2 ||
-                        JefConfig.feature.dungeons.scarfHighlight != 2 ||
-                        JefConfig.feature.dungeons.scarfMinionHighlight != 2 ||
-                        JefConfig.feature.dungeons.professorHighlight != 2;
+        boolean anyEnabled = JefConfig.feature.dungeons.bonzoHighlight != 2 || JefConfig.feature.dungeons.scarfHighlight != 2 || JefConfig.feature.dungeons.scarfMinionHighlight != 2 || JefConfig.feature.dungeons.professorHighlight != 2;
         if (!anyEnabled) return;
 
         if (++tickCounter < 4) return;
@@ -70,20 +62,11 @@ public class BossHighlight {
 
             if (JefConfig.feature.dungeons.bonzoHighlight != 2 && name.contains("bonzo")) {
                 type = BossType.BONZO;
-            } else if (JefConfig.feature.dungeons.scarfMinionHighlight != 2
-                    && (name.contains("undead mage")
-                    || name.contains("undead archer")
-                    || name.contains("undead warrior")
-                    || name.contains("undead priest"))) {
+            } else if (JefConfig.feature.dungeons.scarfMinionHighlight != 2 && (name.contains("undead mage") || name.contains("undead archer") || name.contains("undead warrior") || name.contains("undead priest"))) {
                 type = BossType.SCARF_MINION;
             } else if (JefConfig.feature.dungeons.scarfHighlight != 2 && name.contains("scarf")) {
                 type = BossType.SCARF;
-            } else if (JefConfig.feature.dungeons.professorHighlight != 2
-                    && (name.contains("healthy")
-                    || name.contains("chaos")
-                    || name.contains("laser")
-                    || name.contains("rogue")
-                    || name.contains("reinforced"))) {
+            } else if (JefConfig.feature.dungeons.professorHighlight != 2 && (name.contains("healthy") || name.contains("chaos") || name.contains("laser") || name.contains("rogue") || name.contains("reinforced"))) {
                 type = BossType.PROFESSOR_GUARDIAN;
             } else if (JefConfig.feature.dungeons.professorHighlight != 2 && name.contains("professor")) {
                 type = BossType.PROFESSOR;
@@ -92,20 +75,13 @@ public class BossHighlight {
             if (type == null) continue;
 
             final BossType finalType = type;
-            EntityLivingBase mob = mc.theWorld.getEntitiesWithinAABB(
-                    EntityLivingBase.class,
-                    entity.getEntityBoundingBox().expand(1.0, 3.0, 1.0),
-                    e -> e != null && !(e instanceof EntityArmorStand) && e != mc.thePlayer
-            ).stream().findFirst().orElse(null);
+            EntityLivingBase mob = mc.theWorld.getEntitiesWithinAABB(EntityLivingBase.class, entity.getEntityBoundingBox().expand(1.0, 3.0, 1.0), e -> e != null && !(e instanceof EntityArmorStand) && e != mc.thePlayer).stream().findFirst().orElse(null);
 
-            if (mob != null && !mob.isDead && mob.getHealth() > 0)
-                found.put(mob, finalType);
+            if (mob != null && !mob.isDead && mob.getHealth() > 0) found.put(mob, finalType);
         }
 
         bossMobs = found;
     }
-
-    // ── Outline mode ─────────────────────────────────────────────────────────
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void onRenderEntityModel(RenderEntityModelEvent event) {
@@ -116,8 +92,6 @@ public class BossHighlight {
         if (highlightModeFor(type) != 1) return;
         renderCleanOutline(event, colorFor(type));
     }
-
-    // ── Box mode ─────────────────────────────────────────────────────────────
 
     @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
@@ -152,8 +126,7 @@ public class BossHighlight {
 
         for (Map.Entry<BossType, Set<EntityLivingBase>> entry : byType.entrySet()) {
             Color c = colorFor(entry.getKey());
-            float r = c.getRed() / 255f, g = c.getGreen() / 255f,
-                    b = c.getBlue() / 255f, a = c.getAlpha() / 255f;
+            float r = c.getRed() / 255f, g = c.getGreen() / 255f, b = c.getBlue() / 255f, a = c.getAlpha() / 255f;
             for (EntityLivingBase mob : entry.getValue())
                 drawBox(mob.getEntityBoundingBox().expand(0.1, 0.05, 0.1), r, g, b, a);
         }
@@ -163,37 +136,46 @@ public class BossHighlight {
         GL11.glColor4f(1f, 1f, 1f, 1f);
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
-
     private int highlightModeFor(BossType type) {
         if (JefConfig.feature == null) return 2;
         switch (type) {
-            case BONZO:              return JefConfig.feature.dungeons.bonzoHighlight;
-            case SCARF:              return JefConfig.feature.dungeons.scarfHighlight;
-            case SCARF_MINION:       return JefConfig.feature.dungeons.scarfMinionHighlight;
-            case PROFESSOR:          return JefConfig.feature.dungeons.professorHighlight;
-            case PROFESSOR_GUARDIAN: return JefConfig.feature.dungeons.professorHighlight;
-            default:                 return 2;
+            case BONZO:
+                return JefConfig.feature.dungeons.bonzoHighlight;
+            case SCARF:
+                return JefConfig.feature.dungeons.scarfHighlight;
+            case SCARF_MINION:
+                return JefConfig.feature.dungeons.scarfMinionHighlight;
+            case PROFESSOR:
+                return JefConfig.feature.dungeons.professorHighlight;
+            case PROFESSOR_GUARDIAN:
+                return JefConfig.feature.dungeons.professorHighlight;
+            default:
+                return 2;
         }
     }
 
     private Color colorFor(BossType type) {
         String raw;
         switch (type) {
-            case BONZO:              raw = JefConfig.feature.dungeons.bonzoColor; break;
-            case SCARF:              raw = JefConfig.feature.dungeons.scarfColor; break;
-            case SCARF_MINION:       raw = JefConfig.feature.dungeons.scarfMinionColor; break;
+            case BONZO:
+                raw = JefConfig.feature.dungeons.bonzoColor;
+                break;
+            case SCARF:
+                raw = JefConfig.feature.dungeons.scarfColor;
+                break;
+            case SCARF_MINION:
+                raw = JefConfig.feature.dungeons.scarfMinionColor;
+                break;
             case PROFESSOR:
-            case PROFESSOR_GUARDIAN: raw = JefConfig.feature.dungeons.professorColor; break;
-            default:                 raw = "200:255:255:255:255"; break;
+            case PROFESSOR_GUARDIAN:
+                raw = JefConfig.feature.dungeons.professorColor;
+                break;
+            default:
+                raw = "200:255:255:255:255";
+                break;
         }
         int argb = ChromaColour.specialToChromaRGB(raw);
-        return new Color(
-                (argb >> 16) & 0xFF,
-                (argb >> 8)  & 0xFF,
-                argb        & 0xFF,
-                (argb >> 24) & 0xFF
-        );
+        return new Color((argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF, (argb >> 24) & 0xFF);
     }
 
     private void renderCleanOutline(RenderEntityModelEvent event, Color color) {
@@ -210,15 +192,13 @@ public class BossHighlight {
         // Pass 1: faint fill
         GlStateManager.color(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, 0.22f);
         GlStateManager.scale(1.04f, 1.04f, 1.04f);
-        event.getModel().render(entity, event.getLimbSwing(), event.getLimbSwingAmount(),
-                event.getAgeInTicks(), event.getHeadYaw(), event.getHeadPitch(), event.getScaleFactor());
+        event.getModel().render(entity, event.getLimbSwing(), event.getLimbSwingAmount(), event.getAgeInTicks(), event.getHeadYaw(), event.getHeadPitch(), event.getScaleFactor());
 
         // Pass 2: crisp edge
         GlStateManager.color(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, 0.88f);
         float shrink = 1.025f / 1.04f;
         GlStateManager.scale(shrink, shrink, shrink);
-        event.getModel().render(entity, event.getLimbSwing(), event.getLimbSwingAmount(),
-                event.getAgeInTicks(), event.getHeadYaw(), event.getHeadPitch(), event.getScaleFactor());
+        event.getModel().render(entity, event.getLimbSwing(), event.getLimbSwingAmount(), event.getAgeInTicks(), event.getHeadYaw(), event.getHeadPitch(), event.getScaleFactor());
 
         GlStateManager.depthMask(true);
         GlStateManager.enableDepth();
@@ -231,28 +211,17 @@ public class BossHighlight {
     }
 
     private void drawBox(AxisAlignedBB bb, float r, float g, float b, float a) {
-        double[][] edges = {
-                {bb.minX,bb.minY,bb.minZ, bb.maxX,bb.minY,bb.minZ},
-                {bb.minX,bb.minY,bb.maxZ, bb.maxX,bb.minY,bb.maxZ},
-                {bb.minX,bb.minY,bb.minZ, bb.minX,bb.minY,bb.maxZ},
-                {bb.maxX,bb.minY,bb.minZ, bb.maxX,bb.minY,bb.maxZ},
-                {bb.minX,bb.maxY,bb.minZ, bb.maxX,bb.maxY,bb.minZ},
-                {bb.minX,bb.maxY,bb.maxZ, bb.maxX,bb.maxY,bb.maxZ},
-                {bb.minX,bb.maxY,bb.minZ, bb.minX,bb.maxY,bb.maxZ},
-                {bb.maxX,bb.maxY,bb.minZ, bb.maxX,bb.maxY,bb.maxZ},
-                {bb.minX,bb.minY,bb.minZ, bb.minX,bb.maxY,bb.minZ},
-                {bb.maxX,bb.minY,bb.minZ, bb.maxX,bb.maxY,bb.minZ},
-                {bb.minX,bb.minY,bb.maxZ, bb.minX,bb.maxY,bb.maxZ},
-                {bb.maxX,bb.minY,bb.maxZ, bb.maxX,bb.maxY,bb.maxZ},
-        };
-        int ri = (int)(r*255), gi = (int)(g*255), bi = (int)(b*255), ai = (int)(a*255);
+        double[][] edges = {{bb.minX, bb.minY, bb.minZ, bb.maxX, bb.minY, bb.minZ}, {bb.minX, bb.minY, bb.maxZ, bb.maxX, bb.minY, bb.maxZ}, {bb.minX, bb.minY, bb.minZ, bb.minX, bb.minY, bb.maxZ}, {bb.maxX, bb.minY, bb.minZ, bb.maxX, bb.minY, bb.maxZ}, {bb.minX, bb.maxY, bb.minZ, bb.maxX, bb.maxY, bb.minZ}, {bb.minX, bb.maxY, bb.maxZ, bb.maxX, bb.maxY, bb.maxZ}, {bb.minX, bb.maxY, bb.minZ, bb.minX, bb.maxY, bb.maxZ}, {bb.maxX, bb.maxY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ}, {bb.minX, bb.minY, bb.minZ, bb.minX, bb.maxY, bb.minZ}, {bb.maxX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.minZ}, {bb.minX, bb.minY, bb.maxZ, bb.minX, bb.maxY, bb.maxZ}, {bb.maxX, bb.minY, bb.maxZ, bb.maxX, bb.maxY, bb.maxZ},};
+        int ri = (int) (r * 255), gi = (int) (g * 255), bi = (int) (b * 255), ai = (int) (a * 255);
         Tessellator tess = Tessellator.getInstance();
         WorldRenderer wr = tess.getWorldRenderer();
         wr.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
         for (double[] e : edges) {
-            wr.pos(e[0],e[1],e[2]).color(ri,gi,bi,ai).endVertex();
-            wr.pos(e[3],e[4],e[5]).color(ri,gi,bi,ai).endVertex();
+            wr.pos(e[0], e[1], e[2]).color(ri, gi, bi, ai).endVertex();
+            wr.pos(e[3], e[4], e[5]).color(ri, gi, bi, ai).endVertex();
         }
         tess.draw();
     }
+
+    private enum BossType {BONZO, SCARF, SCARF_MINION, PROFESSOR, PROFESSOR_GUARDIAN}
 }

@@ -2,21 +2,14 @@ package com.jef.justenoughfakepixel.features.fishing.trophy;
 
 public enum TrophyRarity {
 
-    BRONZE ("§8", "Bronze"),
-    SILVER ("§7", "Silver"),
-    GOLD   ("§6", "Gold"),
-    DIAMOND("§b", "Diamond");
+    BRONZE("§8", "Bronze"), SILVER("§7", "Silver"), GOLD("§6", "Gold"), DIAMOND("§b", "Diamond");
 
     public final String formatCode;
     public final String displayName;
 
     TrophyRarity(String formatCode, String displayName) {
-        this.formatCode  = formatCode;
+        this.formatCode = formatCode;
         this.displayName = displayName;
-    }
-
-    public String getFormatted() {
-        return formatCode + displayName;
     }
 
     public static TrophyRarity fromDisplayName(String name) {
@@ -34,5 +27,9 @@ public enum TrophyRarity {
             if (upper.endsWith(r.name())) return r;
         }
         return null;
+    }
+
+    public String getFormatted() {
+        return formatCode + displayName;
     }
 }

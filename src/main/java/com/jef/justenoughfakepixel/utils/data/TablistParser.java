@@ -1,10 +1,11 @@
 package com.jef.justenoughfakepixel.utils.data;
 
-import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
 import com.jef.justenoughfakepixel.features.scoreboard.BankParser;
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.ColorUtils;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiPlayerTabOverlay;
 import net.minecraft.client.network.NetworkPlayerInfo;
@@ -20,13 +21,15 @@ import java.util.List;
 @RegisterEvents
 public class TablistParser {
 
+    private static final int TICK_INTERVAL = 20;
+    private static final Ordering<NetworkPlayerInfo> PLAYER_ORDERING = Ordering.from(new PlayerComparator());
+    @Getter
     private static SkyblockData.Location currentLocation = SkyblockData.Location.NONE;
-    private static String activeEvent        = null;
+    @Getter
+    private static String activeEvent = null;
+    @Getter
     private static String activeEventTimeLeft = null;
-
-    public static SkyblockData.Location getCurrentLocation()  { return currentLocation; }
-    public static String getActiveEvent()                        { return activeEvent; }
-    public static String getActiveEventTimeLeft()                { return activeEventTimeLeft; }
+    private int tickCounter = 0;
 
     public static boolean isEventActive(String eventName) {
         return activeEvent != null && activeEvent.contains(eventName);
@@ -55,8 +58,14 @@ public class TablistParser {
             if (raw == null || raw.isEmpty()) continue;
             String line = net.minecraft.util.StringUtils.stripControlCodes(raw).trim();
             if (line.isEmpty()) continue;
-            if (line.equals("Server Info") || raw.contains("Server Info")) { inServer = true; continue; }
-            if (inServer && (line.equals("Account Info") || line.equals("Player Stats"))) { inServer = false; continue; }
+            if (line.equals("Server Info") || raw.contains("Server Info")) {
+                inServer = true;
+                continue;
+            }
+            if (inServer && (line.equals("Account Info") || line.equals("Player Stats"))) {
+                inServer = false;
+                continue;
+            }
             if (inServer && line.startsWith("Gems: ")) return line.substring("Gems: ".length()).trim();
         }
         return null;
@@ -70,64 +79,25 @@ public class TablistParser {
         for (String line : lines) {
             String l = line.trim();
             if (l.isEmpty()) continue;
-            if (!sawCookie && l.contains("Cookie Buff")) { sawCookie = true; continue; }
+            if (!sawCookie && l.contains("Cookie Buff")) {
+                sawCookie = true;
+                continue;
+            }
             if (sawCookie && l.contains("Active")) continue;
             if (sawCookie) return l;
         }
         return null;
     }
 
-    private static final int TICK_INTERVAL = 20;
-    private int tickCounter = 0;
-
-    private static final Ordering<NetworkPlayerInfo> PLAYER_ORDERING =
-            Ordering.from(new PlayerComparator());
-
-    private static class PlayerComparator implements Comparator<NetworkPlayerInfo> {
-        @Override
-        public int compare(NetworkPlayerInfo o1, NetworkPlayerInfo o2) {
-            ScorePlayerTeam t1 = o1.getPlayerTeam();
-            ScorePlayerTeam t2 = o2.getPlayerTeam();
-            return ComparisonChain.start()
-                    .compareTrueFirst(
-                            o1.getGameType() != WorldSettings.GameType.SPECTATOR,
-                            o2.getGameType() != WorldSettings.GameType.SPECTATOR)
-                    .compare(t1 != null ? t1.getRegisteredName() : "",
-                            t2 != null ? t2.getRegisteredName() : "")
-                    .compare(o1.getGameProfile().getName(), o2.getGameProfile().getName())
-                    .result();
-        }
-    }
-
-    @SubscribeEvent
-    public void onTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
-        if ((tickCounter = (tickCounter + 1) % TICK_INTERVAL) != 0) return;
-
-        Minecraft mc = Minecraft.getMinecraft();
-        if (mc.thePlayer == null) return;
-
-        parseTablist(mc);
-    }
-
-    @SubscribeEvent
-    public void onWorldUnload(WorldEvent.Unload event) {
-        currentLocation       = SkyblockData.Location.NONE;
-        activeEvent           = null;
-        activeEventTimeLeft   = null;
-        BankParser.clear();
-    }
-
     private static void parseTablist(Minecraft mc) {
         GuiPlayerTabOverlay tab = mc.ingameGUI.getTabList();
-        List<NetworkPlayerInfo> infos =
-                PLAYER_ORDERING.sortedCopy(mc.thePlayer.sendQueue.getPlayerInfoMap());
+        List<NetworkPlayerInfo> infos = PLAYER_ORDERING.sortedCopy(mc.thePlayer.sendQueue.getPlayerInfoMap());
 
-        boolean inServerSection  = false;
+        boolean inServerSection = false;
         boolean inAccountSection = false;
-        boolean expectEventTime  = false;
+        boolean expectEventTime = false;
 
-        String  pendingEvent     = null;
+        String pendingEvent = null;
 
         for (NetworkPlayerInfo info : infos) {
             String raw = tab.getPlayerName(info);
@@ -135,33 +105,31 @@ public class TablistParser {
 
             String line = net.minecraft.util.StringUtils.stripControlCodes(raw).trim();
 
-            if (raw.contains("\u00A73\u00A7l Server Info\u00A7r")) {
-                inServerSection  = true;
+            if (raw.contains("§3§l Server Info§r")) {
+                inServerSection = true;
                 inAccountSection = false;
-                expectEventTime  = false;
+                expectEventTime = false;
                 continue;
             }
-            if (raw.contains("\u00A76\u00A7lAccount Info") || line.equals("Account Info")) {
+            if (raw.contains("§6§lAccount Info") || line.equals("Account Info")) {
                 inAccountSection = true;
-                inServerSection  = false;
-                expectEventTime  = false;
+                inServerSection = false;
+                expectEventTime = false;
                 continue;
             }
-            if (raw.contains("\u00A72\u00A7lPlayer Stats\u00A7r")
-                    || line.equals("Player Stats") || line.equals("Quests")
-                    || line.equals("Party")        || line.equals("Dungeon")) {
-                inServerSection  = false;
+            if (raw.contains("§2§lPlayer Stats§r") || line.equals("Player Stats") || line.equals("Quests") || line.equals("Party") || line.equals("Dungeon")) {
+                inServerSection = false;
                 inAccountSection = false;
-                expectEventTime  = false;
+                expectEventTime = false;
                 continue;
             }
 
             if (line.isEmpty()) {
                 if (expectEventTime) {
-                    activeEvent         = pendingEvent;
+                    activeEvent = pendingEvent;
                     activeEventTimeLeft = null;
-                    expectEventTime     = false;
-                    pendingEvent        = null;
+                    expectEventTime = false;
+                    pendingEvent = null;
                 }
                 continue;
             }
@@ -187,29 +155,29 @@ public class TablistParser {
                     if (line.startsWith("Ends in: ")) {
                         activeEventTimeLeft = line.substring("Ends in: ".length()).trim();
                     } else if (line.equals("No active event")) {
-                        activeEvent         = null;
+                        activeEvent = null;
                         activeEventTimeLeft = null;
                     } else {
                         activeEventTimeLeft = null;
                     }
                     expectEventTime = false;
-                    pendingEvent    = null;
+                    pendingEvent = null;
                     continue;
                 }
 
                 if (line.startsWith("Event: ")) {
-                    activeEvent         = line.substring("Event: ".length()).trim();
+                    activeEvent = line.substring("Event: ".length()).trim();
                     activeEventTimeLeft = null;
-                    expectEventTime     = true;
-                    pendingEvent        = activeEvent;
+                    expectEventTime = true;
+                    pendingEvent = activeEvent;
                     continue;
                 }
 
                 if (line.equals("Mining Event:") || line.startsWith("Mining Event: ")) {
-                    activeEvent         = null;
+                    activeEvent = null;
                     activeEventTimeLeft = null;
-                    expectEventTime     = true;
-                    pendingEvent        = null;
+                    expectEventTime = true;
+                    pendingEvent = null;
                     continue;
                 }
 
@@ -227,7 +195,7 @@ public class TablistParser {
         }
 
         if (expectEventTime && pendingEvent == null) {
-            activeEvent         = null;
+            activeEvent = null;
             activeEventTimeLeft = null;
         }
     }
@@ -237,7 +205,7 @@ public class TablistParser {
         String clean = ColorUtils.stripColor(afterColon).trim();
         if (clean.contains(" / ")) {
             String[] parts = clean.split(" / ", 2);
-            return parts[0].trim() + " \u00A77/ \u00A76" + parts[1].trim();
+            return parts[0].trim() + " §7/ §6" + parts[1].trim();
         }
         return clean.isEmpty() ? fallback : clean;
     }
@@ -245,17 +213,43 @@ public class TablistParser {
     private static SkyblockData.Location matchLocation(String s) {
         for (SkyblockData.Location loc : SkyblockData.Location.values()) {
             if (loc.main.isEmpty()) continue;
-            if (loc.main.equals(s) || loc.sandbox.equals(s) || loc.alpha.equals(s))
-                return loc;
+            if (loc.main.equals(s) || loc.sandbox.equals(s) || loc.alpha.equals(s)) return loc;
         }
         return SkyblockData.Location.NONE;
     }
 
     private static int indexOfDashDigits(String s) {
         for (int i = 0; i < s.length() - 1; i++) {
-            if (s.charAt(i) == '-' && Character.isDigit(s.charAt(i + 1)))
-                return i;
+            if (s.charAt(i) == '-' && Character.isDigit(s.charAt(i + 1))) return i;
         }
         return -1;
+    }
+
+    @SubscribeEvent
+    public void onTick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
+        if ((tickCounter = (tickCounter + 1) % TICK_INTERVAL) != 0) return;
+
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.thePlayer == null) return;
+
+        parseTablist(mc);
+    }
+
+    @SubscribeEvent
+    public void onWorldUnload(WorldEvent.Unload event) {
+        currentLocation = SkyblockData.Location.NONE;
+        activeEvent = null;
+        activeEventTimeLeft = null;
+        BankParser.clear();
+    }
+
+    private static class PlayerComparator implements Comparator<NetworkPlayerInfo> {
+        @Override
+        public int compare(NetworkPlayerInfo o1, NetworkPlayerInfo o2) {
+            ScorePlayerTeam t1 = o1.getPlayerTeam();
+            ScorePlayerTeam t2 = o2.getPlayerTeam();
+            return ComparisonChain.start().compareTrueFirst(o1.getGameType() != WorldSettings.GameType.SPECTATOR, o2.getGameType() != WorldSettings.GameType.SPECTATOR).compare(t1 != null ? t1.getRegisteredName() : "", t2 != null ? t2.getRegisteredName() : "").compare(o1.getGameProfile().getName(), o2.getGameProfile().getName()).result();
+        }
     }
 }

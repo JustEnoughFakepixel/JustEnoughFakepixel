@@ -3,8 +3,9 @@ package com.jef.justenoughfakepixel.features.misc.pet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.jef.justenoughfakepixel.init.RegisterInstance;
-import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
 import com.jef.justenoughfakepixel.utils.ItemUtils;
+import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.inventory.ContainerChest;
@@ -25,27 +26,28 @@ import static com.jef.justenoughfakepixel.features.misc.pet.PetCache.normalizePe
 
 public class CurrentPetTracker {
 
-    private static final Pattern SUMMONED     = Pattern.compile("^You summoned your (.+)!$");
-    private static final Pattern AUTOPET      = Pattern.compile("^Autopet equipped your \\[Lvl \\d+\\] (.+)!$");
+    private static final Pattern SUMMONED = Pattern.compile("^You summoned your (.+)!$");
+    private static final Pattern AUTOPET = Pattern.compile("^Autopet equipped your \\[Lvl \\d+\\] (.+)!$");
     private static final Pattern LEVEL_PREFIX = Pattern.compile("^\\[Lvl \\d+\\] ");
 
     private static final String PETS_CONTAINER = "Pets";
-    private static final String ACTIVE_LORE    = "Click to despawn";
+    private static final String ACTIVE_LORE = "Click to despawn";
 
     private static final Gson GSON = new GsonBuilder().create();
 
     @RegisterInstance
     private static CurrentPetTracker INSTANCE;
+    private File file;
+    @Getter
+    private String currentBaseName = "";
+
+    private CurrentPetTracker() {
+    }
 
     public static CurrentPetTracker getInstance() {
         if (INSTANCE == null) INSTANCE = new CurrentPetTracker();
         return INSTANCE;
     }
-
-    private CurrentPetTracker() {}
-
-    private File   file;
-    private String currentBaseName = "";
 
     public void initFile(File configDir) {
         file = new File(configDir, "current_pet.json");
@@ -73,10 +75,6 @@ public class CurrentPetTracker {
         }
     }
 
-    public String getCurrentBaseName() {
-        return currentBaseName;
-    }
-
     @SubscribeEvent
     public void onGuiDraw(GuiScreenEvent.BackgroundDrawnEvent event) {
         if (!(event.gui instanceof GuiChest)) return;
@@ -102,8 +100,7 @@ public class CurrentPetTracker {
 
             String formatted = item.getDisplayName();
             formatted = formatted.replace("Â§", "§");
-            String base = LEVEL_PREFIX.matcher(
-                    StringUtils.stripControlCodes(formatted)).replaceFirst("").trim();
+            String base = LEVEL_PREFIX.matcher(StringUtils.stripControlCodes(formatted)).replaceFirst("").trim();
 
             base = normalizePetName(base);
             if (base.isEmpty()) continue;

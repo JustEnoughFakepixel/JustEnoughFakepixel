@@ -16,8 +16,15 @@ public class PowderCommand extends SimpleCommand {
 
     private static final String PREFIX = EnumChatFormatting.AQUA + "[Powder] " + EnumChatFormatting.RESET;
 
-    @Override public String getName()  { return "powdertracker"; }
-    @Override public String getUsage() { return "/powdertracker <reset|toggle>"; }
+    @Override
+    public String getName() {
+        return "powdertracker";
+    }
+
+    @Override
+    public String getUsage() {
+        return "/powdertracker <reset|toggle>";
+    }
 
     @Override
     public List<String> getAliases() {
@@ -27,8 +34,7 @@ public class PowderCommand extends SimpleCommand {
     @Override
     public void execute(ICommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.addChatMessage(new ChatComponentText(
-                    PREFIX + EnumChatFormatting.YELLOW + "Usage: /pdt <reset|toggle>"));
+            sender.addChatMessage(new ChatComponentText(PREFIX + EnumChatFormatting.YELLOW + "Usage: /pdt <reset|toggle>"));
             return;
         }
 
@@ -37,21 +43,16 @@ public class PowderCommand extends SimpleCommand {
         switch (args[0].toLowerCase()) {
             case "reset":
                 stats.reset();
-                sender.addChatMessage(new ChatComponentText(
-                        PREFIX + EnumChatFormatting.GREEN + "Powder tracker data has been reset."));
+                sender.addChatMessage(new ChatComponentText(PREFIX + EnumChatFormatting.GREEN + "Powder tracker data has been reset."));
                 break;
 
             case "toggle":
                 boolean now = stats.toggleTracking();
-                sender.addChatMessage(new ChatComponentText(
-                        PREFIX + (now
-                                ? EnumChatFormatting.GREEN + "Tracker enabled."
-                                : EnumChatFormatting.RED   + "Tracker paused.")));
+                sender.addChatMessage(new ChatComponentText(PREFIX + (now ? EnumChatFormatting.GREEN + "Tracker enabled." : EnumChatFormatting.RED + "Tracker paused.")));
                 break;
 
             default:
-                sender.addChatMessage(new ChatComponentText(
-                        PREFIX + EnumChatFormatting.RED + "Unknown subcommand. Use: reset, toggle"));
+                sender.addChatMessage(new ChatComponentText(PREFIX + EnumChatFormatting.RED + "Unknown subcommand. Use: reset, toggle"));
         }
     }
 

@@ -12,12 +12,21 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import java.awt.Color;
+import java.awt.*;
 
 @RegisterEvents
 public class BlockOverlay {
 
     private static final Minecraft mc = Minecraft.getMinecraft();
+
+    private static AxisAlignedBB getSelectionAABB(BlockPos pos) {
+        if (mc.theWorld == null) {
+            return new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
+        }
+        Block block = mc.theWorld.getBlockState(pos).getBlock();
+        AxisAlignedBB aabb = block.getSelectedBoundingBox(mc.theWorld, pos);
+        return aabb != null ? aabb : new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
+    }
 
     @SubscribeEvent
     public void onDrawBlockHighlight(DrawBlockHighlightEvent event) {
@@ -37,16 +46,5 @@ public class BlockOverlay {
         } else {
             WorldRenderUtils.drawSelectionBox(aabb, color, JefConfig.feature.qol.blockSelectionThickness);
         }
-    }
-
-    private static AxisAlignedBB getSelectionAABB(BlockPos pos) {
-        if (mc.theWorld == null) {
-            return new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ(),
-                    pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
-        }
-        Block block = mc.theWorld.getBlockState(pos).getBlock();
-        AxisAlignedBB aabb = block.getSelectedBoundingBox(mc.theWorld, pos);
-        return aabb != null ? aabb : new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ(),
-                pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
     }
 }

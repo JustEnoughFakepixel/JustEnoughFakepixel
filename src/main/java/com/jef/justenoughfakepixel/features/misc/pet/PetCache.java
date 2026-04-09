@@ -18,34 +18,31 @@ import java.util.UUID;
 public class PetCache {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-
-    private static PetCache INSTANCE;
-    public static PetCache getInstance() {
-        if (INSTANCE == null) INSTANCE = new PetCache();
-        return INSTANCE;
-    }
-
-
-    private PetCache() {}
-
-    public static String normalizePetName(String name) {
-        if (name == null) return "";
-
-        return name
-                .replace("✦", "")   // remove skinned pet symbol
-                .replace("’", "'")  // normalize apostrophe
-                .trim();
-    }
-
-    private File file;
     private static final int MAX_ENTRIES = 200;
-
+    private static PetCache INSTANCE;
     private final Map<String, CachedPet> pets = new LinkedHashMap<String, CachedPet>(16, 0.75f, true) {
         @Override
         protected boolean removeEldestEntry(Map.Entry<String, CachedPet> eldest) {
             return size() > MAX_ENTRIES;
         }
     };
+    private File file;
+
+    private PetCache() {
+    }
+
+    public static PetCache getInstance() {
+        if (INSTANCE == null) INSTANCE = new PetCache();
+        return INSTANCE;
+    }
+
+    public static String normalizePetName(String name) {
+        if (name == null) return "";
+
+        return name.replace("✦", "")   // remove skinned pet symbol
+                .replace("’", "'")  // normalize apostrophe
+                .trim();
+    }
 
     public void initFile(File configDir) {
         file = new File(configDir, "pet_cache.json");
@@ -54,13 +51,13 @@ public class PetCache {
     public void load() {
         if (file == null || !file.exists()) return;
         try (Reader r = new FileReader(file)) {
-            Type type = new TypeToken<Map<String, CachedPet>>(){}.getType();
+            Type type = new TypeToken<Map<String, CachedPet>>() {
+            }.getType();
             Map<String, CachedPet> loaded = GSON.fromJson(r, type);
             if (loaded != null) {
                 // sanitize corrupted § on load
                 for (CachedPet pet : loaded.values()) {
-                    if (pet.formattedName != null)
-                        pet.formattedName = pet.formattedName.replace("Â§", "§");
+                    if (pet.formattedName != null) pet.formattedName = pet.formattedName.replace("Â§", "§");
                 }
                 pets.putAll(loaded);
             }
@@ -97,7 +94,7 @@ public class PetCache {
         int starIndex = formattedName.indexOf("✦");
         if (starIndex > 0) {
             String before = formattedName.substring(0, starIndex);
-            if (before.length() >= 2 && before.charAt(before.length() - 2) == '\u00a7') {
+            if (before.length() >= 2 && before.charAt(before.length() - 2) == '§') {
                 starSuffix = " " + before.substring(before.length() - 2) + "✦";
             } else {
                 starSuffix = " ✦";
@@ -108,14 +105,13 @@ public class PetCache {
         if (!starSuffix.isEmpty()) formattedName = formattedName + starSuffix;
 
         CachedPet existing = pets.get(baseName);
-        if (existing != null
-                && existing.formattedName.equals(formattedName)
-                && existing.textureValue.equals(textureValue)) return;
+        if (existing != null && existing.formattedName.equals(formattedName) && existing.textureValue.equals(textureValue))
+            return;
 
-        CachedPet pet     = new CachedPet();
-        pet.baseName      = baseName;
+        CachedPet pet = new CachedPet();
+        pet.baseName = baseName;
         pet.formattedName = formattedName;
-        pet.textureValue  = textureValue;
+        pet.textureValue = textureValue;
         pets.put(baseName, pet);
         save();
     }

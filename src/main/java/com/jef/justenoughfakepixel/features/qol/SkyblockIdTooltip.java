@@ -24,7 +24,7 @@ public class SkyblockIdTooltip {
         if (e.toolTip == null || e.itemStack == null) return;
         if (JefConfig.feature == null) return;
 
-        boolean doRoman    = JefConfig.feature.qol.romanNumerals;
+        boolean doRoman = JefConfig.feature.qol.romanNumerals;
         boolean doSkyblock = JefConfig.feature.qol.showSkyblockId;
 
         if (doRoman) {
@@ -57,16 +57,18 @@ public class SkyblockIdTooltip {
             for (NetworkPlayerInfo info : infos) {
                 try {
                     if (info.getDisplayName() != null) {
-                        String name     = info.getDisplayName().getFormattedText();
+                        String name = info.getDisplayName().getFormattedText();
                         String replaced = RomanNumeralParser.replaceInString(name);
                         if (!replaced.equals(name)) info.setDisplayName(new ChatComponentText(replaced));
                     } else if (info.getGameProfile() != null) {
-                        String name     = info.getGameProfile().getName();
+                        String name = info.getGameProfile().getName();
                         String replaced = RomanNumeralParser.replaceInString(name);
                         if (!replaced.equals(name)) info.setDisplayName(new ChatComponentText(replaced));
                     }
-                } catch (Throwable ignored) {}
+                } catch (Throwable ignored) {
+                }
             }
-        } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {
+        }
     }
 }

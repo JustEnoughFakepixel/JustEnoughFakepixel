@@ -6,13 +6,14 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.EntityLivingBase;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.Color;
+import java.awt.*;
 
 public final class EntityHighlight {
 
     private static final Minecraft mc = Minecraft.getMinecraft();
 
-    private EntityHighlight() {}
+    private EntityHighlight() {
+    }
 
     public static void renderEntityOutline(RenderEntityModelEvent event, Color color) {
         EntityLivingBase entity = event.getEntity();
@@ -30,22 +31,11 @@ public final class EntityHighlight {
         GlStateManager.enableBlend();
         GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GlStateManager.depthMask(false);
-        GlStateManager.color(
-                color.getRed()   / 255f,
-                color.getGreen() / 255f,
-                color.getBlue()  / 255f,
-                color.getAlpha() / 255f
-        );
+        GlStateManager.color(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
 
         GlStateManager.scale(1.03f, 1.03f, 1.03f);
 
-        event.getModel().render(entity,
-                event.getLimbSwing(),
-                event.getLimbSwingAmount(),
-                event.getAgeInTicks(),
-                event.getHeadYaw(),
-                event.getHeadPitch(),
-                event.getScaleFactor());
+        event.getModel().render(entity, event.getLimbSwing(), event.getLimbSwingAmount(), event.getAgeInTicks(), event.getHeadYaw(), event.getHeadPitch(), event.getScaleFactor());
 
         GlStateManager.depthMask(true);
         GlStateManager.enableDepth();

@@ -3,14 +3,9 @@ package com.jef.justenoughfakepixel.features.dungeons.puzzles;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jef.justenoughfakepixel.core.JefConfig;
-import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.data.SkyblockData;
 import com.jef.justenoughfakepixel.utils.render.WorldRenderUtils;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockColored;
-import net.minecraft.block.BlockLever;
-import net.minecraft.block.BlockPistonExtension;
-import net.minecraft.block.BlockStone;
+import net.minecraft.block.*;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
@@ -18,7 +13,6 @@ import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -30,48 +24,33 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-
+@Deprecated
 public class WaterSolver {
 
     private static final Minecraft mc = Minecraft.getMinecraft();
 
-    private static final String[] LEVER_KEYS = {
-            "minecraft:quartz_block",
-            "minecraft:diamond_block",
-            "minecraft:gold_block",
-            "minecraft:emerald_block",
-            "minecraft:coal_block",
-            "minecraft:hardened_clay"
-    };
+    private static final String[] LEVER_KEYS = {"minecraft:quartz_block", "minecraft:diamond_block", "minecraft:gold_block", "minecraft:emerald_block", "minecraft:coal_block", "minecraft:hardened_clay"};
 
 
     private static final Map<EnumDyeColor, Integer> WOOL_ORDINAL = new HashMap<>();
+    private static final List<EnumDyeColor> WOOL_ORDER = Arrays.asList(EnumDyeColor.LIME, EnumDyeColor.BLUE, EnumDyeColor.RED, EnumDyeColor.PURPLE, EnumDyeColor.ORANGE);
+    private static JsonObject solutionsJson = null;
+
     static {
         WOOL_ORDINAL.put(EnumDyeColor.PURPLE, 0);
         WOOL_ORDINAL.put(EnumDyeColor.ORANGE, 1);
-        WOOL_ORDINAL.put(EnumDyeColor.BLUE,   2);
-        WOOL_ORDINAL.put(EnumDyeColor.LIME,   3);
-        WOOL_ORDINAL.put(EnumDyeColor.RED,     4);
+        WOOL_ORDINAL.put(EnumDyeColor.BLUE, 2);
+        WOOL_ORDINAL.put(EnumDyeColor.LIME, 3);
+        WOOL_ORDINAL.put(EnumDyeColor.RED, 4);
     }
 
-    private static final List<EnumDyeColor> WOOL_ORDER = Arrays.asList(
-            EnumDyeColor.LIME, EnumDyeColor.BLUE, EnumDyeColor.RED,
-            EnumDyeColor.PURPLE, EnumDyeColor.ORANGE
-    );
-
-    private static JsonObject solutionsJson = null;
-
-    private boolean inWaterRoom   = false;
-    private int     patternId     = -1;
-    private String  extendedSlots = null;
-    private boolean lastOptimized = false;
-
-    private volatile Map<String, int[]> solutions = new HashMap<>();
-
     private final Map<String, Integer> clickCounts = new HashMap<>();
-
     private final Map<String, Boolean> prevPowered = new HashMap<>();
-
+    private boolean inWaterRoom = false;
+    private int patternId = -1;
+    private String extendedSlots = null;
+    private boolean lastOptimized = false;
+    private volatile Map<String, int[]> solutions = new HashMap<>();
     private volatile Map<String, BlockPos> leverPositions = new HashMap<>();
     private volatile BlockPos waterLeverPos = null;
     private boolean prevWaterPowered = false;
@@ -81,6 +60,51 @@ public class WaterSolver {
     private int tickCounter = 0;
 
     private int scanTick = 0;
+
+    private static int[] toTickArray(com.google.gson.JsonArray arr) {
+        int[] out = new int[arr.size()];
+        for (int i = 0; i < arr.size(); i++)
+            out[i] = (int) (arr.get(i).getAsDouble() * 20);
+        return out;
+    }
+
+    private static BlockPos stepInDirection(BlockPos pos, EnumFacing facing) {
+        switch (facing) {
+            case NORTH:
+                return new BlockPos(pos.getX(), pos.getY(), pos.getZ() - 1);
+            case EAST:
+                return new BlockPos(pos.getX() + 1, pos.getY(), pos.getZ());
+            case SOUTH:
+                return new BlockPos(pos.getX(), pos.getY(), pos.getZ() + 1);
+            case WEST:
+                return new BlockPos(pos.getX() - 1, pos.getY(), pos.getZ());
+            default:
+                return null;
+        }
+    }
+
+    private static BlockPos stepOpposite(BlockPos pos, EnumFacing facing) {
+        switch (facing) {
+            case NORTH:
+                return new BlockPos(pos.getX(), pos.getY(), pos.getZ() + 1);
+            case EAST:
+                return new BlockPos(pos.getX() - 1, pos.getY(), pos.getZ());
+            case SOUTH:
+                return new BlockPos(pos.getX(), pos.getY(), pos.getZ() - 1);
+            case WEST:
+                return new BlockPos(pos.getX() + 1, pos.getY(), pos.getZ());
+            case UP:
+                return new BlockPos(pos.getX(), pos.getY() - 1, pos.getZ());
+            case DOWN:
+                return new BlockPos(pos.getX(), pos.getY() + 1, pos.getZ());
+            default:
+                return null;
+        }
+    }
+
+    private static boolean isTargetBlock(String name) {
+        return name.equals("minecraft:quartz_block") || name.equals("minecraft:gold_block") || name.equals("minecraft:coal_block") || name.equals("minecraft:diamond_block") || name.equals("minecraft:emerald_block") || name.equals("minecraft:hardened_clay");
+    }
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
@@ -93,8 +117,7 @@ public class WaterSolver {
 
         if (waterLeverPos != null && openedWaterTick == -1) {
             boolean powered = isLeverPowered(waterLeverPos);
-            if (powered && !prevWaterPowered)
-                openedWaterTick = tickCounter;
+            if (powered && !prevWaterPowered) openedWaterTick = tickCounter;
             prevWaterPowered = powered;
         }
 
@@ -104,8 +127,7 @@ public class WaterSolver {
             if (mc.theWorld.getBlockState(pos).getBlock() != Blocks.lever) continue;
             boolean powered = isLeverPowered(pos);
             Boolean prev = prevPowered.get(key);
-            if (prev != null && powered != prev)
-                clickCounts.merge(key, 1, Integer::sum);
+            if (prev != null && powered != prev) clickCounts.merge(key, 1, Integer::sum);
             prevPowered.put(key, powered);
         }
 
@@ -130,14 +152,14 @@ public class WaterSolver {
             if (key.equals("water")) {
                 if (openedWaterTick == -1 && waterLeverPos != null) {
                     for (int t : times)
-                        pending.add(new Object[]{ waterLeverPos, t });
+                        pending.add(new Object[]{waterLeverPos, t});
                 }
             } else {
                 BlockPos pos = leverPositions.get(key);
                 if (pos == null) continue;
                 int done = clickCounts.getOrDefault(key, 0);
                 for (int i = done; i < times.length; i++)
-                    pending.add(new Object[]{ pos, times[i] });
+                    pending.add(new Object[]{pos, times[i]});
             }
         }
         pending.sort(Comparator.comparingInt(a -> (int) a[1]));
@@ -147,17 +169,14 @@ public class WaterSolver {
         GL11.glTranslated(-vx, -vy, -vz);
         for (int i = 0; i < pending.size(); i++) {
             BlockPos pos = (BlockPos) pending.get(i)[0];
-            WorldRenderUtils.drawEspBox(pos.getX(), pos.getY(), pos.getZ(),
-                    i == 0 ? java.awt.Color.GREEN : java.awt.Color.YELLOW);
+            WorldRenderUtils.drawEspBox(pos.getX(), pos.getY(), pos.getZ(), i == 0 ? java.awt.Color.GREEN : java.awt.Color.YELLOW);
         }
         GL11.glPopMatrix();
         WorldRenderUtils.endWorldRender();
 
         if (!pending.isEmpty()) {
             BlockPos nextPos = (BlockPos) pending.get(0)[0];
-            WorldRenderUtils.drawTracer(
-                    new Vec3(nextPos.getX() + 0.5, nextPos.getY() + 0.5, nextPos.getZ() + 0.5),
-                    event.partialTicks, java.awt.Color.GREEN);
+            WorldRenderUtils.drawTracer(new Vec3(nextPos.getX() + 0.5, nextPos.getY() + 0.5, nextPos.getZ() + 0.5), event.partialTicks, java.awt.Color.GREEN);
         }
 
         GL11.glDisable(GL11.GL_LIGHTING);
@@ -172,8 +191,7 @@ public class WaterSolver {
             int[] times = entry.getValue();
             for (int i = 0; i < times.length - done; i++) {
                 String label = buildLabel(times[done + i], done + i);
-                WorldRenderUtils.drawTextInWorld(label,
-                        pos.getX() + 0.5, pos.getY() + 1.5 + (done + i) * 0.5, pos.getZ() + 0.5);
+                WorldRenderUtils.drawTextInWorld(label, pos.getX() + 0.5, pos.getY() + 1.5 + (done + i) * 0.5, pos.getZ() + 0.5);
             }
         }
         GL11.glPopMatrix();
@@ -217,18 +235,16 @@ public class WaterSolver {
         String newSlots = sb.length() == 3 ? sb.toString() : null;
         int newPattern = detectPattern();
         boolean optimized = JefConfig.feature.dungeons.dungeonBreakerOverlay;
-        if (newPattern == patternId && Objects.equals(newSlots, extendedSlots)
-                && !leverPositions.isEmpty() && optimized == lastOptimized) return;
+        if (newPattern == patternId && Objects.equals(newSlots, extendedSlots) && !leverPositions.isEmpty() && optimized == lastOptimized)
+            return;
         lastOptimized = optimized;
 
-        patternId     = newPattern;
+        patternId = newPattern;
         extendedSlots = newSlots;
 
-        leverPositions = detectLeverPositions(
-                new BlockPos(pistonHead.getX(), pistonHead.getY() + 4, pistonHead.getZ()));
+        leverPositions = detectLeverPositions(new BlockPos(pistonHead.getX(), pistonHead.getY() + 4, pistonHead.getZ()));
 
-        if (patternId != -1 && extendedSlots != null)
-            loadSolutions();
+        if (patternId != -1 && extendedSlots != null) loadSolutions();
     }
 
     private int detectPattern() {
@@ -238,9 +254,9 @@ public class WaterSolver {
                 Block b77 = mc.theWorld.getBlockState(new BlockPos(x, 77, z)).getBlock();
                 Block b78 = mc.theWorld.getBlockState(new BlockPos(x, 78, z)).getBlock();
                 if (b77 == Blocks.hardened_clay) return 0;
-                if (b78 == Blocks.emerald_block)  return 1;
-                if (b78 == Blocks.diamond_block)  return 2;
-                if (b78 == Blocks.quartz_block)   return 3;
+                if (b78 == Blocks.emerald_block) return 1;
+                if (b78 == Blocks.diamond_block) return 2;
+                if (b78 == Blocks.quartz_block) return 3;
             }
         }
         return -1;
@@ -256,21 +272,18 @@ public class WaterSolver {
             if (state.getBlock() != Blocks.piston_head) continue;
             EnumFacing facing = state.getValue(BlockPistonExtension.FACING);
             BlockPos woolPos = stepInDirection(pos, facing);
-            if (woolPos != null)
-                found.add(mc.theWorld.getBlockState(woolPos).getValue(BlockColored.COLOR));
+            if (woolPos != null) found.add(mc.theWorld.getBlockState(woolPos).getValue(BlockColored.COLOR));
         }
 
         List<EnumDyeColor> sorted = new ArrayList<>();
-        for (EnumDyeColor c : new EnumDyeColor[]{
-                EnumDyeColor.PURPLE, EnumDyeColor.ORANGE,
-                EnumDyeColor.BLUE,   EnumDyeColor.LIME, EnumDyeColor.RED})
+        for (EnumDyeColor c : new EnumDyeColor[]{EnumDyeColor.PURPLE, EnumDyeColor.ORANGE, EnumDyeColor.BLUE, EnumDyeColor.LIME, EnumDyeColor.RED})
             if (found.contains(c)) sorted.add(c);
         return sorted;
     }
 
     private Map<String, BlockPos> detectLeverPositions(BlockPos origin) {
         Map<String, BlockPos> result = new HashMap<>();
-        BlockPos scan1 = new BlockPos(origin.getX() + 16, origin.getY(),     origin.getZ() + 16);
+        BlockPos scan1 = new BlockPos(origin.getX() + 16, origin.getY(), origin.getZ() + 16);
         BlockPos scan2 = new BlockPos(origin.getX() - 16, origin.getY() - 1, origin.getZ() - 16);
 
         for (BlockPos pos : BlockPos.getAllInBox(scan1, scan2)) {
@@ -281,15 +294,13 @@ public class WaterSolver {
             BlockPos behind = stepOpposite(pos, facing);
             if (behind == null) continue;
 
-            String name = Block.blockRegistry
-                    .getNameForObject(mc.theWorld.getBlockState(behind).getBlock()).toString();
+            String name = Block.blockRegistry.getNameForObject(mc.theWorld.getBlockState(behind).getBlock()).toString();
 
             if (isTargetBlock(name)) {
                 result.put(name, pos);
             } else if (facing == EnumFacing.UP) {
                 IBlockState belowState = mc.theWorld.getBlockState(behind);
-                if (belowState.getBlock() == Blocks.stone
-                        && belowState.getValue(BlockStone.VARIANT) == BlockStone.EnumType.ANDESITE_SMOOTH) {
+                if (belowState.getBlock() == Blocks.stone && belowState.getValue(BlockStone.VARIANT) == BlockStone.EnumType.ANDESITE_SMOOTH) {
                     waterLeverPos = pos;
                 }
             }
@@ -311,15 +322,12 @@ public class WaterSolver {
 
         try {
             boolean optimized = false;
-            JsonObject bySlots = solutionsJson
-                    .getAsJsonObject(String.valueOf(optimized))
-                    .getAsJsonObject(String.valueOf(patternId))
-                    .getAsJsonObject(extendedSlots);
+            JsonObject bySlots = solutionsJson.getAsJsonObject(String.valueOf(optimized)).getAsJsonObject(String.valueOf(patternId)).getAsJsonObject(extendedSlots);
 
             Map<String, int[]> loaded = new HashMap<>();
             for (Map.Entry<String, com.google.gson.JsonElement> entry : bySlots.entrySet()) {
                 String leverName = entry.getKey();
-                String leverKey  = "minecraft:" + leverName;
+                String leverKey = "minecraft:" + leverName;
                 if (leverName.equals("water")) {
                     loaded.put("water", toTickArray(entry.getValue().getAsJsonArray()));
                     continue;
@@ -331,13 +339,6 @@ public class WaterSolver {
         } catch (Exception e) {
             solutions = new HashMap<>();
         }
-    }
-
-    private static int[] toTickArray(com.google.gson.JsonArray arr) {
-        int[] out = new int[arr.size()];
-        for (int i = 0; i < arr.size(); i++)
-            out[i] = (int)(arr.get(i).getAsDouble() * 20);
-        return out;
     }
 
     private BlockPos checkForBlock(Block target, int radius, int yLevel) {
@@ -355,54 +356,23 @@ public class WaterSolver {
         return s.getBlock() == Blocks.lever && s.getValue(BlockLever.POWERED);
     }
 
-    private static BlockPos stepInDirection(BlockPos pos, EnumFacing facing) {
-        switch (facing) {
-            case NORTH: return new BlockPos(pos.getX(),     pos.getY(), pos.getZ() - 1);
-            case EAST:  return new BlockPos(pos.getX() + 1, pos.getY(), pos.getZ());
-            case SOUTH: return new BlockPos(pos.getX(),     pos.getY(), pos.getZ() + 1);
-            case WEST:  return new BlockPos(pos.getX() - 1, pos.getY(), pos.getZ());
-            default:    return null;
-        }
-    }
-
-    private static BlockPos stepOpposite(BlockPos pos, EnumFacing facing) {
-        switch (facing) {
-            case NORTH: return new BlockPos(pos.getX(),     pos.getY(),     pos.getZ() + 1);
-            case EAST:  return new BlockPos(pos.getX() - 1, pos.getY(),     pos.getZ());
-            case SOUTH: return new BlockPos(pos.getX(),     pos.getY(),     pos.getZ() - 1);
-            case WEST:  return new BlockPos(pos.getX() + 1, pos.getY(),     pos.getZ());
-            case UP:    return new BlockPos(pos.getX(),     pos.getY() - 1, pos.getZ());
-            case DOWN:  return new BlockPos(pos.getX(),     pos.getY() + 1, pos.getZ());
-            default:    return null;
-        }
-    }
-
-    private static boolean isTargetBlock(String name) {
-        return name.equals("minecraft:quartz_block")  ||
-                name.equals("minecraft:gold_block")    ||
-                name.equals("minecraft:coal_block")    ||
-                name.equals("minecraft:diamond_block") ||
-                name.equals("minecraft:emerald_block") ||
-                name.equals("minecraft:hardened_clay");
-    }
-
     @SubscribeEvent
     public void onWorldUnload(WorldEvent.Load event) {
         reset();
     }
 
     private void reset() {
-        inWaterRoom    = false;
-        patternId      = -1;
-        extendedSlots  = null;
-        lastOptimized  = false;
-        solutions      = new HashMap<>();
+        inWaterRoom = false;
+        patternId = -1;
+        extendedSlots = null;
+        lastOptimized = false;
+        solutions = new HashMap<>();
         leverPositions = new HashMap<>();
-        waterLeverPos  = null;
+        waterLeverPos = null;
         openedWaterTick = -1;
         prevWaterPowered = false;
-        tickCounter    = 0;
-        scanTick       = 0;
+        tickCounter = 0;
+        scanTick = 0;
         clickCounts.clear();
         prevPowered.clear();
     }

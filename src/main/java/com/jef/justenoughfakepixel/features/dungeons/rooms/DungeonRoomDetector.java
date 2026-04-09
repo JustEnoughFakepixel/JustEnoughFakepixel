@@ -5,7 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.jef.justenoughfakepixel.core.JefConfig;
-import com.jef.justenoughfakepixel.features.dungeons.overlays.DungeonStats;
+import com.jef.justenoughfakepixel.features.dungeons.DungeonStats;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.data.SkyblockData;
 import net.minecraft.block.Block;
@@ -38,9 +38,9 @@ public class DungeonRoomDetector {
     public void onTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.START) return;
         if (JefConfig.feature == null || !JefConfig.feature.dungeons.dungeonRoomOverlay) {
-            DungeonRoomOverlay.currentRoomName         = null;
-            DungeonRoomOverlay.currentRoomCategory     = null;
-            DungeonRoomOverlay.currentRoomNotes        = null;
+            DungeonRoomOverlay.currentRoomName = null;
+            DungeonRoomOverlay.currentRoomCategory = null;
+            DungeonRoomOverlay.currentRoomNotes = null;
             DungeonRoomOverlay.currentRoomHasFairySoul = false;
             lastRoomHash = null;
             lastRoomJson = null;
@@ -71,8 +71,7 @@ public class DungeonRoomDetector {
                 String floorHash = getMD5(floorFreq);
 
                 // Box room exception (same as FDR)
-                if ("16370f79b2cad049096f881d5294aee6".equals(md5)
-                        && !"94fb12c91c4b46bd0c254edadaa49a3d".equals(floorHash)) {
+                if ("16370f79b2cad049096f881d5294aee6".equals(md5) && !"94fb12c91c4b46bd0c254edadaa49a3d".equals(floorHash)) {
                     floorHash = "e617eff1d7b77faf0f8dd53ec93a220f";
                 }
 
@@ -86,14 +85,14 @@ public class DungeonRoomDetector {
 
                 if (!roomsJson.has(md5)) {
                     if (JefConfig.feature.debug.dungeonRoomDebug) {
-                        DungeonRoomOverlay.currentRoomCategory     = "Debug";
-                        DungeonRoomOverlay.currentRoomName         = "§cUnknown §7(" + md5.substring(0, 32) + ")";
-                        DungeonRoomOverlay.currentRoomNotes        = "§8Hash not in JSON";
+                        DungeonRoomOverlay.currentRoomCategory = "Debug";
+                        DungeonRoomOverlay.currentRoomName = "§cUnknown §7(" + md5.substring(0, 32) + ")";
+                        DungeonRoomOverlay.currentRoomNotes = "§8Hash not in JSON";
                         DungeonRoomOverlay.currentRoomHasFairySoul = false;
                     } else {
-                        DungeonRoomOverlay.currentRoomName         = null;
-                        DungeonRoomOverlay.currentRoomCategory     = null;
-                        DungeonRoomOverlay.currentRoomNotes        = null;
+                        DungeonRoomOverlay.currentRoomName = null;
+                        DungeonRoomOverlay.currentRoomCategory = null;
+                        DungeonRoomOverlay.currentRoomNotes = null;
                         DungeonRoomOverlay.currentRoomHasFairySoul = false;
                     }
 
@@ -133,12 +132,12 @@ public class DungeonRoomDetector {
     }
 
     private void setOverlay(JsonObject room) {
-        String name     = room.get("name").getAsString();
+        String name = room.get("name").getAsString();
         String category = room.get("category").getAsString();
 
         // Populate the new separate fields — secrets are intentionally not displayed
-        DungeonRoomOverlay.currentRoomCategory     = category;
-        DungeonRoomOverlay.currentRoomName         = name;
+        DungeonRoomOverlay.currentRoomCategory = category;
+        DungeonRoomOverlay.currentRoomName = name;
         DungeonRoomOverlay.currentRoomHasFairySoul = room.has("fairysoul");
 
         JsonElement notes = room.get("notes");
@@ -181,14 +180,14 @@ public class DungeonRoomDetector {
 
     private boolean checkPlatform(int x, int y, int z) {
         World world = Minecraft.getMinecraft().theWorld;
-        int n=0, s=0, e=0, w=0;
+        int n = 0, s = 0, e = 0, w = 0;
         for (int j = 0; j < 10; j++) {
-            if (world.getBlockState(new BlockPos(x,y,z-j)).getBlock() != Blocks.air) n++;
-            if (world.getBlockState(new BlockPos(x,y,z+j)).getBlock() != Blocks.air) s++;
-            if (world.getBlockState(new BlockPos(x+j,y,z)).getBlock() != Blocks.air) e++;
-            if (world.getBlockState(new BlockPos(x-j,y,z)).getBlock() != Blocks.air) w++;
+            if (world.getBlockState(new BlockPos(x, y, z - j)).getBlock() != Blocks.air) n++;
+            if (world.getBlockState(new BlockPos(x, y, z + j)).getBlock() != Blocks.air) s++;
+            if (world.getBlockState(new BlockPos(x + j, y, z)).getBlock() != Blocks.air) e++;
+            if (world.getBlockState(new BlockPos(x - j, y, z)).getBlock() != Blocks.air) w++;
         }
-        return (n==10 || s==10 || e==10 || w==10);
+        return (n == 10 || s == 10 || e == 10 || w == 10);
     }
 
     private int endOfRoom(int x, int y, int z, String dir) {
@@ -197,39 +196,68 @@ public class DungeonRoomDetector {
             BlockPos bp;
             int coord;
             switch (dir) {
-                case "n": bp = new BlockPos(x,y,z-i); coord = z-i+1;
-                    if (world.getBlockState(bp).getBlock()==Blocks.air || checkPlatform(x,y+1,z-i)
-                            || Math.abs(dungeonHeight(x,z-i)-dungeonHeight(x,z-i+1))>3) return coord; break;
-                case "s": bp = new BlockPos(x,y,z+i); coord = z+i-1;
-                    if (world.getBlockState(bp).getBlock()==Blocks.air || checkPlatform(x,y+1,z+i)
-                            || Math.abs(dungeonHeight(x,z+i)-dungeonHeight(x,z+i-1))>3) return coord; break;
-                case "e": bp = new BlockPos(x+i,y,z); coord = x+i-1;
-                    if (world.getBlockState(bp).getBlock()==Blocks.air || checkPlatform(x+i,y+1,z)
-                            || Math.abs(dungeonHeight(x+i,z)-dungeonHeight(x+i-1,z))>3) return coord; break;
-                case "w": bp = new BlockPos(x-i,y,z); coord = x-i+1;
-                    if (world.getBlockState(bp).getBlock()==Blocks.air || checkPlatform(x-i,y+1,z)
-                            || Math.abs(dungeonHeight(x-i,z)-dungeonHeight(x-i+1,z))>3) return coord; break;
+                case "n":
+                    bp = new BlockPos(x, y, z - i);
+                    coord = z - i + 1;
+                    if (world.getBlockState(bp).getBlock() == Blocks.air || checkPlatform(x, y + 1, z - i) || Math.abs(dungeonHeight(x, z - i) - dungeonHeight(x, z - i + 1)) > 3)
+                        return coord;
+                    break;
+                case "s":
+                    bp = new BlockPos(x, y, z + i);
+                    coord = z + i - 1;
+                    if (world.getBlockState(bp).getBlock() == Blocks.air || checkPlatform(x, y + 1, z + i) || Math.abs(dungeonHeight(x, z + i) - dungeonHeight(x, z + i - 1)) > 3)
+                        return coord;
+                    break;
+                case "e":
+                    bp = new BlockPos(x + i, y, z);
+                    coord = x + i - 1;
+                    if (world.getBlockState(bp).getBlock() == Blocks.air || checkPlatform(x + i, y + 1, z) || Math.abs(dungeonHeight(x + i, z) - dungeonHeight(x + i - 1, z)) > 3)
+                        return coord;
+                    break;
+                case "w":
+                    bp = new BlockPos(x - i, y, z);
+                    coord = x - i + 1;
+                    if (world.getBlockState(bp).getBlock() == Blocks.air || checkPlatform(x - i, y + 1, z) || Math.abs(dungeonHeight(x - i, z) - dungeonHeight(x - i + 1, z)) > 3)
+                        return coord;
+                    break;
             }
         }
         return -1;
     }
 
-    private int northWidth(int x, int y, int z) { int nz=endOfRoom(x,y,z,"n"); return endOfRoom(x,y,nz,"e")-endOfRoom(x,y,nz,"w"); }
-    private int southWidth(int x, int y, int z) { int sz=endOfRoom(x,y,z,"s"); return endOfRoom(x,y,sz,"e")-endOfRoom(x,y,sz,"w"); }
-    private int eastWidth(int x, int y, int z)  { int ex=endOfRoom(x,y,z,"e"); return endOfRoom(ex,y,z,"s")-endOfRoom(ex,y,z,"n"); }
-    private int westWidth(int x, int y, int z)  { int wx=endOfRoom(x,y,z,"w"); return endOfRoom(wx,y,z,"s")-endOfRoom(wx,y,z,"n"); }
+    private int northWidth(int x, int y, int z) {
+        int nz = endOfRoom(x, y, z, "n");
+        return endOfRoom(x, y, nz, "e") - endOfRoom(x, y, nz, "w");
+    }
+
+    private int southWidth(int x, int y, int z) {
+        int sz = endOfRoom(x, y, z, "s");
+        return endOfRoom(x, y, sz, "e") - endOfRoom(x, y, sz, "w");
+    }
+
+    private int eastWidth(int x, int y, int z) {
+        int ex = endOfRoom(x, y, z, "e");
+        return endOfRoom(ex, y, z, "s") - endOfRoom(ex, y, z, "n");
+    }
+
+    private int westWidth(int x, int y, int z) {
+        int wx = endOfRoom(x, y, z, "w");
+        return endOfRoom(wx, y, z, "s") - endOfRoom(wx, y, z, "n");
+    }
 
     private String getSize(int x, int y, int z) {
-        int n=northWidth(x,y,z), s=southWidth(x,y,z), e=eastWidth(x,y,z), w=westWidth(x,y,z);
-        if (n==s && s==e && e==w) { if(n==30) return "1x1"; if(n==62) return "2x2"; }
-        else if (n==s && e==w) {
-            if((n==62&&e==30)||(n==30&&e==62)) return "1x2";
-            if((n==94&&e==30)||(n==30&&e==94)) return "1x3";
-            if((n==126&&e==30)||(n==30&&e==126)) return "1x4";
+        int n = northWidth(x, y, z), s = southWidth(x, y, z), e = eastWidth(x, y, z), w = westWidth(x, y, z);
+        if (n == s && s == e && e == w) {
+            if (n == 30) return "1x1";
+            if (n == 62) return "2x2";
+        } else if (n == s && e == w) {
+            if ((n == 62 && e == 30) || (n == 30 && e == 62)) return "1x2";
+            if ((n == 94 && e == 30) || (n == 30 && e == 94)) return "1x3";
+            if ((n == 126 && e == 30) || (n == 30 && e == 126)) return "1x4";
         } else {
-            int l62=(n==62?1:0)+(s==62?1:0)+(e==62?1:0)+(w==62?1:0);
-            int l30=(n==30?1:0)+(s==30?1:0)+(e==30?1:0)+(w==30?1:0);
-            if(l62>=2 && l30==4-l62) return "L-shape";
+            int l62 = (n == 62 ? 1 : 0) + (s == 62 ? 1 : 0) + (e == 62 ? 1 : 0) + (w == 62 ? 1 : 0);
+            int l30 = (n == 30 ? 1 : 0) + (s == 30 ? 1 : 0) + (e == 30 ? 1 : 0) + (w == 30 ? 1 : 0);
+            if (l62 >= 2 && l30 == 4 - l62) return "L-shape";
         }
         return "error";
     }
@@ -239,45 +267,43 @@ public class DungeonRoomDetector {
         World world = Minecraft.getMinecraft().theWorld;
         List<String> blockList = new ArrayList<>();
 
-        int nw = northWidth(x,y,z), sw = southWidth(x,y,z), ew = eastWidth(x,y,z), ww = westWidth(x,y,z);
+        int nw = northWidth(x, y, z), sw = southWidth(x, y, z), ew = eastWidth(x, y, z), ww = westWidth(x, y, z);
 
         if (nw == sw && ew == ww) {
-            int nz = endOfRoom(x,y,z,"n"), nwx = endOfRoom(x,y,nz,"w");
-            int sz = endOfRoom(x,y,z,"s"), sex = endOfRoom(x,y,sz,"e");
-            for (BlockPos bp : BlockPos.getAllInBox(new BlockPos(nwx,y,nz), new BlockPos(sex,y,sz)))
+            int nz = endOfRoom(x, y, z, "n"), nwx = endOfRoom(x, y, nz, "w");
+            int sz = endOfRoom(x, y, z, "s"), sex = endOfRoom(x, y, sz, "e");
+            for (BlockPos bp : BlockPos.getAllInBox(new BlockPos(nwx, y, nz), new BlockPos(sex, y, sz)))
                 blockList.add(world.getBlockState(bp).toString());
-        } else if (getSize(x,y,z).equals("L-shape")) {
+        } else if (getSize(x, y, z).equals("L-shape")) {
             if (nw == sw) { // E/W unequal
-                int startX = ew > ww ? endOfRoom(x,y,z,"e") : endOfRoom(x,y,z,"w");
-                int nz = endOfRoom(startX,y,z,"n");
+                int startX = ew > ww ? endOfRoom(x, y, z, "e") : endOfRoom(x, y, z, "w");
+                int nz = endOfRoom(startX, y, z, "n");
                 int dx = ew > ww ? -1 : 1;
-                outer: for (int i = 0; i < 200; i++) {
+                for (int i = 0; i < 200; i++) {
                     int cz = nz + i;
-                    if (world.getBlockState(new BlockPos(startX,y,cz)).getBlock()==Blocks.air
-                            || checkPlatform(startX,y+1,cz)
-                            || (i>0 && Math.abs(dungeonHeight(startX,cz)-dungeonHeight(startX,cz-1))>3)) break;
+                    if (world.getBlockState(new BlockPos(startX, y, cz)).getBlock() == Blocks.air || checkPlatform(startX, y + 1, cz) || (i > 0 && Math.abs(dungeonHeight(startX, cz) - dungeonHeight(startX, cz - 1)) > 3))
+                        break;
                     for (int j = 0; j < 200; j++) {
-                        BlockPos bp = new BlockPos(startX+dx*j,y,cz);
+                        BlockPos bp = new BlockPos(startX + dx * j, y, cz);
                         Block b = world.getBlockState(bp).getBlock();
-                        if (b==Blocks.air || checkPlatform(startX+dx*j,y+1,cz)
-                                || (j>0 && Math.abs(dungeonHeight(startX+dx*j,cz)-dungeonHeight(startX+dx*(j-1),cz))>3)) break;
+                        if (b == Blocks.air || checkPlatform(startX + dx * j, y + 1, cz) || (j > 0 && Math.abs(dungeonHeight(startX + dx * j, cz) - dungeonHeight(startX + dx * (j - 1), cz)) > 3))
+                            break;
                         blockList.add(b.toString());
                     }
                 }
             } else { // N/S unequal
-                int startZ = nw > sw ? endOfRoom(x,y,z,"n") : endOfRoom(x,y,z,"s");
-                int wx = endOfRoom(x,y,startZ,"w");
+                int startZ = nw > sw ? endOfRoom(x, y, z, "n") : endOfRoom(x, y, z, "s");
+                int wx = endOfRoom(x, y, startZ, "w");
                 int dz = nw > sw ? 1 : -1;
                 for (int i = 0; i < 200; i++) {
                     int cx = wx + i;
-                    if (world.getBlockState(new BlockPos(cx,y,startZ)).getBlock()==Blocks.air
-                            || checkPlatform(cx,y+1,startZ)
-                            || (i>0 && Math.abs(dungeonHeight(cx,startZ)-dungeonHeight(cx-1,startZ))>3)) break;
+                    if (world.getBlockState(new BlockPos(cx, y, startZ)).getBlock() == Blocks.air || checkPlatform(cx, y + 1, startZ) || (i > 0 && Math.abs(dungeonHeight(cx, startZ) - dungeonHeight(cx - 1, startZ)) > 3))
+                        break;
                     for (int j = 0; j < 200; j++) {
-                        BlockPos bp = new BlockPos(cx,y,startZ+dz*j);
+                        BlockPos bp = new BlockPos(cx, y, startZ + dz * j);
                         Block b = world.getBlockState(bp).getBlock();
-                        if (b==Blocks.air || checkPlatform(cx,y+1,startZ+dz*j)
-                                || (j>0 && Math.abs(dungeonHeight(cx,startZ+dz*j)-dungeonHeight(cx,startZ+dz*(j-1)))>3)) break;
+                        if (b == Blocks.air || checkPlatform(cx, y + 1, startZ + dz * j) || (j > 0 && Math.abs(dungeonHeight(cx, startZ + dz * j) - dungeonHeight(cx, startZ + dz * (j - 1))) > 3))
+                            break;
                         blockList.add(b.toString());
                     }
                 }
@@ -297,13 +323,13 @@ public class DungeonRoomDetector {
         World world = Minecraft.getMinecraft().theWorld;
         List<String> blockList = new ArrayList<>();
 
-        if (northWidth(x,y,z) == southWidth(x,y,z) && eastWidth(x,y,z) == westWidth(x,y,z)) {
-            int nz=endOfRoom(x,y,z,"n"), nwx=endOfRoom(x,y,nz,"w");
-            int sz=endOfRoom(x,y,z,"s"), sex=endOfRoom(x,y,sz,"e");
-            for (BlockPos bp : BlockPos.getAllInBox(new BlockPos(nwx+10,68,nz+10), new BlockPos(sex-10,68,sz-10)))
+        if (northWidth(x, y, z) == southWidth(x, y, z) && eastWidth(x, y, z) == westWidth(x, y, z)) {
+            int nz = endOfRoom(x, y, z, "n"), nwx = endOfRoom(x, y, nz, "w");
+            int sz = endOfRoom(x, y, z, "s"), sex = endOfRoom(x, y, sz, "e");
+            for (BlockPos bp : BlockPos.getAllInBox(new BlockPos(nwx + 10, 68, nz + 10), new BlockPos(sex - 10, 68, sz - 10)))
                 blockList.add(world.getBlockState(bp).getBlock().toString());
         }
-        if (getSize(x,y,z).equals("L-shape")) blockList.add(String.valueOf(dungeonTop(x,68,z)));
+        if (getSize(x, y, z).equals("L-shape")) blockList.add(String.valueOf(dungeonTop(x, 68, z)));
 
         if (blockList.isEmpty()) return null;
         Set<String> distinct = new HashSet<>(blockList);
@@ -322,6 +348,8 @@ public class DungeonRoomDetector {
             String hash = no.toString(16);
             while (hash.length() < 32) hash = "0" + hash;
             return hash;
-        } catch (Exception e) { return null; }
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.jef.justenoughfakepixel.features.scoreboard;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+@Deprecated
 public class UnknownLinesHandler {
 
     public static class Entry {

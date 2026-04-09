@@ -19,9 +19,7 @@ public class RenderEntityModelEvent extends Event {
     private float scaleFactor;
     private ModelBase model;
 
-    public RenderEntityModelEvent(EntityLivingBase entity, float limbSwing, float limbSwingAmount,
-                                  float ageInTicks, float headYaw, float headPitch,
-                                  float scaleFactor, ModelBase model) {
+    public RenderEntityModelEvent(EntityLivingBase entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch, float scaleFactor, ModelBase model) {
         this.entity = entity;
         this.limbSwing = limbSwing;
         this.limbSwingAmount = limbSwingAmount;

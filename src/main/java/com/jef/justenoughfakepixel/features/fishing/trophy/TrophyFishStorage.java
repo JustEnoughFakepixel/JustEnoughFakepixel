@@ -9,19 +9,18 @@ import java.util.Map;
 
 public class TrophyFishStorage {
 
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static TrophyFishStorage INSTANCE;
+    private File file;
+    private StoredData data = new StoredData();
+
+    private TrophyFishStorage() {
+    }
 
     public static TrophyFishStorage getInstance() {
         if (INSTANCE == null) INSTANCE = new TrophyFishStorage();
         return INSTANCE;
     }
-
-    private TrophyFishStorage() {}
-
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-
-    private File file;
-    private StoredData data = new StoredData();
 
     public void initFile(File configDir) {
         this.file = new File(configDir, "trophy_fish.json");
@@ -55,21 +54,24 @@ public class TrophyFishStorage {
         if (counts == null) return 0;
         return counts.getOrDefault(rarity.name(), 0);
     }
+
     public int incrementCount(String fishName, TrophyRarity rarity) {
         Map<String, Integer> counts = data.fish.computeIfAbsent(fishName, k -> new LinkedHashMap<>());
         int next = counts.getOrDefault(rarity.name(), 0) + 1;
         counts.put(rarity.name(), next);
         return next;
     }
+
     public void setCount(String fishName, TrophyRarity rarity, int count) {
-        data.fish.computeIfAbsent(fishName, k -> new LinkedHashMap<>())
-                 .put(rarity.name(), count);
+        data.fish.computeIfAbsent(fishName, k -> new LinkedHashMap<>()).put(rarity.name(), count);
     }
+
     public int getTotal(String fishName) {
         Map<String, Integer> counts = data.fish.get(fishName);
         if (counts == null) return 0;
         return counts.values().stream().mapToInt(Integer::intValue).sum();
     }
+
     public TrophyRarity getBestRarity(String fishName) {
         TrophyRarity best = TrophyRarity.BRONZE;
         for (TrophyRarity r : TrophyRarity.values()) {

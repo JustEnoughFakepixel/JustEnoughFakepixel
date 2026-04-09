@@ -54,9 +54,8 @@ public class HighlightUtils {
         if (display != null && strip(display).toLowerCase(Locale.ROOT).contains(query)) return true;
 
         List<String> tooltip = stack.getTooltip(Minecraft.getMinecraft().thePlayer, false);
-        if (tooltip != null)
-            for (String line : tooltip)
-                if (line != null && strip(line).toLowerCase(Locale.ROOT).contains(query)) return true;
+        if (tooltip != null) for (String line : tooltip)
+            if (line != null && strip(line).toLowerCase(Locale.ROOT).contains(query)) return true;
 
         return false;
     }

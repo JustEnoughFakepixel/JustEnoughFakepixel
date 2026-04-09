@@ -4,8 +4,9 @@ import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import com.jef.justenoughfakepixel.utils.overlay.Overlay;
 import com.jef.justenoughfakepixel.utils.data.SkyblockData;
+import com.jef.justenoughfakepixel.utils.overlay.Overlay;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -16,6 +17,7 @@ import java.util.Map;
 @RegisterEvents
 public class TrophyFishOverlay extends Overlay {
 
+    @Getter
     private static TrophyFishOverlay instance;
 
     public TrophyFishOverlay() {
@@ -23,12 +25,25 @@ public class TrophyFishOverlay extends Overlay {
         instance = this;
     }
 
-    public static TrophyFishOverlay getInstance() { return instance; }
+    @Override
+    public Position getPosition() {
+        return JefConfig.feature.fishing.trophyFishPos;
+    }
 
-    @Override public Position getPosition()     { return JefConfig.feature.fishing.trophyFishPos; }
-    @Override public float    getScale()        { return JefConfig.feature.fishing.trophyFishScale; }
-    @Override public int      getBgColor()      { return ChromaColour.specialToChromaRGB(JefConfig.feature.fishing.trophyFishBgColor); }
-    @Override public int      getCornerRadius() { return JefConfig.feature.fishing.trophyFishCornerRadius; }
+    @Override
+    public float getScale() {
+        return JefConfig.feature.fishing.trophyFishScale;
+    }
+
+    @Override
+    public int getBgColor() {
+        return ChromaColour.specialToChromaRGB(JefConfig.feature.fishing.trophyFishBgColor);
+    }
+
+    @Override
+    public int getCornerRadius() {
+        return JefConfig.feature.fishing.trophyFishCornerRadius;
+    }
 
     @Override
     protected boolean isEnabled() {
@@ -61,19 +76,15 @@ public class TrophyFishOverlay extends Overlay {
             return out;
         }
 
-        fish.entrySet().stream()
-            .filter(e -> storage.getTotal(e.getKey()) > 0)
-            .sorted(Comparator.comparingInt((Map.Entry<String, Map<String, Integer>> e) ->
-                    storage.getTotal(e.getKey())).reversed())
-            .forEach(entry -> {
-                String name = entry.getKey();
-                int b = storage.getCount(name, TrophyRarity.BRONZE);
-                int s = storage.getCount(name, TrophyRarity.SILVER);
-                int g = storage.getCount(name, TrophyRarity.GOLD);
-                int d = storage.getCount(name, TrophyRarity.DIAMOND);
-                String coloredName = storage.getBestRarity(name).formatCode + name;
-                out.add(coloredName + "  §8" + b + " §7" + s + " §6" + g + " §b" + d);
-            });
+        fish.entrySet().stream().filter(e -> storage.getTotal(e.getKey()) > 0).sorted(Comparator.comparingInt((Map.Entry<String, Map<String, Integer>> e) -> storage.getTotal(e.getKey())).reversed()).forEach(entry -> {
+            String name = entry.getKey();
+            int b = storage.getCount(name, TrophyRarity.BRONZE);
+            int s = storage.getCount(name, TrophyRarity.SILVER);
+            int g = storage.getCount(name, TrophyRarity.GOLD);
+            int d = storage.getCount(name, TrophyRarity.DIAMOND);
+            String coloredName = storage.getBestRarity(name).formatCode + name;
+            out.add(coloredName + "  §8" + b + " §7" + s + " §6" + g + " §b" + d);
+        });
 
         return out;
     }

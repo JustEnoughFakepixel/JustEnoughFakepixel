@@ -15,15 +15,13 @@ public class EnchantChromaRenderer {
     private static boolean chromaOn;
     private static boolean renderingShadow;
 
-    private EnchantChromaRenderer() {}
+    private EnchantChromaRenderer() {
+    }
 
     public static void beginRenderString(String text, boolean shadow) {
         chromaOn = false;
         renderingShadow = shadow;
-        chromaActive = JefConfig.feature != null
-                && JefConfig.feature.qol.enchantChroma
-                && text != null
-                && (text.contains("\u00a7z") || text.contains("\u00a7Z"));
+        chromaActive = JefConfig.feature != null && JefConfig.feature.qol.enchantChroma && text != null && (text.contains("§z") || text.contains("§Z"));
     }
 
     public static void onChromaCode() {

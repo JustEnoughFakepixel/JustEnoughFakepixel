@@ -31,96 +31,13 @@ import java.util.regex.Pattern;
 public class BrewingStandHelper {
 
     private static final Minecraft mc = Minecraft.getMinecraft();
-    private static final Pattern TIME_REGEX = Pattern.compile("\u00a7a(\\d+(?:\\.\\d)?)s");
-
-    private TileEntityBrewingStand lastBrewingStand = null;
+    private static final Pattern TIME_REGEX = Pattern.compile("§a(\\d+(?:\\.\\d)?)s");
     private final Map<BlockPos, Long> brewingStandToTimeMap = new HashMap<>();
+    private TileEntityBrewingStand lastBrewingStand = null;
     private int tickCounter = 0;
 
     private static boolean isOnPrivateIsland() {
         return SkyblockData.getCurrentLocation() == SkyblockData.Location.PRIVATE_ISLAND;
-    }
-
-    @SubscribeEvent
-    public void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.START) return;
-        if (JefConfig.feature == null || !JefConfig.feature.qol.colorBrewingStands) return;
-        if (mc.theWorld == null) return;
-        if (!isOnPrivateIsland()) return;
-        if (++tickCounter % 100 != 0) return;
-
-        Iterator<Map.Entry<BlockPos, Long>> it = brewingStandToTimeMap.entrySet().iterator();
-        while (it.hasNext()) {
-            if (!(mc.theWorld.getTileEntity(it.next().getKey()) instanceof TileEntityBrewingStand))
-                it.remove();
-        }
-    }
-
-    @SubscribeEvent
-    public void onPlayerInteract(PlayerInteractEvent event) {
-        if (JefConfig.feature == null || !JefConfig.feature.qol.colorBrewingStands) return;
-        if (!isOnPrivateIsland()) return;
-        if (event.action != PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK) return;
-        if (mc.theWorld == null) return;
-        if (mc.theWorld.getTileEntity(event.pos) instanceof TileEntityBrewingStand)
-            lastBrewingStand = (TileEntityBrewingStand) mc.theWorld.getTileEntity(event.pos);
-    }
-
-    @SubscribeEvent
-    public void onGuiDraw(GuiScreenEvent.DrawScreenEvent.Pre event) {
-        if (JefConfig.feature == null || !JefConfig.feature.qol.colorBrewingStands) return;
-        if (!isOnPrivateIsland()) return;
-        if (lastBrewingStand == null) return;
-        if (!(event.gui instanceof GuiChest)) return;
-
-        ContainerChest container = (ContainerChest) ((GuiChest) event.gui).inventorySlots;
-        if (!container.getLowerChestInventory().getDisplayName().getUnformattedText().equals("Brewing Stand")) return;
-
-        BlockPos pos = lastBrewingStand.getPos();
-        double time = 0.0;
-        boolean found = false;
-
-        for (int i = 0; i < container.inventorySlots.size(); i++) {
-            ItemStack stack = container.getSlot(i).getStack();
-            if (stack == null) continue;
-            Matcher matcher = TIME_REGEX.matcher(stack.getDisplayName());
-            if (matcher.find()) {
-                try { time = Double.parseDouble(matcher.group(1)); found = true; }
-                catch (NumberFormatException ignored) {}
-                break;
-            }
-        }
-
-        if (!found) {
-            brewingStandToTimeMap.remove(pos);
-            return;
-        }
-
-        brewingStandToTimeMap.put(pos, System.currentTimeMillis() + (long)(time * 1000L));
-    }
-
-    @SubscribeEvent
-    public void onRenderWorld(RenderWorldLastEvent event) {
-        if (JefConfig.feature == null || !JefConfig.feature.qol.colorBrewingStands) return;
-        if (!isOnPrivateIsland()) return;
-        if (mc.theWorld == null || mc.thePlayer == null) return;
-
-        float pt = event.partialTicks;
-        double vx = mc.thePlayer.lastTickPosX + (mc.thePlayer.posX - mc.thePlayer.lastTickPosX) * pt;
-        double vy = mc.thePlayer.lastTickPosY + (mc.thePlayer.posY - mc.thePlayer.lastTickPosY) * pt;
-        double vz = mc.thePlayer.lastTickPosZ + (mc.thePlayer.posZ - mc.thePlayer.lastTickPosZ) * pt;
-
-        long now = System.currentTimeMillis();
-
-        for (Map.Entry<BlockPos, Long> entry : brewingStandToTimeMap.entrySet()) {
-            if (entry.getValue() <= now) continue;
-            BlockPos pos = entry.getKey();
-            AxisAlignedBB bb = new AxisAlignedBB(
-                    pos.getX()     - vx, pos.getY()     - vy, pos.getZ()     - vz,
-                    pos.getX() + 1 - vx, pos.getY() + 1 - vy, pos.getZ() + 1 - vz
-            );
-            drawFilledBox(bb, 1f, 0f, 0f, 0.5f);
-        }
     }
 
     private static void drawFilledBox(AxisAlignedBB bb, float r, float g, float b, float a) {
@@ -173,5 +90,86 @@ public class BrewingStandHelper {
         GlStateManager.enableLighting();
         GlStateManager.enableTexture2D();
         GlStateManager.disableBlend();
+    }
+
+    @SubscribeEvent
+    public void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.START) return;
+        if (JefConfig.feature == null || !JefConfig.feature.qol.colorBrewingStands) return;
+        if (mc.theWorld == null) return;
+        if (!isOnPrivateIsland()) return;
+        if (++tickCounter % 100 != 0) return;
+
+        Iterator<Map.Entry<BlockPos, Long>> it = brewingStandToTimeMap.entrySet().iterator();
+        while (it.hasNext()) {
+            if (!(mc.theWorld.getTileEntity(it.next().getKey()) instanceof TileEntityBrewingStand)) it.remove();
+        }
+    }
+
+    @SubscribeEvent
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        if (JefConfig.feature == null || !JefConfig.feature.qol.colorBrewingStands) return;
+        if (!isOnPrivateIsland()) return;
+        if (event.action != PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK) return;
+        if (mc.theWorld == null) return;
+        if (mc.theWorld.getTileEntity(event.pos) instanceof TileEntityBrewingStand)
+            lastBrewingStand = (TileEntityBrewingStand) mc.theWorld.getTileEntity(event.pos);
+    }
+
+    @SubscribeEvent
+    public void onGuiDraw(GuiScreenEvent.DrawScreenEvent.Pre event) {
+        if (JefConfig.feature == null || !JefConfig.feature.qol.colorBrewingStands) return;
+        if (!isOnPrivateIsland()) return;
+        if (lastBrewingStand == null) return;
+        if (!(event.gui instanceof GuiChest)) return;
+
+        ContainerChest container = (ContainerChest) ((GuiChest) event.gui).inventorySlots;
+        if (!container.getLowerChestInventory().getDisplayName().getUnformattedText().equals("Brewing Stand")) return;
+
+        BlockPos pos = lastBrewingStand.getPos();
+        double time = 0.0;
+        boolean found = false;
+
+        for (int i = 0; i < container.inventorySlots.size(); i++) {
+            ItemStack stack = container.getSlot(i).getStack();
+            if (stack == null) continue;
+            Matcher matcher = TIME_REGEX.matcher(stack.getDisplayName());
+            if (matcher.find()) {
+                try {
+                    time = Double.parseDouble(matcher.group(1));
+                    found = true;
+                } catch (NumberFormatException ignored) {
+                }
+                break;
+            }
+        }
+
+        if (!found) {
+            brewingStandToTimeMap.remove(pos);
+            return;
+        }
+
+        brewingStandToTimeMap.put(pos, System.currentTimeMillis() + (long) (time * 1000L));
+    }
+
+    @SubscribeEvent
+    public void onRenderWorld(RenderWorldLastEvent event) {
+        if (JefConfig.feature == null || !JefConfig.feature.qol.colorBrewingStands) return;
+        if (!isOnPrivateIsland()) return;
+        if (mc.theWorld == null || mc.thePlayer == null) return;
+
+        float pt = event.partialTicks;
+        double vx = mc.thePlayer.lastTickPosX + (mc.thePlayer.posX - mc.thePlayer.lastTickPosX) * pt;
+        double vy = mc.thePlayer.lastTickPosY + (mc.thePlayer.posY - mc.thePlayer.lastTickPosY) * pt;
+        double vz = mc.thePlayer.lastTickPosZ + (mc.thePlayer.posZ - mc.thePlayer.lastTickPosZ) * pt;
+
+        long now = System.currentTimeMillis();
+
+        for (Map.Entry<BlockPos, Long> entry : brewingStandToTimeMap.entrySet()) {
+            if (entry.getValue() <= now) continue;
+            BlockPos pos = entry.getKey();
+            AxisAlignedBB bb = new AxisAlignedBB(pos.getX() - vx, pos.getY() - vy, pos.getZ() - vz, pos.getX() + 1 - vx, pos.getY() + 1 - vy, pos.getZ() + 1 - vz);
+            drawFilledBox(bb, 1f, 0f, 0f, 0.5f);
+        }
     }
 }

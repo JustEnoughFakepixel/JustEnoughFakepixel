@@ -3,6 +3,7 @@ package com.jef.justenoughfakepixel.features.scoreboard;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
 public class CustomScoreboardAPI {
 
     private static List<String> lastLines = new ArrayList<>();

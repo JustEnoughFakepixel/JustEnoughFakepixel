@@ -14,38 +14,36 @@ import java.util.*;
 @RegisterEvents
 public class LootshareDetect {
 
-    private static final long   NAME_CHECK_TIMEOUT_MS = 5_000L;
-    private static final long   LOOTSHARE_WINDOW_MS   = 2_000L;
-    private static final String DIANA_MARKER = "\u273f"; // ✿
-
-    private final Map<Integer, Long>             unconfirmed    = new HashMap<>();
-    private final Map<Integer, EntityArmorStand> tracked        = new HashMap<>();
-    private final Set<Integer>                   trackedInqs    = new HashSet<>();
-    private final Set<Integer>                   trackedNonInqs = new HashSet<>();
-
-    private static volatile long    lastInqDisappearMs = -1L;
-    private static volatile boolean nonInqMobActive    = false;
-
+    private static final long NAME_CHECK_TIMEOUT_MS = 5_000L;
+    private static final long LOOTSHARE_WINDOW_MS = 2_000L;
+    private static final String DIANA_MARKER = "✿"; // ✿
+    private static volatile long lastInqDisappearMs = -1L;
+    private static volatile boolean nonInqMobActive = false;
     private static LootshareDetect INSTANCE;
-    public LootshareDetect() { INSTANCE = this; }
-
+    private final Map<Integer, Long> unconfirmed = new HashMap<>();
+    private final Map<Integer, EntityArmorStand> tracked = new HashMap<>();
+    private final Set<Integer> trackedInqs = new HashSet<>();
+    private final Set<Integer> trackedNonInqs = new HashSet<>();
     private final Minecraft mc = Minecraft.getMinecraft();
 
-    /** Called by DianaTracker when "Uh oh! You dug out X" fires for a non-inq mob */
+    public LootshareDetect() {
+        INSTANCE = this;
+    }
+
+    // Called by DianaTracker when "Uh oh! You dug out X" fires for a non-inq mob
     public static void onNonInqMobDug() {
         nonInqMobActive = true;
     }
 
     public static boolean wasInqKilledByOther() {
-        return lastInqDisappearMs > 0
-                && System.currentTimeMillis() - lastInqDisappearMs <= LOOTSHARE_WINDOW_MS;
+        return lastInqDisappearMs > 0 && System.currentTimeMillis() - lastInqDisappearMs <= LOOTSHARE_WINDOW_MS;
     }
 
     public static void clearInqDisappear() {
         lastInqDisappearMs = -1L;
     }
 
-    /** Returns the closest tracked inq stand name, or null */
+    // Returns the closest tracked inq stand name, or null
     public static String getClosestInqName() {
         if (INSTANCE == null) return null;
         Minecraft mc = Minecraft.getMinecraft();
@@ -57,12 +55,15 @@ public class LootshareDetect {
             EntityArmorStand stand = e.getValue();
             if (stand.isDead) continue;
             double d = mc.thePlayer.getDistanceSqToEntity(stand);
-            if (d < minDist) { minDist = d; closest = stand; }
+            if (d < minDist) {
+                minDist = d;
+                closest = stand;
+            }
         }
         return closest != null ? closest.getCustomNameTag() : null;
     }
 
-    /** Returns the closest tracked non-inq diana mob stand name, only after a dig message fired */
+    // Returns the closest tracked non-inq diana mob stand name, only after a dig message fired
     public static String getClosestNonInqMobName() {
         if (INSTANCE == null || !nonInqMobActive) return null;
         Minecraft mc = Minecraft.getMinecraft();
@@ -74,7 +75,10 @@ public class LootshareDetect {
             EntityArmorStand stand = e.getValue();
             if (stand.isDead) continue;
             double d = mc.thePlayer.getDistanceSqToEntity(stand);
-            if (d < minDist) { minDist = d; closest = stand; }
+            if (d < minDist) {
+                minDist = d;
+                closest = stand;
+            }
         }
         return closest != null ? closest.getCustomNameTag() : null;
     }
@@ -113,9 +117,12 @@ public class LootshareDetect {
             int id = entry.getKey();
             Entity entity = mc.theWorld.getEntityByID(id);
 
-            if (!(entity instanceof EntityArmorStand) || entity.isDead) { it.remove(); continue; }
+            if (!(entity instanceof EntityArmorStand) || entity.isDead) {
+                it.remove();
+                continue;
+            }
 
-            String name = ((EntityArmorStand) entity).getCustomNameTag();
+            String name = entity.getCustomNameTag();
             if (name.contains(DIANA_MARKER)) {
                 tracked.put(id, (EntityArmorStand) entity);
                 String cleanName = net.minecraft.util.StringUtils.stripControlCodes(name);
@@ -140,8 +147,7 @@ public class LootshareDetect {
 
             if (!stand.isDead) {
                 if (!trackedInqs.contains(id) && !trackedNonInqs.contains(id)) {
-                    String clean = net.minecraft.util.StringUtils.stripControlCodes(
-                            stand.getCustomNameTag());
+                    String clean = net.minecraft.util.StringUtils.stripControlCodes(stand.getCustomNameTag());
                     if (clean.contains("Minos Inquisitor")) trackedInqs.add(id);
                 }
                 continue;

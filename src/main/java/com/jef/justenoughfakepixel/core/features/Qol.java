@@ -96,7 +96,7 @@ public class Qol {
     public String enchantUltimateColor = "0:255:255:85:255";
 
     @Expose
-    @ConfigOption(name = "Gyro Wand Helper", desc = "Settings for the Gyrokinetic Wand helper")
+    @ConfigOption(name = "Gyro Wand Ring", desc = "Settings for the Gyrokinetic Wand AoE ring")
     @ConfigEditorAccordion(id = 20)
     public boolean gyroWandAccordion = false;
 
@@ -113,43 +113,118 @@ public class Qol {
     public float gyroWandThickness = 2f;
 
     @Expose
-    @ConfigOption(name = "Cooldown Timer", desc = "Shows a cooldown timer overlay when the Gyro Wand ability is on cooldown")
-    @ConfigEditorBoolean
-    @ConfigAccordionId(id = 20)
-    public boolean gyroWandTimer = true;
+    @ConfigOption(name = "Item Cooldown Overlay", desc = "Settings for the item ability cooldown overlay")
+    @ConfigEditorAccordion(id = 23)
+    public boolean itemCooldownAccordion = false;
 
     @Expose
-    @ConfigOption(name = "Always Show Timer", desc = "Shows the cooldown timer even when the Gyro Wand is not held")
+    @ConfigOption(name = "Enable Overlay", desc = "Shows a cooldown timer overlay for item abilities")
     @ConfigEditorBoolean
-    @ConfigAccordionId(id = 20)
-    public boolean gyroWandTimerAlways = false;
+    @ConfigAccordionId(id = 23)
+    public boolean itemCooldownOverlay = true;
 
     @Expose
-    @ConfigOption(name = "Background Color", desc = "Background color of the cooldown timer overlay")
+    @ConfigOption(name = "Background Color", desc = "Background color of the cooldown overlay")
     @ConfigEditorColour
-    @ConfigAccordionId(id = 20)
-    public String gyroWandBgColor = "0:136:0:0:0";
+    @ConfigAccordionId(id = 23)
+    public String itemCooldownBgColor = "0:136:0:0:0";
 
     @Expose
-    @ConfigOption(name = "Corner Radius", desc = "Roundness of the cooldown timer overlay corners")
+    @ConfigOption(name = "Corner Radius", desc = "Roundness of the overlay corners")
     @ConfigEditorSliderAnnotation(minValue = 0f, maxValue = 12f, minStep = 1f)
-    @ConfigAccordionId(id = 20)
-    public int gyroWandCornerRadius = 4;
+    @ConfigAccordionId(id = 23)
+    public int itemCooldownCornerRadius = 4;
 
     @Expose
-    @ConfigOption(name = "Scale", desc = "Size of the cooldown timer overlay")
+    @ConfigOption(name = "Scale", desc = "Size of the cooldown overlay")
     @ConfigEditorSliderAnnotation(minValue = 0.5f, maxValue = 3f, minStep = 0.1f)
-    @ConfigAccordionId(id = 20)
-    public float gyroWandScale = 1f;
+    @ConfigAccordionId(id = 23)
+    public float itemCooldownScale = 1f;
 
     @Expose
-    @ConfigOption(name = "Edit Timer Position", desc = "Drag the cooldown timer overlay to reposition it")
-    @ConfigEditorButton(runnableId = "openGyroWandEditor", buttonText = "Edit")
-    @ConfigAccordionId(id = 20)
-    public boolean gyroWandEditPosDummy = false;
+    @ConfigOption(name = "Edit Overlay Position", desc = "Drag the cooldown overlay to reposition it")
+    @ConfigEditorButton(runnableId = "openItemCooldownEditor", buttonText = "Edit")
+    @ConfigAccordionId(id = 23)
+    public boolean itemCooldownEditPosDummy = false;
 
     @Expose
-    public Position gyroWandPos = new Position(4, 4);
+    public Position itemCooldownPos = new Position(4, 4);
+
+    @Expose
+    @ConfigOption(name = "Ability Timer Overlay", desc = "Settings for the item ability active-duration overlay")
+    @ConfigEditorAccordion(id = 24)
+    public boolean itemAbilityTimerAccordion = false;
+
+    @Expose
+    @ConfigOption(name = "Enable Overlay", desc = "Shows a timer while an item ability is active (e.g. Fire Veil Wand 5s wall)")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 24)
+    public boolean itemAbilityTimerOverlay = true;
+
+    @Expose
+    @ConfigOption(name = "Background Color", desc = "Background color of the ability timer overlay")
+    @ConfigEditorColour
+    @ConfigAccordionId(id = 24)
+    public String itemAbilityTimerBgColor = "0:136:0:0:0";
+
+    @Expose
+    @ConfigOption(name = "Corner Radius", desc = "Roundness of the overlay corners")
+    @ConfigEditorSliderAnnotation(minValue = 0f, maxValue = 12f, minStep = 1f)
+    @ConfigAccordionId(id = 24)
+    public int itemAbilityTimerCornerRadius = 4;
+
+    @Expose
+    @ConfigOption(name = "Scale", desc = "Size of the ability timer overlay")
+    @ConfigEditorSliderAnnotation(minValue = 0.5f, maxValue = 3f, minStep = 0.1f)
+    @ConfigAccordionId(id = 24)
+    public float itemAbilityTimerScale = 1f;
+
+    @Expose
+    @ConfigOption(name = "Edit Overlay Position", desc = "Drag the ability timer overlay to reposition it")
+    @ConfigEditorButton(runnableId = "openItemAbilityTimerEditor", buttonText = "Edit")
+    @ConfigAccordionId(id = 24)
+    public boolean itemAbilityTimerEditPosDummy = false;
+
+    @Expose
+    public Position itemAbilityTimerPos = new Position(4, 30);
+
+    @Expose
+    @ConfigOption(name = "Invincibility Overlay", desc = "Settings for the post-save invincibility timer overlay")
+    @ConfigEditorAccordion(id = 25)
+    public boolean itemInvincibilityAccordion = false;
+
+    @Expose
+    @ConfigOption(name = "Enable Overlay", desc = "Shows a timer for the invincibility window granted by Bonzo's Mask and Spirit Mask")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 25)
+    public boolean itemInvincibilityOverlay = true;
+
+    @Expose
+    @ConfigOption(name = "Background Color", desc = "Background color of the invincibility overlay")
+    @ConfigEditorColour
+    @ConfigAccordionId(id = 25)
+    public String itemInvincibilityBgColor = "0:136:0:0:0";
+
+    @Expose
+    @ConfigOption(name = "Corner Radius", desc = "Roundness of the overlay corners")
+    @ConfigEditorSliderAnnotation(minValue = 0f, maxValue = 12f, minStep = 1f)
+    @ConfigAccordionId(id = 25)
+    public int itemInvincibilityCornerRadius = 4;
+
+    @Expose
+    @ConfigOption(name = "Scale", desc = "Size of the invincibility overlay")
+    @ConfigEditorSliderAnnotation(minValue = 0.5f, maxValue = 3f, minStep = 0.1f)
+    @ConfigAccordionId(id = 25)
+    public float itemInvincibilityScale = 1f;
+
+    @Expose
+    @ConfigOption(name = "Edit Overlay Position", desc = "Drag the invincibility overlay to reposition it")
+    @ConfigEditorButton(runnableId = "openItemInvincibilityEditor", buttonText = "Edit")
+    @ConfigAccordionId(id = 25)
+    public boolean itemInvincibilityEditPosDummy = false;
+
+    @Expose
+    public Position itemInvincibilityPos = new Position(4, 56);
 
     @Expose
     @ConfigOption(name = "Block Selection Overlay", desc = "Customize the block selection highlight")
