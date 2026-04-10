@@ -22,10 +22,6 @@ public class Config {
     public final Scoreboard scoreboard = new Scoreboard();
 
     @Expose
-    @Category(name = "Storage", desc = "Custom scoreboard panel")
-    public final Storage storage = new Storage();
-
-    @Expose
     @Category(name = "Misc", desc = "Misc features")
     public final Misc misc = new Misc();
 
