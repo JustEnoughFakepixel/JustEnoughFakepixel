@@ -1710,6 +1710,12 @@
       "goodLevel": 5,
       "maxLevel": 6
     },
+    "piscary": {
+      "loreName": "Piscary",
+      "nbtName": "piscary",
+      "goodLevel": 5,
+      "maxLevel": 6
+    },
     "caster": {
       "loreName": "Caster",
       "nbtName": "caster",
@@ -1847,6 +1853,12 @@
       "nbtName": "fortune",
       "goodLevel": 3,
       "maxLevel": 4
+    },
+    "lapidary": {
+      "loreName": "Lapidary",
+      "nbtName": "lapidary",
+      "goodLevel": 0,
+      "maxLevel": 5
     },
     "frail": {
       "loreName": "Frail",
