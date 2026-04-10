@@ -42,8 +42,8 @@ public class StorageOverlay extends GuiScreen {
 
     @Override
     public void initGui() {
-        SCROLL_SPEED = 100 * (JefConfig.feature.storage.scrollSpeed);
-        isHorizontal = JefConfig.feature.storage.horizontalScroll;
+        SCROLL_SPEED = 100 * (JefConfig.feature.dungeons.bloodMobHighlight);
+        isHorizontal = JefConfig.feature.dungeons.dungeonRoomOverlay;
 
         int cols = isHorizontal ? 8 : 3;
         int rows = isHorizontal ? 3 : 6;
@@ -99,7 +99,7 @@ public class StorageOverlay extends GuiScreen {
         clampScroll();
 
         offset = this.scrollOffset;
-        if (!JefConfig.feature.storage.smoothScroll) {
+        if (!JefConfig.feature.dungeons.dungeonRoomOverlay) {
             offset = Math.round(this.scrollOffset);
         }
 
@@ -116,7 +116,7 @@ public class StorageOverlay extends GuiScreen {
         }
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
 
-        if (maxScroll > 0 && JefConfig.feature.storage.barScroll) {
+        if (maxScroll > 0 && JefConfig.feature.dungeons.dungeonRoomOverlay) {
             int SCROLLBAR_SIZE = 10;
             int SCROLLBAR_MARGIN = 5;
 
@@ -189,7 +189,7 @@ public class StorageOverlay extends GuiScreen {
         isDraggingScrollbar = false;
         if (maxScroll > 0) {
             if (mouseX >= thumbX && mouseX <= thumbX + thumbW && mouseY >= thumbY && mouseY <= thumbY + thumbH) {
-                if (JefConfig.feature.storage.barScroll) {
+                if (JefConfig.feature.dungeons.dungeonRoomOverlay) {
                     isDraggingScrollbar = true;
                     scrollbarDragOffset = isHorizontal ? mouseX - thumbX : mouseY - thumbY;
                     return;
@@ -205,7 +205,7 @@ public class StorageOverlay extends GuiScreen {
 
                 scrollOffset = progress * maxScroll;
                 clampScroll();
-                if (JefConfig.feature.storage.barScroll) {
+                if (JefConfig.feature.dungeons.dungeonRoomOverlay) {
                     isDraggingScrollbar = true;
                 }
                 scrollbarDragOffset = (int) (thumbLen / 2);
@@ -213,7 +213,7 @@ public class StorageOverlay extends GuiScreen {
             }
 
 
-            if (!JefConfig.feature.storage.dragScroll) {
+            if (!JefConfig.feature.dungeons.dungeonRoomOverlay) {
                 if (activeContainer != null && !activeContainer.isEmpty() && containers.containsKey(activeContainer)) {
                     if (isHovering(mouseX, mouseY, containers.get(activeContainer))) {
                         containers.get(activeContainer).mouseClicked(mouseX, mouseY, mouseButton);
@@ -228,7 +228,7 @@ public class StorageOverlay extends GuiScreen {
             }
 
             if (mouseX >= boxX && mouseX <= boxX + boxWidth && mouseY >= boxY && mouseY <= boxY + boxHeight) {
-                if (JefConfig.feature.storage.dragScroll) {
+                if (JefConfig.feature.dungeons.dungeonRoomOverlay) {
                     isDraggingScreen = true;
                 }
             }

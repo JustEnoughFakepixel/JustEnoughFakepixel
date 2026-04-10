@@ -6,6 +6,7 @@ import com.jef.justenoughfakepixel.features.scoreboard.BankParser;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.ColorUtils;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiPlayerTabOverlay;
 import net.minecraft.client.network.NetworkPlayerInfo;
@@ -29,6 +30,14 @@ public class TablistParser {
     private static String activeEvent = null;
     @Getter
     private static String activeEventTimeLeft = null;
+    @Getter
+    private static long gemstonePowder = 0;
+    @Getter
+    private static long mithrilPowder = 0;
+    @Getter
+    private static long glacitePowder = 0;
+    @Setter
+    private static java.util.function.BiConsumer<Long, Long> gemstonePowderChangeListener = null;
     private int tickCounter = 0;
 
     public static boolean isEventActive(String eventName) {
@@ -137,7 +146,6 @@ public class TablistParser {
             if (inServerSection) {
                 if (line.startsWith("Dungeon: ")) {
                     currentLocation = SkyblockData.Location.DUNGEON;
-                    inServerSection = false;
                     continue;
                 }
                 if (line.startsWith("Server: ")) {
@@ -145,7 +153,35 @@ public class TablistParser {
                     int dash = indexOfDashDigits(s);
                     if (dash >= 0) s = s.substring(0, dash + 1);
                     currentLocation = matchLocation(s);
-                    inServerSection = false;
+                    continue;
+                }
+                if (line.startsWith("Mithril Powder: ")) {
+                    String num = line.substring("Mithril Powder: ".length()).replaceAll(",", "");
+                    try {
+                        mithrilPowder = Long.parseLong(num);
+                    } catch (NumberFormatException ignored) {
+                    }
+                    continue;
+                }
+                if (line.startsWith("Gemstone Powder: ")) {
+                    String num = line.substring("Gemstone Powder: ".length()).replaceAll(",", "");
+                    try {
+                        long newValue = Long.parseLong(num);
+                        long oldValue = gemstonePowder;
+                        gemstonePowder = newValue;
+                        if (gemstonePowderChangeListener != null && newValue != oldValue) {
+                            gemstonePowderChangeListener.accept(oldValue, newValue);
+                        }
+                    } catch (NumberFormatException ignored) {
+                    }
+                    continue;
+                }
+                if (line.startsWith("Glacite Powder: ")) {
+                    String num = line.substring("Glacite Powder: ".length()).replaceAll(",", "");
+                    try {
+                        glacitePowder = Long.parseLong(num);
+                    } catch (NumberFormatException ignored) {
+                    }
                     continue;
                 }
             }
@@ -241,6 +277,9 @@ public class TablistParser {
         currentLocation = SkyblockData.Location.NONE;
         activeEvent = null;
         activeEventTimeLeft = null;
+        gemstonePowder = 0;
+        mithrilPowder = 0;
+        glacitePowder = 0;
         BankParser.clear();
     }
 

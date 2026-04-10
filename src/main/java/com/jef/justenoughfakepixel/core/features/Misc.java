@@ -174,7 +174,7 @@ public class Misc {
     public Position itemPickupLogPos = new Position(2, 60);
 
     @Expose
-    public Position searchBarPos = new Position(4, 4);
+    public Position searchBarPos = new Position(0, -20, true, true);
 
     @Expose
     public Position hudPos = new Position(2, 2);

@@ -57,12 +57,21 @@ public class ItemCooldownOverlay extends Overlay {
 
     @Override
     public List<String> getLines(boolean preview) {
-        if (preview) return Collections.singletonList("§5Example Item §f30.0s");
+        List<String> lines = new ArrayList<>();
+        
+        if (preview) {
+            lines.add("§b§lCooldowns");
+            lines.add("§5Example Item §f30.0s");
+            return lines;
+        }
 
         List<String> active = ItemCooldowns.getActiveCooldowns();
-        if (active.isEmpty()) return Collections.emptyList();
+        boolean showWhenEmpty = JefConfig.feature != null && JefConfig.feature.qol.itemCooldownShowWhenEmpty;
+        
+        if (active.isEmpty() && !showWhenEmpty) return Collections.emptyList();
+        
+        lines.add("§b§lCooldowns");
 
-        List<String> lines = new ArrayList<>(active.size());
         for (String id : active) {
             ItemStack stack = ItemCooldowns.findItemStack(id);
             if (stack == null) continue;
