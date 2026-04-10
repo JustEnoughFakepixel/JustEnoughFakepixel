@@ -1,4 +1,4 @@
-package com.jef.justenoughfakepixel.utils;
+package com.jef.justenoughfakepixel.utils.time;
 
 public class TimeFormatter {
 

@@ -1,7 +1,7 @@
 package com.jef.justenoughfakepixel.features.dungeons.caseopening;
 
 import com.jef.justenoughfakepixel.DebugLogger;
-import com.jef.justenoughfakepixel.utils.ItemUtils;
+import com.jef.justenoughfakepixel.utils.item.ItemUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.ContainerChest;

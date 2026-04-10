@@ -1,6 +1,6 @@
 package com.jef.justenoughfakepixel.mixins;
 
-import com.jef.justenoughfakepixel.features.qol.EnchantChromaRenderer;
+import com.jef.justenoughfakepixel.features.qol.helpers.EnchantChromaRenderer;
 import net.minecraft.client.gui.FontRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
