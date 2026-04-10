@@ -123,7 +123,7 @@ public class Config {
                 openUrl("https://discord.gg/tdMFbmhFTb");
                 break;
             case "openGithub":
-                openUrl("https://github.com/hamlook/justenoughfakepixel");
+                openUrl("https://github.com/JustEnoughFakepixel/justenoughfakepixel");
                 break;
 
             case "openLicenseForge":
