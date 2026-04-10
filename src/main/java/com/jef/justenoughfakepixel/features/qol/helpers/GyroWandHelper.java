@@ -1,9 +1,10 @@
-package com.jef.justenoughfakepixel.features.qol;
+package com.jef.justenoughfakepixel.features.qol.helpers;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.utils.RenderUtils;
+import com.jef.justenoughfakepixel.features.qol.timers.ItemCooldowns;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import com.jef.justenoughfakepixel.utils.ItemUtils;
+import com.jef.justenoughfakepixel.utils.item.ItemUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;

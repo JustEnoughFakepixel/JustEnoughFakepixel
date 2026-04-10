@@ -2,7 +2,7 @@ package com.jef.justenoughfakepixel.features.qol;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import com.jef.justenoughfakepixel.utils.ItemUtils;
+import com.jef.justenoughfakepixel.utils.item.ItemUtils;
 import com.jef.justenoughfakepixel.utils.RomanNumeralParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetworkPlayerInfo;

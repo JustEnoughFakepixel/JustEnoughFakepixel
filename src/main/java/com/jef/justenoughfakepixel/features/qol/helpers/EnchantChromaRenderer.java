@@ -1,4 +1,4 @@
-package com.jef.justenoughfakepixel.features.qol;
+package com.jef.justenoughfakepixel.features.qol.helpers;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
