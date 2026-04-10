@@ -19,6 +19,7 @@
 
 - **Performance HUD** — shows FPS, TPS, ping, coords, and rotation in a small overlay
 - **Search Bar** — adds a search bar to inventory GUIs with item highlighting
+- **Item Cooldowns** — tracks cooldowns for abilities and invincibility timers with a HUD overlay
 - **Current Pet** — shows your active pet as a HUD overlay
 - **Item Pickup Log** — shows recently picked up or dropped items in a HUD
 - **Inventory Buttons** — adds clickable shortcut buttons to inventories, configure with `/jefbuttons`
@@ -80,6 +81,7 @@
 ## Commands 
 
 + `/jef [category]` — opens the JEF config, optionally jumping to a category
++ `/jef reload` — reloads repo data (timers and other remote config)
 + `/diana <reset|toggle>` — resets or pauses Diana tracking
 + `/pdt <reset|toggle>` (`/powdertracker`) — resets or pauses the powder tracker
 + `/lockmouse` — toggles mouse lock
