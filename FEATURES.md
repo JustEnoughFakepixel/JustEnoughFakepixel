@@ -38,7 +38,7 @@
 - **Dungeon Overlay** — run timers and end-of-run stats in chat
 - **Dungeon Breaker Overlay** — shows Dungeon Breaker charges while in a dungeon
 - **Dungeon Room Overlay** — shows the name of your current dungeon room
-
+- **CSGO Chest Opening** — opening a obsidian/bedrock chest plays a csgo crate opening animation
 
 ## Mining
 
