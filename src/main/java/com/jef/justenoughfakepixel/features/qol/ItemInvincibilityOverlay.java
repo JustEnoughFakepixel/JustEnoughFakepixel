@@ -57,12 +57,21 @@ public class ItemInvincibilityOverlay extends Overlay {
 
     @Override
     public List<String> getLines(boolean preview) {
-        if (preview) return Collections.singletonList("§5Bonzo's Mask §f3.7s");
+        List<String> lines = new ArrayList<>();
+        
+        if (preview) {
+            lines.add("§b§lInvincibility");
+            lines.add("§5Bonzo's Mask §f3.7s");
+            return lines;
+        }
 
         List<String> active = ItemInvincibilityTimers.getActiveTimers();
-        if (active.isEmpty()) return Collections.emptyList();
+        boolean showWhenEmpty = JefConfig.feature != null && JefConfig.feature.qol.itemInvincibilityShowWhenEmpty;
+        
+        if (active.isEmpty() && !showWhenEmpty) return Collections.emptyList();
+        
+        lines.add("§b§lInvincibility");
 
-        List<String> lines = new ArrayList<>(active.size());
         for (String id : active) {
             ItemStack stack = ItemInvincibilityTimers.findItemStack(id);
             if (stack == null) continue;

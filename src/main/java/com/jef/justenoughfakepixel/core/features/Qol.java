@@ -142,13 +142,19 @@ public class Qol {
     public float itemCooldownScale = 1f;
 
     @Expose
+    @ConfigOption(name = "Show When Empty", desc = "Show the overlay header even when no cooldowns are active")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 23)
+    public boolean itemCooldownShowWhenEmpty = false;
+
+    @Expose
     @ConfigOption(name = "Edit Overlay Position", desc = "Drag the cooldown overlay to reposition it")
     @ConfigEditorButton(runnableId = "openItemCooldownEditor", buttonText = "Edit")
     @ConfigAccordionId(id = 23)
     public boolean itemCooldownEditPosDummy = false;
 
     @Expose
-    public Position itemCooldownPos = new Position(4, 4);
+    public Position itemCooldownPos = new Position(-4, 4, true, false);
 
     @Expose
     @ConfigOption(name = "Ability Timer Overlay", desc = "Settings for the item ability active-duration overlay")
@@ -180,13 +186,19 @@ public class Qol {
     public float itemAbilityTimerScale = 1f;
 
     @Expose
+    @ConfigOption(name = "Show When Empty", desc = "Show the overlay header even when no ability timers are active")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 24)
+    public boolean itemAbilityTimerShowWhenEmpty = false;
+
+    @Expose
     @ConfigOption(name = "Edit Overlay Position", desc = "Drag the ability timer overlay to reposition it")
     @ConfigEditorButton(runnableId = "openItemAbilityTimerEditor", buttonText = "Edit")
     @ConfigAccordionId(id = 24)
     public boolean itemAbilityTimerEditPosDummy = false;
 
     @Expose
-    public Position itemAbilityTimerPos = new Position(4, 30);
+    public Position itemAbilityTimerPos = new Position(-4, 40, true, false);
 
     @Expose
     @ConfigOption(name = "Invincibility Overlay", desc = "Settings for the post-save invincibility timer overlay")
@@ -218,13 +230,19 @@ public class Qol {
     public float itemInvincibilityScale = 1f;
 
     @Expose
+    @ConfigOption(name = "Show When Empty", desc = "Show the overlay header even when no invincibility timers are active")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 25)
+    public boolean itemInvincibilityShowWhenEmpty = false;
+
+    @Expose
     @ConfigOption(name = "Edit Overlay Position", desc = "Drag the invincibility overlay to reposition it")
     @ConfigEditorButton(runnableId = "openItemInvincibilityEditor", buttonText = "Edit")
     @ConfigAccordionId(id = 25)
     public boolean itemInvincibilityEditPosDummy = false;
 
     @Expose
-    public Position itemInvincibilityPos = new Position(4, 56);
+    public Position itemInvincibilityPos = new Position(-4, 76, true, false);
 
     @Expose
     @ConfigOption(name = "Block Selection Overlay", desc = "Customize the block selection highlight")

@@ -1,13 +1,11 @@
 package com.jef.justenoughfakepixel.features.mining.powder;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
+import com.jef.justenoughfakepixel.features.misc.ItemPickupLog;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import com.jef.justenoughfakepixel.utils.ItemUtils;
 import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
 import com.jef.justenoughfakepixel.utils.data.SkyblockData;
 import com.jef.justenoughfakepixel.utils.data.TablistParser;
-import net.minecraft.client.Minecraft;
-import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -39,7 +37,26 @@ public class PowderTracker {
     private static final Pattern BLUE_GOBLIN_EGG = Pattern.compile("Blue Goblin Egg x([\\d,]+)");
 
     private static int tickCounter = 0;
-    private static ItemStack[] lastInventory = new ItemStack[36];
+    private static boolean listenerRegistered = false;
+
+    private static void ensureListenerRegistered() {
+        if (listenerRegistered) return;
+        ItemPickupLog itemLog = ItemPickupLog.getInstance();
+        if (itemLog != null) {
+            itemLog.addItemChangeListener(PowderTracker::onItemChange);
+            listenerRegistered = true;
+        }
+    }
+
+    private static void onItemChange(String displayName, int delta) {
+        if (!isActive()) return;
+        if (!displayName.contains("§aEnchanted Hard Stone")) return;
+        if (delta <= 0) return;
+
+        PowderStats stats = PowderStats.getInstance();
+        stats.getData().hardStone += delta;
+        stats.save();
+    }
 
     public static boolean isDoublePowder() {
         return TablistParser.isEventActive("2x Powder");
@@ -71,42 +88,11 @@ public class PowderTracker {
         if (event.phase != TickEvent.Phase.END) return;
         if (!isActive()) return;
 
+        ensureListenerRegistered();
+
         tickCounter++;
 
         if (tickCounter % 20 == 0) PowderStats.getInstance().tickRates();
-
-        Minecraft mc = Minecraft.getMinecraft();
-        if (mc.thePlayer == null || mc.currentScreen != null) return;
-
-        ItemStack[] inv = mc.thePlayer.inventory.mainInventory;
-        for (int i = 0; i < inv.length; i++) {
-            ItemStack current = inv[i];
-            ItemStack prev = lastInventory[i];
-
-            if (current == null) {
-                lastInventory[i] = null;
-                continue;
-            }
-
-            if (!ItemUtils.getInternalName(current).equals("ENCHANTED_HARD_STONE")) {
-                lastInventory[i] = current.copy();
-                continue;
-            }
-
-            if (prev == null) {
-                lastInventory[i] = current.copy();
-                continue;
-            }
-
-            int gained = current.stackSize - prev.stackSize;
-            if (gained > 0) {
-                PowderStats stats = PowderStats.getInstance();
-                stats.getData().hardStone += gained;
-                stats.save();
-            }
-
-            lastInventory[i] = current.copy();
-        }
     }
 
     @SubscribeEvent
@@ -226,7 +212,6 @@ public class PowderTracker {
 
     @SubscribeEvent
     public void onWorldUnload(WorldEvent.Unload event) {
-        lastInventory = new ItemStack[36];
         PowderStats.getInstance().onWorldChange();
     }
 }

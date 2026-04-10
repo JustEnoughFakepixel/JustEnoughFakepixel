@@ -57,12 +57,21 @@ public class ItemAbilityTimerOverlay extends Overlay {
 
     @Override
     public List<String> getLines(boolean preview) {
-        if (preview) return Collections.singletonList("§6Fire Veil §f4.2s");
+        List<String> lines = new ArrayList<>();
+        
+        if (preview) {
+            lines.add("§b§lAbility Timers");
+            lines.add("§6Fire Veil §f4.2s");
+            return lines;
+        }
 
         List<String> active = ItemAbilityTimers.getActiveTimers();
-        if (active.isEmpty()) return Collections.emptyList();
+        boolean showWhenEmpty = JefConfig.feature != null && JefConfig.feature.qol.itemAbilityTimerShowWhenEmpty;
+        
+        if (active.isEmpty() && !showWhenEmpty) return Collections.emptyList();
+        
+        lines.add("§b§lAbility Timers");
 
-        List<String> lines = new ArrayList<>(active.size());
         for (String id : active) {
             ItemStack stack = ItemAbilityTimers.findItemStack(id);
             if (stack == null) continue;

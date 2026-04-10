@@ -67,11 +67,11 @@ public class PowderOverlay extends Overlay {
     private String lineForEntry(int ordinal, PowderData d, PowderStats stats, boolean preview) {
         switch (ordinal) {
             case 0:
-                return "§b§lGemstone Powder Tracker" + (!preview && !PowderStats.getInstance().isTrackingEnabled() ? " §7[Paused]" : "");
+                return "§b§lPowder Tracker" + (!preview && !PowderStats.getInstance().isTrackingEnabled() ? " §7[Paused]" : "");
             case 1: {
                 String rate = preview ? "120" : PowderStats.fmtRate(stats.chestInfo.perHour);
                 long n = preview ? 420L : d.totalChestsPicked;
-                return String.format("§d%s Chests §7(%s/h)", PowderStats.fmtNum(n), rate);
+                return String.format("§7%s Chests §7(%s/h)", PowderStats.fmtNum(n), rate);
             }
             case 2: {
                 if (preview) return "§b2x Powder: §aActive! §7(5m 20s)";
@@ -83,7 +83,7 @@ public class PowderOverlay extends Overlay {
             case 3: {
                 String rate = preview ? "2.5K" : PowderStats.fmtRate(stats.gemstoneInfo.perHour);
                 long n = preview ? 1337L : d.gemstonePowder;
-                return String.format("§b%s Gemstone Powder §7(%s/h)", PowderStats.fmtNum(n), rate);
+                return String.format("§d%s Gemstone Powder §7(%s/h)", PowderStats.fmtNum(n), rate);
             }
             case 4: {
                 long n = preview ? 12L : d.diamondEssence;
@@ -113,14 +113,14 @@ public class PowderOverlay extends Overlay {
             case 9: {
                 long n = preview ? 1L : d.jungleHearts;
                 if (!preview && n == 0) return null;
-                return String.format("§2%s Jungle Heart%s", PowderStats.fmtNum(n), n == 1 ? "" : "s");
+                return String.format("§6%s Jungle Heart%s", PowderStats.fmtNum(n), n == 1 ? "" : "s");
             }
             case 10: {
                 long raw = preview ? 512L : d.hardStone;
                 long compacted = preview ? 5L : d.hardStoneCompacted;
                 String rate = preview ? "1.5K" : PowderStats.fmtRate(stats.hardStoneInfo.perHour);
                 if (!preview && raw + compacted == 0) return null;
-                return String.format("§7%s Hard Stone §8(%s compact) §7(%s/h)", PowderStats.fmtNum(raw), PowderStats.fmtNum(compacted), rate);
+                return String.format("§a%s Hard Stone §8(%s compact) §7(%s/h)", PowderStats.fmtNum(raw), PowderStats.fmtNum(compacted), rate);
             }
             default: {
                 int gemIndex = ordinal - 11;

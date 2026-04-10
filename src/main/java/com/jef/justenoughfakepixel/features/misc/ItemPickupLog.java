@@ -15,6 +15,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 
 @RegisterEvents
 public class ItemPickupLog extends Overlay {
@@ -27,6 +28,7 @@ public class ItemPickupLog extends Overlay {
     @Getter
     private static ItemPickupLog instance;
     private final LinkedList<LogEntry> log = new LinkedList<>();
+    private final List<BiConsumer<String, Integer>> itemChangeListeners = new ArrayList<>();
     private ItemStack[] preScreenSnapshot = null;
     private ItemStack[] previousInventory = null;
 
@@ -46,6 +48,10 @@ public class ItemPickupLog extends Overlay {
             copy[i] = src[i] != null ? ItemStack.copyItemStack(src[i]) : null;
         }
         return copy;
+    }
+
+    public void addItemChangeListener(BiConsumer<String, Integer> listener) {
+        itemChangeListeners.add(listener);
     }
 
     private boolean inventoryChanged(ItemStack[] prev, ItemStack[] curr) {
@@ -87,12 +93,11 @@ public class ItemPickupLog extends Overlay {
 
     @SubscribeEvent
     public void onGuiOpen(GuiOpenEvent event) {
-        if (!isEnabled() || !SkyblockData.isOnSkyblock()) return;
+        if (!SkyblockData.isOnSkyblock()) return;
         Minecraft mc = Minecraft.getMinecraft();
         if (mc.thePlayer == null) return;
 
         if (event.gui == null) {
-            // GUI closed — diff pre-open snapshot vs current to capture chest/NPC transactions cleanly
             if (preScreenSnapshot != null) {
                 ItemStack[] current = mc.thePlayer.inventory.mainInventory;
                 if (preScreenSnapshot.length == current.length) {
@@ -100,10 +105,8 @@ public class ItemPickupLog extends Overlay {
                 }
                 preScreenSnapshot = null;
             }
-            // Re-arm the tick snapshot so we don't double-count on the next tick
             previousInventory = copyInventory(mc.thePlayer.inventory.mainInventory);
         } else {
-            // GUI opened — freeze a snapshot of what we had before
             preScreenSnapshot = copyInventory(mc.thePlayer.inventory.mainInventory);
             previousInventory = null;
         }
@@ -114,7 +117,7 @@ public class ItemPickupLog extends Overlay {
         if (event.phase != TickEvent.Phase.END) return;
 
         Minecraft mc = Minecraft.getMinecraft();
-        if (mc.thePlayer == null || !isEnabled() || !SkyblockData.isOnSkyblock()) {
+        if (mc.thePlayer == null || !SkyblockData.isOnSkyblock()) {
             previousInventory = null;
             return;
         }
@@ -125,7 +128,6 @@ public class ItemPickupLog extends Overlay {
 
         ItemStack[] current = mc.thePlayer.inventory.mainInventory;
 
-        // Only diff when something actually changed — prevents logging every idle tick
         if (previousInventory != null
                 && previousInventory.length == current.length
                 && inventoryChanged(previousInventory, current)) {
@@ -156,6 +158,11 @@ public class ItemPickupLog extends Overlay {
         for (String name : allKeys) {
             int delta = currMap.getOrDefault(name, 0) - prevMap.getOrDefault(name, 0);
             if (delta == 0) continue;
+
+            for (BiConsumer<String, Integer> listener : itemChangeListeners) {
+                listener.accept(name, delta);
+            }
+
             addOrMerge(name, delta);
         }
     }
