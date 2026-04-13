@@ -2,25 +2,14 @@ package com.jef.justenoughfakepixel.features.storage;
 
 import com.jef.justenoughfakepixel.JefMod;
 import com.jef.justenoughfakepixel.core.JefConfig;
-import com.jef.justenoughfakepixel.utils.ColorUtils;
 import com.jef.justenoughfakepixel.utils.render.ResolutionUtils;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.init.Blocks;
-import net.minecraft.inventory.ContainerChest;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.NBTException;
-import net.minecraft.nbt.NBTTagCompound;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 
 public class StorageOverlay extends GuiScreen {
@@ -30,14 +19,15 @@ public class StorageOverlay extends GuiScreen {
     private static final int BASE_CONTAINER_WIDTH = 450;
     private static final int BASE_CONTAINER_HEIGHT = BASE_CONTAINER_WIDTH * 9 / 16;
     private static final int BASE_PADDING = 30;
-    public static boolean isHorizontal = true;
+    public boolean isHorizontal = true;
     public double scrollOffset = 0;
     public double offset = 0;
+    public HashMap<String, StorageContainer> containers = new HashMap<>();
     public String activeContainer = "";
     private int boxX, boxY, boxWidth, boxHeight;
     private int cWidth, cHeight, pX, pY;
     private int startX, startY;
-    private static double SCROLL_SPEED = 100;
+    private double SCROLL_SPEED = 100;
     private double maxScroll = 0;
     private double totalElements = 0;
     private double visibleElements = 0;
@@ -50,152 +40,26 @@ public class StorageOverlay extends GuiScreen {
     private int trackX, trackY, trackW, trackH;
     private int thumbX, thumbY, thumbW, thumbH;
 
-    public static HashMap<String, StorageContainer> containers = new HashMap<>();
-    public static List<ItemStack> searchedItems = new ArrayList<>();
-    public static void openOverlay(ContainerChest chest) {
-        containers.clear();
-        searchedItems.clear();
+    @Override
+    public void initGui() {
+        SCROLL_SPEED = 100 * (JefConfig.feature.dungeons.bloodMobHighlight);
+        isHorizontal = JefConfig.feature.dungeons.dungeonRoomOverlay;
 
-        JefMod.logger.info("Searching Items");
-        isHorizontal = JefConfig.feature.storage.horizontalScroll;
-        SCROLL_SPEED = 100 * (JefConfig.feature.storage.scrollSpeed);
-
-        int rows = isHorizontal ? 3 : 6;
         int cols = isHorizontal ? 8 : 3;
+        int rows = isHorizontal ? 3 : 6;
 
-        int validItemIndex = 0;
-
-        int echestCount = 0;
-        int backpackCount = 0;
-
-        for (int i = 9; i < 18; i++) {
-            ItemStack stack = chest.getSlot(i).getStack();
-            if (stack == null) continue;
-
-            String name = ColorUtils.stripColor(stack.getDisplayName());
-            if (name.startsWith("Locked")) continue;
-
-            searchedItems.add(stack);
-            echestCount++;
-
-            int xGrid = isHorizontal ? (validItemIndex / rows) : (validItemIndex % cols);
-            int yGrid = isHorizontal ? (validItemIndex % rows) : (validItemIndex / cols);
-
-            containers.put("echest-" + echestCount,
-                    new StorageContainer(new HashMap<>(), ContainerType.ECHEST, echestCount, xGrid, yGrid));
-
-            validItemIndex++;
+        int pageCounter = 1;
+        for (int y = 0; y < rows; y++) {
+            for (int x = 0; x < cols; x++) {
+                containers.put("echest-" + pageCounter, new StorageContainer(new HashMap<>(), ContainerType.ECHEST, pageCounter, x, y));
+                pageCounter++;
+            }
         }
 
-        for (int i = 27; i < 45; i++) {
-            ItemStack stack = chest.getSlot(i).getStack();
-            if (stack == null) continue;
-
-            String name = ColorUtils.stripColor(stack.getDisplayName());
-            if (name.startsWith("Empty")) continue;
-
-            searchedItems.add(stack);
-            backpackCount++;
-
-            int xGrid = isHorizontal ? (validItemIndex / rows) : (validItemIndex % cols);
-            int yGrid = isHorizontal ? (validItemIndex % rows) : (validItemIndex / cols);
-
-            containers.put("bag-" + backpackCount,
-                    new StorageContainer(new HashMap<>(), ContainerType.BACKPACK, backpackCount, xGrid, yGrid));
-
-            validItemIndex++;
-        }
-
-        if (searchedItems.isEmpty()) return;
-
-        JefMod.logger.info("Parsed " + searchedItems.size() + " items.");
-        JefConfig.screenToOpen = new StorageOverlay();
+        //TODO: Scrap Containers from Storage GUI
+        super.initGui();
     }
 
-    public static void updateContainer(ContainerChest container,boolean echest) {
-        String name = container.getLowerChestInventory().getDisplayName().getUnformattedText();
-
-        if(echest) {
-            char page = name.charAt((name.indexOf(')') - 1));
-            int pageID;
-            try {
-                pageID = Integer.parseInt(String.valueOf(page));
-            } catch (NumberFormatException e) {
-                JefMod.logger.info("Error While Trying to Parse " + page);
-                return;
-            }
-            if (pageID < 0) return;
-            String id = "echest-"+ pageID;
-            StorageContainer storage = containers.get(id);
-            if(storage == null) return;
-            storage.items = parseItems(container);
-
-            ItemStack stack = container.getSlot(0).getStack();
-            if(stack == null || stack.getItem() != Item.getItemFromBlock(Blocks.barrier)){
-                StorageListener.scanned.put(id,false);
-            }else {
-                StorageListener.scanned.put(id,true);
-            }
-
-            JefMod.logger.info("Put " + storage.items.size() + " in container id " + id);
-        }else {
-            String[] words = name.split(" ");
-            String temp = words[words.length - 1];
-            String pageStr = temp.split("/")[0];
-            int pageID;
-            try{
-                pageID = Integer.parseInt(pageStr);
-            } catch (NumberFormatException e) {
-                JefMod.logger.info("Error While Trying to Parse " + pageStr);
-                return;
-            }
-            if (pageID < 0) return;
-            String id = "bag-"+(pageID - 1);
-            StorageContainer storage = containers.get(id);
-            if(storage == null) return;
-            storage.items = parseItems(container);
-
-            ItemStack stack = container.getSlot(0).getStack();
-            if(stack == null || stack.getItem() != Item.getItemFromBlock(Blocks.barrier)){
-                StorageListener.scanned.put(id,false);
-            }else {
-                StorageListener.scanned.put(id,true);
-            }
-
-            JefMod.logger.info("Put " + storage.items.size() + " in container id " + id);
-        }
-    }
-
-    public static HashMap<Integer,String> parseItems(ContainerChest chest){
-        HashMap<Integer,String> data = new HashMap<>();
-        for(int i = 9;i < chest.getLowerChestInventory().getSizeInventory();i++){
-            ItemStack stack = chest.getSlot(i).getStack();
-            if(stack == null){
-                continue;
-            }
-            NBTTagCompound compound = new NBTTagCompound();
-            stack.writeToNBT(compound);
-            String item = compound.toString();
-            data.put(i,item);
-            JefMod.logger.info(i + ": " + item.substring(0,100));
-        }
-        return data;
-    }
-
-    public static ItemStack getItemFromNBT(String itemString) {
-        if (itemString == null || itemString.isEmpty()) {
-            return null;
-        }
-        try {
-            NBTTagCompound nbt = JsonToNBT.getTagFromJson(itemString);
-
-            return ItemStack.loadItemStackFromNBT(nbt);
-
-        } catch (NBTException e) {
-            System.err.println("Failed to parse ItemStack from string: " + e.getMessage());
-            return null;
-        }
-    }
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
@@ -235,7 +99,7 @@ public class StorageOverlay extends GuiScreen {
         clampScroll();
 
         offset = this.scrollOffset;
-        if (!JefConfig.feature.storage.smoothScroll) {
+        if (!JefConfig.feature.dungeons.dungeonRoomOverlay) {
             offset = Math.round(this.scrollOffset);
         }
 
@@ -252,7 +116,7 @@ public class StorageOverlay extends GuiScreen {
         }
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
 
-        if (maxScroll > 0 && JefConfig.feature.storage.barScroll) {
+        if (maxScroll > 0 && JefConfig.feature.dungeons.dungeonRoomOverlay) {
             int SCROLLBAR_SIZE = 10;
             int SCROLLBAR_MARGIN = 5;
 
@@ -325,7 +189,7 @@ public class StorageOverlay extends GuiScreen {
         isDraggingScrollbar = false;
         if (maxScroll > 0) {
             if (mouseX >= thumbX && mouseX <= thumbX + thumbW && mouseY >= thumbY && mouseY <= thumbY + thumbH) {
-                if (JefConfig.feature.storage.barScroll) {
+                if (JefConfig.feature.dungeons.dungeonRoomOverlay) {
                     isDraggingScrollbar = true;
                     scrollbarDragOffset = isHorizontal ? mouseX - thumbX : mouseY - thumbY;
                     return;
@@ -341,7 +205,7 @@ public class StorageOverlay extends GuiScreen {
 
                 scrollOffset = progress * maxScroll;
                 clampScroll();
-                if (JefConfig.feature.storage.barScroll) {
+                if (JefConfig.feature.dungeons.dungeonRoomOverlay) {
                     isDraggingScrollbar = true;
                 }
                 scrollbarDragOffset = (int) (thumbLen / 2);
@@ -349,7 +213,7 @@ public class StorageOverlay extends GuiScreen {
             }
 
 
-            if (!JefConfig.feature.storage.dragScroll) {
+            if (!JefConfig.feature.dungeons.dungeonRoomOverlay) {
                 if (activeContainer != null && !activeContainer.isEmpty() && containers.containsKey(activeContainer)) {
                     if (isHovering(mouseX, mouseY, containers.get(activeContainer))) {
                         containers.get(activeContainer).mouseClicked(mouseX, mouseY, mouseButton);
@@ -358,13 +222,13 @@ public class StorageOverlay extends GuiScreen {
                 for (StorageContainer container : containers.values()) {
                     if (isHovering(mouseX, mouseY, container)) {
                         this.activeContainer = container.id;
-                        Minecraft.getMinecraft().thePlayer.sendChatMessage("/" + container.type.command + " " + container.page);
+                        JefMod.logger.info("Active: " + this.activeContainer);
                     }
                 }
             }
 
             if (mouseX >= boxX && mouseX <= boxX + boxWidth && mouseY >= boxY && mouseY <= boxY + boxHeight) {
-                if (JefConfig.feature.storage.dragScroll) {
+                if (JefConfig.feature.dungeons.dungeonRoomOverlay) {
                     isDraggingScreen = true;
                 }
             }
@@ -418,7 +282,7 @@ public class StorageOverlay extends GuiScreen {
             for (StorageContainer container : containers.values()) {
                 if (isHovering(mouseX, mouseY, container)) {
                     this.activeContainer = container.id;
-                    Minecraft.getMinecraft().thePlayer.sendChatMessage("/" + container.type.command + " " + container.page);
+                    JefMod.logger.info("Active: " + this.activeContainer);
                 }
             }
         }
@@ -434,7 +298,7 @@ public class StorageOverlay extends GuiScreen {
 
         drawRect((int) renderX, (int) renderY, (int) renderX + cWidth, (int) renderY + cHeight, new Color(150, 150, 150, 200).getRGB());
 
-        this.drawCenteredString(mc.fontRendererObj, container.type.name().toLowerCase() + "-" + container.page, (int) renderX + (cWidth / 2), (int) renderY + (cHeight / 2) - 4, new Color(255, 255, 255).getRGB());
+        this.drawCenteredString(mc.fontRendererObj, String.valueOf(container.page), (int) renderX + (cWidth / 2), (int) renderY + (cHeight / 2) - 4, new Color(255, 255, 255).getRGB());
     }
 
     private void clampScroll() {

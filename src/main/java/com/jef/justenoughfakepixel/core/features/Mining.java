@@ -50,12 +50,12 @@ public class Mining {
     public Position fetchurOverlayPos = new Position(4, 4);
 
     @Expose
-    @ConfigOption(name = "Gemstone Powder Tracker", desc = "Tracks gemstone powder and chest drops in Crystal Hollows")
+    @ConfigOption(name = "Powder Tracker", desc = "Tracks gemstone powder and chest drops in Crystal Hollows")
     @ConfigEditorAccordion(id = 21)
     public boolean powderTrackerAccordion = false;
 
     @Expose
-    @ConfigOption(name = "Enable", desc = "Show the Gemstone Powder Tracker overlay while in Crystal Hollows")
+    @ConfigOption(name = "Enable", desc = "Show the Powder Tracker overlay while in Crystal Hollows")
     @ConfigEditorBoolean
     @ConfigAccordionId(id = 21)
     public boolean powderTracker = true;
@@ -98,18 +98,17 @@ public class Mining {
 
     @Expose
     @ConfigOption(name = "Display Lines", desc = "Choose which lines to show and drag to reorder")
-    @ConfigEditorDraggableList(exampleText = {
-            "§b§lGemstone Powder Tracker",                    // 0
-            "§d420 Chests §7(120/h)",                         // 1
+    @ConfigEditorDraggableList(exampleText = {"§b§lPowder Tracker",                    // 0
+            "§7420 Chests §7(120/h)",                         // 1
             "§b2x Powder: §aActive!",                         // 2
-            "§b1,337 Gemstone Powder §7(2.5K/h)",             // 3
+            "§d1,337 Gemstone Powder §7(2.5K/h)",             // 3
             "§b12 Diamond Essence",                                 // 4
             "§66 Gold Essence",                                     // 5
             "§88 Oil Barrels",                                      // 6
             "§53 Ascension Ropes",                                  // 7
             "§92 Wishing Compasses",                                // 8
-            "§21 Jungle Hearts",                                    // 9
-            "§7512 Hard Stone §8(5 compact) §7(1.5K/h)", // 10
+            "§61 Jungle Hearts",                                    // 9
+            "§a512 Hard Stone §8(5 compact) §7(1.5K/h)", // 10
             "§51-§93-§a4-§f0 §cRuby",         // 11
             "§51-§93-§a4-§f0 §bSapphire",     // 12
             "§51-§93-§a4-§f0 §6Amber",        // 13
@@ -125,8 +124,7 @@ public class Mining {
             "§33-§c2-§e1-§a1-§91 §fGoblin Eggs" // 23
     })
     @ConfigAccordionId(id = 21)
-    public List<Integer> powderDisplayLines = new ArrayList<>(
-            Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23));
+    public List<Integer> powderDisplayLines = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23));
 
     @Expose
     public Position powderOverlayPos = new Position(4, 60);

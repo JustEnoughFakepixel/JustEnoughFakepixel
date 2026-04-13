@@ -3,7 +3,7 @@ package com.jef.justenoughfakepixel.features.fishing.trophy;
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.ColorUtils;
-import com.jef.justenoughfakepixel.utils.ItemUtils;
+import com.jef.justenoughfakepixel.utils.item.ItemUtils;
 import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;

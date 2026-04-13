@@ -1,13 +1,11 @@
 package com.jef.justenoughfakepixel.features.mining.powder;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
+import com.jef.justenoughfakepixel.features.misc.ItemPickupLog;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import com.jef.justenoughfakepixel.utils.ItemUtils;
 import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
 import com.jef.justenoughfakepixel.utils.data.SkyblockData;
 import com.jef.justenoughfakepixel.utils.data.TablistParser;
-import net.minecraft.client.Minecraft;
-import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -20,26 +18,71 @@ import java.util.regex.Pattern;
 public class PowderTracker {
 
     private static final Pattern CHEST_UNCOVERED = Pattern.compile("You uncovered a treasure chest!");
-
+    private static final Pattern COMPACT = Pattern.compile("COMPACT! You found an? Enchanted Hard Stone!");
     private static final Pattern GEMSTONE_POWDER = Pattern.compile("Gemstone Powder x([\\d,]+)");
+    private static final Pattern GEMSTONE_DROP = Pattern.compile("\\S (Rough|Flawed|Fine|Flawless) " + "(Ruby|Sapphire|Amber|Amethyst|Jade|Topaz|Jasper|Opal|Citrine|Aquamarine|Peridot|Onyx) " + "Gemstone x([\\d,]+)");
     private static final Pattern DIAMOND_ESSENCE = Pattern.compile("Diamond Essence x([\\d,]+)");
     private static final Pattern GOLD_ESSENCE = Pattern.compile("Gold Essence x([\\d,]+)");
     private static final Pattern OIL_BARREL = Pattern.compile("Oil Barrel x([\\d,]+)");
     private static final Pattern ASCENSION_ROPE = Pattern.compile("Ascension Rope x([\\d,]+)");
     private static final Pattern WISHING_COMPASS = Pattern.compile("Wishing Compass x([\\d,]+)");
     private static final Pattern JUNGLE_HEART = Pattern.compile("Jungle Heart x([\\d,]+)");
-    private static final Pattern COMPACT = Pattern.compile("COMPACT! You found an? Enchanted Hard Stone!");
-
-    private static final Pattern GEMSTONE_DROP = Pattern.compile("\\S (Rough|Flawed|Fine|Flawless) " + "(Ruby|Sapphire|Amber|Amethyst|Jade|Topaz|Jasper|Opal|Citrine|Aquamarine|Peridot|Onyx) " + "Gemstone x([\\d,]+)");
-
     private static final Pattern GOBLIN_EGG = Pattern.compile("Goblin Egg x([\\d,]+)$");
     private static final Pattern GREEN_GOBLIN_EGG = Pattern.compile("Green Goblin Egg x([\\d,]+)");
     private static final Pattern RED_GOBLIN_EGG = Pattern.compile("Red Goblin Egg x([\\d,]+)");
     private static final Pattern YELLOW_GOBLIN_EGG = Pattern.compile("Yellow Goblin Egg x([\\d,]+)");
     private static final Pattern BLUE_GOBLIN_EGG = Pattern.compile("Blue Goblin Egg x([\\d,]+)");
 
+    private static final long SYNC_WINDOW_MS = 2000;
+
     private static int tickCounter = 0;
-    private static ItemStack[] lastInventory = new ItemStack[36];
+    private static boolean listenerRegistered = false;
+
+    private static long pendingGemstoneDelta = 0;
+    private static long pendingDeltaTime = 0;
+    private static long lastGemstoneChatTime = 0;
+
+    private static void ensureListenerRegistered() {
+        if (listenerRegistered) return;
+
+        ItemPickupLog itemLog = ItemPickupLog.getInstance();
+        if (itemLog != null) {
+            itemLog.addItemChangeListener(PowderTracker::onItemChange);
+        }
+
+        TablistParser.setGemstonePowderChangeListener(PowderTracker::onGemstonePowderChange);
+
+        listenerRegistered = true;
+    }
+
+    private static void onGemstonePowderChange(long oldValue, long newValue) {
+        if (newValue <= oldValue) return;
+
+        long delta = newValue - oldValue;
+        long now = System.currentTimeMillis();
+
+        if (now - lastGemstoneChatTime <= SYNC_WINDOW_MS) {
+            if (!isActive()) return;
+            PowderStats stats = PowderStats.getInstance();
+            stats.getData().gemstonePowder += delta;
+            stats.save();
+            lastGemstoneChatTime = 0;
+        }
+        else {
+            pendingGemstoneDelta = delta;
+            pendingDeltaTime = now;
+        }
+    }
+
+    private static void onItemChange(String displayName, int delta) {
+        if (!isActive()) return;
+        if (!displayName.contains("§aEnchanted Hard Stone")) return;
+        if (delta <= 0) return;
+
+        PowderStats stats = PowderStats.getInstance();
+        stats.getData().hardStone += delta;
+        stats.save();
+    }
 
     public static boolean isDoublePowder() {
         return TablistParser.isEventActive("2x Powder");
@@ -71,42 +114,11 @@ public class PowderTracker {
         if (event.phase != TickEvent.Phase.END) return;
         if (!isActive()) return;
 
+        ensureListenerRegistered();
+
         tickCounter++;
 
         if (tickCounter % 20 == 0) PowderStats.getInstance().tickRates();
-
-        Minecraft mc = Minecraft.getMinecraft();
-        if (mc.thePlayer == null || mc.currentScreen != null) return;
-
-        ItemStack[] inv = mc.thePlayer.inventory.mainInventory;
-        for (int i = 0; i < inv.length; i++) {
-            ItemStack current = inv[i];
-            ItemStack prev = lastInventory[i];
-
-            if (current == null) {
-                lastInventory[i] = null;
-                continue;
-            }
-
-            if (!ItemUtils.getInternalName(current).equals("ENCHANTED_HARD_STONE")) {
-                lastInventory[i] = current.copy();
-                continue;
-            }
-
-            if (prev == null) {
-                lastInventory[i] = current.copy();
-                continue;
-            }
-
-            int gained = current.stackSize - prev.stackSize;
-            if (gained > 0) {
-                PowderStats stats = PowderStats.getInstance();
-                stats.getData().hardStone += gained;
-                stats.save();
-            }
-
-            lastInventory[i] = current.copy();
-        }
     }
 
     @SubscribeEvent
@@ -134,8 +146,17 @@ public class PowderTracker {
 
         m = GEMSTONE_POWDER.matcher(msg);
         if (m.find()) {
-            data.gemstonePowder += parseLong(m.group(1));
-            stats.save();
+            long now = System.currentTimeMillis();
+
+            if (pendingGemstoneDelta > 0 && now - pendingDeltaTime <= SYNC_WINDOW_MS) {
+                data.gemstonePowder += pendingGemstoneDelta;
+                stats.save();
+                pendingGemstoneDelta = 0;
+                pendingDeltaTime = 0;
+            }
+            else {
+                lastGemstoneChatTime = now;
+            }
             return;
         }
 
@@ -226,7 +247,10 @@ public class PowderTracker {
 
     @SubscribeEvent
     public void onWorldUnload(WorldEvent.Unload event) {
-        lastInventory = new ItemStack[36];
+        pendingGemstoneDelta = 0;
+        pendingDeltaTime = 0;
+        lastGemstoneChatTime = 0;
+
         PowderStats.getInstance().onWorldChange();
     }
 }

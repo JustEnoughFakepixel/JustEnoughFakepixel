@@ -1,10 +1,12 @@
 // Credit: Skytils (https://github.com/Skytils/SkytilsMod) (AGPLv3)
 
-package com.jef.justenoughfakepixel.utils;
+package com.jef.justenoughfakepixel.utils.item;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.events.RenderItemOverlayEvent;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
+import com.jef.justenoughfakepixel.utils.ColorUtils;
+import com.jef.justenoughfakepixel.utils.RomanNumeralParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.inventory.GuiChest;

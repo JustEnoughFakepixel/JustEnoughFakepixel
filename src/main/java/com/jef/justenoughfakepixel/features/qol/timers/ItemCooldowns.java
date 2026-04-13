@@ -1,4 +1,4 @@
-package com.jef.justenoughfakepixel.features.qol;
+package com.jef.justenoughfakepixel.features.qol.timers;
 
 import com.jef.justenoughfakepixel.events.ActionBarUpdateEvent;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
@@ -6,8 +6,8 @@ import com.jef.justenoughfakepixel.repo.JefRepo;
 import com.jef.justenoughfakepixel.repo.RepoHandler;
 import com.jef.justenoughfakepixel.repo.TimerRepo;
 import com.jef.justenoughfakepixel.repo.data.TimerData;
-import com.jef.justenoughfakepixel.utils.ItemStackFinder;
-import com.jef.justenoughfakepixel.utils.TimerManager;
+import com.jef.justenoughfakepixel.utils.item.ItemStackFinder;
+import com.jef.justenoughfakepixel.utils.time.TimerManager;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;

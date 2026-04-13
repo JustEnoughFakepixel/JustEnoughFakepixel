@@ -1,4 +1,4 @@
-package com.jef.justenoughfakepixel.features.qol;
+package com.jef.justenoughfakepixel.features.qol.enchants;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

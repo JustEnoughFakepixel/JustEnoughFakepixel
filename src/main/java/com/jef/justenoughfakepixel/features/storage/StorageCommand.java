@@ -6,7 +6,6 @@ import com.jef.justenoughfakepixel.init.RegisterCommand;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 
-@RegisterCommand
 public class StorageCommand extends SimpleCommand {
 
 

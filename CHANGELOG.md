@@ -1,25 +1,26 @@
 
-# JEF 1.2.3 - 1.2.4 Changelog
+# JEF 1.2.4 - 1.2.5 Changelog
+
+- Added Item Cooldowns overlay (abilities, invincibility timers)
+- Added CS2 case opening animation
+- Added Daily Grind, Powder & Core of the mountain to HOTM Powder Display
+----------------
+- Added timer repo with dynamic reload of timers
+- Added /jef reload debug command and debug button to reload repo data
+- Added drawHoveringText in TextRenderUtils
+- Added debug logger for easier debugging
+- Cleaned and organized most of the code
+-------------
+- Fixed scoreboard header being hardcoded
+- Fixed item log mechanics
+- Fixed Powder Tracker Gemstone Powder not being accurate
+- Fixed Hard Stone in Powder Tracker
+- Noticeable increase in performance 
 
 
-- Added Confirm Disconnect
-- Added Boss Highlights
-- Added Dungeonbreaker Overlay
-- Added Hotm Powder display
-- Added Trophy Fishing tracker
-- Added Dungeom Room overlay
-- Added Fishing Timer
-- Added Block Overlay
-- Added Party Finder Labels
-- Added Skyblock XP in chat (wont work unless server adds sb xp in action bar)
 
 
-- Fixed crashing when changing keybind to mousebuttons
-- Fixed toxophilite not being detected by enchant parser
-- Fixed social xp not being accurate
-- Some fixes on Item log 
-
-The full changelog can be found [here](https://github.com/hamlook/JustEnoughFakepixel/commits/main/)
+The full changelog can be found [here](https://github.com/JustEnoughFakepixel/JustEnoughFakepixel/commits/main/)
 
 
 
