@@ -3,7 +3,7 @@ package com.jef.justenoughfakepixel.features.misc.pet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.jef.justenoughfakepixel.init.RegisterInstance;
-import com.jef.justenoughfakepixel.utils.ItemUtils;
+import com.jef.justenoughfakepixel.utils.item.ItemUtils;
 import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;

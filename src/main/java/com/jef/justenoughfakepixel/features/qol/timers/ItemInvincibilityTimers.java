@@ -1,20 +1,20 @@
-package com.jef.justenoughfakepixel.features.qol;
+package com.jef.justenoughfakepixel.features.qol.timers;
 
 import com.jef.justenoughfakepixel.repo.JefRepo;
 import com.jef.justenoughfakepixel.repo.RepoHandler;
 import com.jef.justenoughfakepixel.repo.TimerRepo;
-import com.jef.justenoughfakepixel.utils.ItemStackFinder;
-import com.jef.justenoughfakepixel.utils.TimerManager;
+import com.jef.justenoughfakepixel.utils.item.ItemStackFinder;
+import com.jef.justenoughfakepixel.utils.time.TimerManager;
 import net.minecraft.item.ItemStack;
 
 import java.util.List;
 
-public class ItemAbilityTimers {
+public class ItemInvincibilityTimers {
 
-    private static final TimerManager timerManager = new TimerManager(TimerRepo.getAbilityDurations());
+    private static final TimerManager timerManager = new TimerManager(TimerRepo.getInvincibilityDurations());
 
     static {
-        RepoHandler.addListener(JefRepo.KEY_TIMERS, () -> timerManager.updateDurations(TimerRepo.getAbilityDurations()));
+        RepoHandler.addListener(JefRepo.KEY_TIMERS, () -> timerManager.updateDurations(TimerRepo.getInvincibilityDurations()));
     }
 
     public static void markActive(String itemId) {

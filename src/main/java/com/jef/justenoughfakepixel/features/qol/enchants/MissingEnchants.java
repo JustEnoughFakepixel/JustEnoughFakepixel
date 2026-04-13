@@ -1,4 +1,4 @@
-package com.jef.justenoughfakepixel.features.qol;
+package com.jef.justenoughfakepixel.features.qol.enchants;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -8,6 +8,7 @@ import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.repo.JefRepo;
 import com.jef.justenoughfakepixel.repo.RepoHandler;
 import com.jef.justenoughfakepixel.utils.ColorUtils;
+import com.jef.justenoughfakepixel.utils.item.ItemUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -93,7 +94,7 @@ public class MissingEnchants {
     private JsonArray getAllEnchantsForItem(JsonObject enchantsConst, ItemStack stack) {
         try {
             JsonObject enchantsObj = enchantsConst.get("enchants").getAsJsonObject();
-            List<String> lore = com.jef.justenoughfakepixel.utils.ItemUtils.getLoreLines(stack);
+            List<String> lore = ItemUtils.getLoreLines(stack);
 
             String rarityLine = "";
             for (int i = lore.size() - 1; i >= 0; i--) {

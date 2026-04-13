@@ -5,7 +5,7 @@ import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
 import com.jef.justenoughfakepixel.features.dungeons.utils.DungeonFloor;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
-import com.jef.justenoughfakepixel.utils.TimeFormatter;
+import com.jef.justenoughfakepixel.utils.time.TimeFormatter;
 import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
 import com.jef.justenoughfakepixel.utils.data.SkyblockData;
 import com.jef.justenoughfakepixel.utils.overlay.Overlay;

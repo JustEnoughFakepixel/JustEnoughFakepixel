@@ -1,97 +1,70 @@
 # JustEnoughFakepixel Features
-
-
 ## QoL
-
-- **Block Selection Overlay** — replaces the vanilla block selection with a custom filled or outline highlight.
-- **Enchant Parser** — colors enchants by level, sorts ultimates to the top, supports normal/compressed/expanded layout and chroma animation
-- **Gyro Wand Helper** — shows the AoE ring when holding the Gyrokinetic Wand, plus a cooldown timer
-- **Roman Numerals** — converts roman numerals to integers
-- **Prevent Cursor Reset** — stops the mouse cursor from resetting when opening GUIs
-- **Skyblock ID** — shows the internal skyblock item ID at the bottom of tooltips
-- **Disable Enchant Glint** — removes the enchantment glint
-- **Brewing Helper** — highlights brewing stands
-- **Missing Enchants** — hold shift on an enchanted item to see missing enchants
-- **Confirm Disconnect** — makes you click twice to disconnect so you don't do it by accident
-
-
+- **Ability Timer Overlay** — Tracks active ability durations.
+- **Block Selection Overlay** — Custom block highlight.
+- **Brewing Helper** — Highlights brewing stands.
+- **Confirm Disconnect** — Prevents accidental disconnects.
+- **Damage Splashes** — Hides crit and/or non-crit damage nametags.
+- **Disable Enchant Glint** — Removes enchantment glint.
+- **Enchant Parser** — Colors enchants by level, sorts ultimates to the top, with chroma support.
+- **Gyro Wand Helper** — Shows AoE ring when holding the Gyrokinetic Wand.
+- **Invincibility Overlay** — Timer for the invincibility window from Bonzo's Mask and Spirit Mask.
+- **Item Cooldown Overlay** — Tracks ability cooldowns with a HUD overlay.
+- **Missing Enchants** — Hold Shift to view missing enchants.
+- **Prevent Cursor Reset** — Keeps cursor position when opening GUIs.
+- **Roman Numerals** — Converts Roman numerals to integers.
+- **Skyblock ID** — Shows internal SkyBlock item ID in tooltips.
 ## Misc
-
-- **Performance HUD** — shows FPS, TPS, ping, coords, and rotation in a small overlay
-- **Search Bar** — adds a search bar to inventory GUIs with item highlighting
-- **Item Cooldowns** — tracks cooldowns for abilities and invincibility timers with a HUD overlay
-- **Current Pet** — shows your active pet as a HUD overlay
-- **Item Pickup Log** — shows recently picked up or dropped items in a HUD
-- **Inventory Buttons** — adds clickable shortcut buttons to inventories, configure with `/jefbuttons`
-- **Item Stack Tips** — shows enchant levels on books and floor numbers on catacombs passes
-- **Party Finder Floor Labels** — shows F1–F7, M1–M7 or ENT on listings in the Party Finder
-- **Skill XP Display** — hold shift on a skill item to see XP remaining to max
-- **No Swap Animation** — removes the item lowering animation when switching hotbar slots
-- **Show Own Nametag** — shows your own nametag in third person
-- **Disable Entity Fire** — hides the fire overlay on burning entities
-- **SkyBlock XP in Chat** — sends SkyBlock XP gains from the action bar into chat *(needs server support, probably won't work on hypixel)*
-
-
-## Dungeons
-
-- **Blood Mob Highlight** — highlights blood room mobs with a box or glow
-- **Boss Highlights** — highlights Bonzo, Scarf, Scarf's minions, and the Professor with configurable colors
-- **Dungeon Overlay** — run timers and end-of-run stats in chat
-- **Dungeon Breaker Overlay** — shows Dungeon Breaker charges while in a dungeon
-- **Dungeon Room Overlay** — shows the name of your current dungeon room
-- **CSGO Chest Opening** — opening a obsidian/bedrock chest plays a csgo crate opening animation
-
-## Mining
-
-- **Fetchur Overlay** — shows today's Fetchur item
-- **Gemstone Powder Tracker** — tracks powder and chest drops in Crystal Hollows
-- **HOTM Powder Display** — adds powder spent vs max cost to HOTM perk tooltips, hold shift to see cost for the next 10 levels
-
-
-## Fishing
-
-- **Trophy Fish Tracker** — tracks trophy fish counts with an overlay, chat message formatting, and Odger tooltip totals
-- **Fishing Timer** — shows a timer while fishing with a configurable alert time
-
-
-## Diana
-
-- **Diana Tracker** — tracks playtime, burrows, and mob rates during the Diana event
-- **Event Overlay** — HUD for the event stats
-- **Loot Overlay** — HUD for chimeras, rare drops, and coins
-- **Inquisitor HP Overlay** — live HP bar for the nearest Minos Inquisitor
-- **Diana Mob HP Overlay** — live HP bar for the nearest non-inquisitor Diana mob
-
-
-## Farming
-
-- **Lock Mouse** — locks your yaw and pitch so you don't accidentally move the camera while farming
-
-
+- **Current Pet** — Shows active pet in a HUD overlay.
+- **Disable Entity Fire** — Hides fire overlay on entities.
+- **Inventory Buttons** — Adds configurable shortcut buttons (`/jefbuttons`).
+- **Item Pickup Log** — Displays recently picked up or dropped items.
+- **Item Stack Tips** — Shows enchant levels and dungeon floor info.
+- **No Swap Animation** — Removes swap animation.
+- **Party Finder Floor Labels** — Displays floor tags (F1–F7, M1–M7, ENT).
+- **Performance HUD** — Displays FPS, TPS, ping, coords, and rotation.
+- **Search Bar** — Adds inventory search with item highlighting.
+- **Show Own Nametag** — Visible in third person.
+- **Skill XP Display** — Hold Shift to view XP remaining to max.
+- **SkyBlock XP in Chat** — Sends XP gains to chat *(server dependent)*.
 ## Scoreboard
-
-- **Custom Scoreboard** — replaces the vanilla sidebar with a custom one. lines, order, colors, and scale are configurable
-
-
+- **Custom Scoreboard** — Fully configurable scoreboard replacement.
 ## Waypoints
-- **JEF Ordered waypoints** — `/jw guide`
-- **Waypoint Manager** — gui to manage waypoint groups
-- **Auto Advance** — automatically moves to the next waypoint when you're close enough for long enough
-
-## Commands 
-
-+ `/jef [category]` — opens the JEF config, optionally jumping to a category
-+ `/jef reload` — reloads repo data (timers and other remote config)
-+ `/diana <reset|toggle>` — resets or pauses Diana tracking
-+ `/pdt <reset|toggle>` (`/powdertracker`) — resets or pauses the powder tracker
-+ `/lockmouse` — toggles mouse lock
-+ `/jw guide` — all the commands for jef ordered waypoints
-+ `/waypoint` — opens the waypoint group manager
-+ `/jefbuttons` — opens the inventory button editor
-
-
-## Party Commands 
-+ `!help` for diana commands
-+ `!pb` to view personal bests of dungeon floors, phases
- - Usages - !pb f1-m7, br, p1,p2,p3,p4,p5
-+ `!jef` to view a user's JEF version
+- **Auto Advance** — Moves to next waypoint automatically.
+- **JEF Ordered Waypoints** — `/jw guide`
+- **Waypoint Manager** — GUI for waypoint groups.
+## Diana
+- **Diana Tracker** — Tracks playtime, burrows, and mob rates.
+- **Diana Mob HP Overlay** — HP bar for nearest non-Inquisitor Diana mob.
+- **Event Overlay** — Displays event stats.
+- **Inquisitor HP Overlay** — HP bar for nearest Minos Inquisitor.
+- **Loot Overlay** — Shows rare drops and coins.
+## Dungeons
+- **Blood Mob Highlight** — Highlights blood room mobs.
+- **Boss Highlights** — Highlights Bonzo, Scarf, minions, and Professor.
+- **Chest Case Opening** — Adds a CS:GO-style case opening animation for Obsidian and Bedrock chests.
+- **Dungeon Breaker Overlay** — Displays Dungeon Breaker charges.
+- **Dungeon Overlay** — Shows run timers and end stats.
+- **Dungeon Room Overlay** — Shows current room name.
+## Farming
+- **Lock Mouse** — Locks camera movement while farming.
+## Fishing
+- **Fishing Timer** — Timer on rod with configurable alert.
+- **Trophy Fish Tracker** — Tracks trophy fish counts and totals.
+## Mining
+- **Fetchur Overlay** — Shows today's Fetchur item.
+- **Gemstone Powder Tracker** — Tracks powder and chest drops.
+- **HOTM Powder Display** — Shows spent powder and upcoming costs.
+## Commands
++ `/jef [category]` — Opens config.
++ `/jef reload` — Reloads repo data.
++ `/diana <reset|toggle>` — Diana tracker controls.
++ `/pdt <reset|toggle>` (`/powdertracker`) — Powder tracker controls.
++ `/lockmouse` — Toggles mouse lock.
++ `/jw guide` — Waypoint commands.
++ `/waypoint` — Opens waypoint manager.
++ `/jefbuttons` — Opens inventory button editor.
+## Party Commands
++ `!help` — Diana help.
++ `!pb` — View dungeon personal bests. Usages: `f1–m7`, `br`, `p1–p5`
++ `!jef` — Shows a user's JEF version.

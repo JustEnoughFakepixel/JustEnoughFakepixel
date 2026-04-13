@@ -1,4 +1,4 @@
-package com.jef.justenoughfakepixel.utils;
+package com.jef.justenoughfakepixel.utils.item;
 
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
