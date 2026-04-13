@@ -186,17 +186,21 @@ public class CustomDropAnimationGui extends GuiScreen {
     @Override
     public void initGui() {
         super.initGui();
+        DebugLogger.log("[JEF ANIMATION] initGui called - initializing animation GUI");
         try {
             blurShader = new ShaderGroup(mc.getTextureManager(), mc.getResourceManager(), mc.getFramebuffer(), new ResourceLocation("justenoughfakepixel", "shaders/post/blur.json"));
             blurShader.createBindFramebuffers(mc.displayWidth, mc.displayHeight);
+            DebugLogger.log("[JEF ANIMATION] Blur shader initialized successfully");
         } catch (Exception e) {
+            DebugLogger.log("[JEF ANIMATION] ERROR: Failed to initialize blur shader: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        GlStateManager.disableAlpha();
+        // Clear the screen to prevent black background with OptiFine
+        drawDefaultBackground();
 
         float progress = Math.min((System.nanoTime() - guiOpenStartTime) / (float) animationDuration, 1.0f);
         progress = 1 - (1 - progress) * (1 - progress);
