@@ -2,318 +2,301 @@ package com.jef.justenoughfakepixel.features.storage;
 
 import com.jef.justenoughfakepixel.JefMod;
 import com.jef.justenoughfakepixel.core.JefConfig;
+import com.jef.justenoughfakepixel.utils.render.NineSliceUtils;
 import com.jef.justenoughfakepixel.utils.render.ResolutionUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.inventory.ContainerChest;
+import net.minecraft.util.ResourceLocation;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 import java.io.IOException;
-import java.util.HashMap;
-
+import java.util.LinkedHashMap;
 
 public class StorageOverlay extends GuiScreen {
 
-    private static final int BASE_BOX_WIDTH = 1536;
-    private static final int BASE_BOX_HEIGHT = BASE_BOX_WIDTH * 9 / 16;
-    private static final int BASE_CONTAINER_WIDTH = 450;
-    private static final int BASE_CONTAINER_HEIGHT = BASE_CONTAINER_WIDTH * 9 / 16;
-    private static final int BASE_PADDING = 30;
-    public boolean isHorizontal = true;
-    public double scrollOffset = 0;
-    public double offset = 0;
-    public HashMap<String, StorageContainer> containers = new HashMap<>();
-    public String activeContainer = "";
-    private int boxX, boxY, boxWidth, boxHeight;
-    private int cWidth, cHeight, pX, pY;
-    private int startX, startY;
-    private double SCROLL_SPEED = 100;
-    private double maxScroll = 0;
-    private double totalElements = 0;
-    private double visibleElements = 0;
-    private boolean isDraggingScreen = false;
-    private boolean isDraggingScrollbar = false;
-    private int lastMouseX, lastMouseY;
-    private int draggedDistance = 0;
-    private int scrollbarDragOffset = 0;
+    // Information
+    public static LinkedHashMap<String,SContainer> containers = new LinkedHashMap<>();
+    public static int echests,bags;
 
-    private int trackX, trackY, trackW, trackH;
-    private int thumbX, thumbY, thumbW, thumbH;
+    // Drawing
+    public static int boxX,boxY,boxW,boxH;
+    public static int containerW,containerH;
+    public static int PADDING = 5;
+
+    // Scrolling
+    public static int SINGLE_FILE = 3;
+    public static float scrollOffset = 0;
+    public static float scrollTarget = 0;
+    public static final float SCROLL_LENGTH = 0.2f;
+
+    // Changeable Variables
+    public static float SCROLL_SPEED = 1f;
+    public static boolean isHorizontal = false;
+
+    // Containers
+    private static final ResourceLocation CONTAINER_BG =
+            new ResourceLocation("justenoughfakepixel",
+                    "textures/gui/storage_container_bg.png");
+    private static final int NINE_SLICE_CORNER = 6;
+    private static final int NINE_SLICE_SIZE   = 18;
+
+    public static boolean openGUI(ContainerChest parser){
+        containers = new LinkedHashMap<>(StorageSaving.loadStorageData());
+        if(containers.isEmpty()) {
+            containers = StorageParser.parseOverlay(parser);
+        }
+        if(containers.isEmpty()) return false;
+        SCROLL_SPEED = JefConfig.feature.storage.scrollSpeed;
+        isHorizontal = JefConfig.feature.storage.horizontal;
+
+        echests = 0;
+        bags = 0;
+        scrollOffset = 0;
+        scrollTarget = 0;
+
+        containers.values().forEach(s -> {
+            if(s.type == Type.ECHEST) {
+                echests++;
+            }else {
+                bags++;
+            }
+        });
+        JefConfig.screenToOpen = new StorageOverlay();
+        return true;
+    }
+
+    @Override
+    public void onGuiClosed() {
+        StorageSaving.saveStorageData(containers.values());
+    }
 
     @Override
     public void initGui() {
-        SCROLL_SPEED = 100 * (JefConfig.feature.dungeons.bloodMobHighlight);
-        isHorizontal = JefConfig.feature.dungeons.dungeonRoomOverlay;
-
-        int cols = isHorizontal ? 8 : 3;
-        int rows = isHorizontal ? 3 : 6;
-
-        int pageCounter = 1;
-        for (int y = 0; y < rows; y++) {
-            for (int x = 0; x < cols; x++) {
-                containers.put("echest-" + pageCounter, new StorageContainer(new HashMap<>(), ContainerType.ECHEST, pageCounter, x, y));
-                pageCounter++;
-            }
-        }
-
-        //TODO: Scrap Containers from Storage GUI
-        super.initGui();
+        boxW = (int)ResolutionUtils.getXStatic(1080);
+        boxH = (int)ResolutionUtils.getYStatic(600);
+        boxX = (this.width/2) - (boxW / 2);
+        boxY = (int)((this.height/2.0) - (boxH / 1.25));
+        containerW = (int)ResolutionUtils.getXStatic(307);
+        containerH = (int)ResolutionUtils.getXStatic(170);
     }
 
-
-    @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-
-        boxWidth = (int) ResolutionUtils.getXStatic(BASE_BOX_WIDTH);
-        boxHeight = (int) ResolutionUtils.getYStatic(BASE_BOX_HEIGHT);
-        boxX = (ResolutionUtils.getWidth() - boxWidth) / 2;
-        boxY = (ResolutionUtils.getHeight() - boxHeight) / 2;
-
-        cWidth = (int) ResolutionUtils.getXStatic(BASE_CONTAINER_WIDTH);
-        cHeight = (int) ResolutionUtils.getYStatic(BASE_CONTAINER_HEIGHT);
-        pX = (int) ResolutionUtils.getXStatic(BASE_PADDING);
-        pY = (int) ResolutionUtils.getYStatic(BASE_PADDING);
-
-
-        int maxXGrid = 0;
-        int maxYGrid = 0;
-        for (StorageContainer container : containers.values()) {
-            if (container.xGrid > maxXGrid) maxXGrid = container.xGrid;
-            if (container.yGrid > maxYGrid) maxYGrid = container.yGrid;
-        }
-        int columns = maxXGrid + 1;
-        int rows = maxYGrid + 1;
-
-        int totalGridWidth = (columns * cWidth) + ((columns - 1) * pX);
-        int totalGridHeight = (rows * cHeight) + ((rows - 1) * pY);
-
-        startX = isHorizontal ? boxX + pX : boxX + ((boxWidth - totalGridWidth) / 2);
-        startY = isHorizontal ? boxY + ((boxHeight - totalGridHeight) / 2) : boxY + pY;
-
-        double visibleCols = (double) boxWidth / (cWidth + pX);
-        double visibleRows = (double) boxHeight / (cHeight + pY);
-
-        visibleElements = isHorizontal ? visibleCols : visibleRows;
-        totalElements = isHorizontal ? columns : rows;
-        maxScroll = Math.max(0, (isHorizontal ? columns : rows) - visibleElements);
-        clampScroll();
-
-        offset = this.scrollOffset;
-        if (!JefConfig.feature.dungeons.dungeonRoomOverlay) {
-            offset = Math.round(this.scrollOffset);
-        }
-
-        this.drawCenteredString(mc.fontRendererObj, "Offset: " + String.format("%.2f", offset), boxX + (boxWidth / 2), boxY - 15, new Color(255, 255, 255).getRGB());
-
-        drawRect(boxX - 2, boxY - 2, boxX + boxWidth + 4, boxY + boxHeight + 4, new Color(0, 0, 0, 150).getRGB());
-
-        GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        doGlScissor(boxX, boxY, boxWidth, boxHeight);
-        for (StorageContainer container : containers.values()) {
-            if (canDraw(isHorizontal ? container.xGrid : container.yGrid)) {
-                drawContainer(container);
-            }
-        }
-        GL11.glDisable(GL11.GL_SCISSOR_TEST);
-
-        if (maxScroll > 0 && JefConfig.feature.dungeons.dungeonRoomOverlay) {
-            int SCROLLBAR_SIZE = 10;
-            int SCROLLBAR_MARGIN = 5;
-
-            if (isHorizontal) {
-                trackX = boxX;
-                trackY = boxY + boxHeight + SCROLLBAR_MARGIN;
-                trackW = boxWidth;
-                trackH = SCROLLBAR_SIZE;
-            } else {
-                trackX = boxX + boxWidth + SCROLLBAR_MARGIN;
-                trackY = boxY;
-                trackW = SCROLLBAR_SIZE;
-                trackH = boxHeight;
-            }
-
-            double trackLen = isHorizontal ? trackW : trackH;
-            double thumbLen = Math.max(20, trackLen * (visibleElements / totalElements));
-            double progress = scrollOffset / maxScroll;
-            double thumbStart = (isHorizontal ? trackX : trackY) + progress * (trackLen - thumbLen);
-
-            if (isHorizontal) {
-                thumbX = (int) thumbStart;
-                thumbY = trackY;
-                thumbW = (int) thumbLen;
-                thumbH = trackH;
-            } else {
-                thumbX = trackX;
-                thumbY = (int) thumbStart;
-                thumbW = trackW;
-                thumbH = (int) thumbLen;
-            }
-
-            drawRect(trackX, trackY, trackX + trackW, trackY + trackH, new Color(30, 30, 30, 200).getRGB());
-
-            drawRect(thumbX, thumbY, thumbX + thumbW, thumbY + thumbH, new Color(150, 150, 150, 255).getRGB());
-        }
-
-        super.drawScreen(mouseX, mouseY, partialTicks);
+    private int getRowCount() {
+        return (int) Math.ceil((double) containers.size() / SINGLE_FILE);
     }
 
-    private void doGlScissor(int x, int y, int width, int height) {
-        int scaleFactor = ResolutionUtils.getFactor();
-        int displayHeight = mc.displayHeight;
-
-        GL11.glScissor(x * scaleFactor, displayHeight - ((y + height) * scaleFactor), width * scaleFactor, height * scaleFactor);
-    }
-
-    public boolean canDraw(int gridPos) {
-        return gridPos >= Math.floor(offset) - 1 && gridPos <= Math.ceil(offset + visibleElements) + 1;
-    }
-
-    public boolean isHovering(int mouseX, int mouseY, StorageContainer container) {
-        if (container == null) return false;
-        if (mouseX < boxX || mouseX > boxX + boxWidth || mouseY < boxY || mouseY > boxY + boxHeight) {
-            return false;
-        }
-
-        double renderX = startX + ((container.xGrid - (isHorizontal ? offset : 0)) * (cWidth + pX));
-        double renderY = startY + ((container.yGrid - (!isHorizontal ? offset : 0)) * (cHeight + pY));
-
-        return mouseX >= renderX && mouseX <= renderX + cWidth && mouseY >= renderY && mouseY <= renderY + cHeight;
-    }
-
-    @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        draggedDistance = 0;
-        lastMouseX = mouseX;
-        lastMouseY = mouseY;
-        isDraggingScreen = false;
-        isDraggingScrollbar = false;
-        if (maxScroll > 0) {
-            if (mouseX >= thumbX && mouseX <= thumbX + thumbW && mouseY >= thumbY && mouseY <= thumbY + thumbH) {
-                if (JefConfig.feature.dungeons.dungeonRoomOverlay) {
-                    isDraggingScrollbar = true;
-                    scrollbarDragOffset = isHorizontal ? mouseX - thumbX : mouseY - thumbY;
-                    return;
-                }
-            }
-            if (mouseX >= trackX && mouseX <= trackX + trackW && mouseY >= trackY && mouseY <= trackY + trackH) {
-                double trackLen = isHorizontal ? trackW : trackH;
-                double thumbLen = Math.max(20, trackLen * (visibleElements / totalElements));
-                double clickPos = isHorizontal ? mouseX - trackX : mouseY - trackY;
-
-                double newThumbStart = clickPos - (thumbLen / 2);
-                double progress = newThumbStart / (trackLen - thumbLen);
-
-                scrollOffset = progress * maxScroll;
-                clampScroll();
-                if (JefConfig.feature.dungeons.dungeonRoomOverlay) {
-                    isDraggingScrollbar = true;
-                }
-                scrollbarDragOffset = (int) (thumbLen / 2);
-                return;
-            }
-
-
-            if (!JefConfig.feature.dungeons.dungeonRoomOverlay) {
-                if (activeContainer != null && !activeContainer.isEmpty() && containers.containsKey(activeContainer)) {
-                    if (isHovering(mouseX, mouseY, containers.get(activeContainer))) {
-                        containers.get(activeContainer).mouseClicked(mouseX, mouseY, mouseButton);
-                    }
-                }
-                for (StorageContainer container : containers.values()) {
-                    if (isHovering(mouseX, mouseY, container)) {
-                        this.activeContainer = container.id;
-                        JefMod.logger.info("Active: " + this.activeContainer);
-                    }
-                }
-            }
-
-            if (mouseX >= boxX && mouseX <= boxX + boxWidth && mouseY >= boxY && mouseY <= boxY + boxHeight) {
-                if (JefConfig.feature.dungeons.dungeonRoomOverlay) {
-                    isDraggingScreen = true;
-                }
-            }
-
-        }
-
-        super.mouseClicked(mouseX, mouseY, mouseButton);
-
-    }
-
-    @Override
-    protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-        if (isDraggingScrollbar) {
-            double trackLen = isHorizontal ? trackW : trackH;
-            double thumbLen = Math.max(20, trackLen * (visibleElements / totalElements));
-            double mousePos = isHorizontal ? mouseX : mouseY;
-            double tStart = isHorizontal ? trackX : trackY;
-
-            double newThumbStart = mousePos - scrollbarDragOffset;
-            double progress = (newThumbStart - tStart) / (trackLen - thumbLen);
-
-            scrollOffset = progress * maxScroll;
-            clampScroll();
-
-        } else if (isDraggingScreen) {
-            int deltaX = mouseX - lastMouseX;
-            int deltaY = mouseY - lastMouseY;
-
-            draggedDistance += Math.abs(deltaX) + Math.abs(deltaY);
-
-            if (isHorizontal) {
-                scrollOffset -= (double) deltaX / (cWidth + pX);
-            } else {
-                scrollOffset -= (double) deltaY / (cHeight + pY);
-            }
-
-            clampScroll();
-            lastMouseX = mouseX;
-            lastMouseY = mouseY;
-        }
-    }
-
-    @Override
-    protected void mouseReleased(int mouseX, int mouseY, int state) {
-        if (isDraggingScreen && draggedDistance < 5) {
-            if (activeContainer != null && !activeContainer.isEmpty() && containers.containsKey(activeContainer)) {
-                if (isHovering(mouseX, mouseY, containers.get(activeContainer))) {
-                    containers.get(activeContainer).mouseClicked(mouseX, mouseY, state);
-                }
-            }
-            for (StorageContainer container : containers.values()) {
-                if (isHovering(mouseX, mouseY, container)) {
-                    this.activeContainer = container.id;
-                    JefMod.logger.info("Active: " + this.activeContainer);
-                }
-            }
-        }
-
-        isDraggingScreen = false;
-        isDraggingScrollbar = false;
-        super.mouseReleased(mouseX, mouseY, state);
-    }
-
-    public void drawContainer(StorageContainer container) {
-        double renderX = startX + ((container.xGrid - (isHorizontal ? offset : 0)) * (cWidth + pX));
-        double renderY = startY + ((container.yGrid - (!isHorizontal ? offset : 0)) * (cHeight + pY));
-
-        drawRect((int) renderX, (int) renderY, (int) renderX + cWidth, (int) renderY + cHeight, new Color(150, 150, 150, 200).getRGB());
-
-        this.drawCenteredString(mc.fontRendererObj, String.valueOf(container.page), (int) renderX + (cWidth / 2), (int) renderY + (cHeight / 2) - 4, new Color(255, 255, 255).getRGB());
-    }
-
-    private void clampScroll() {
-        if (this.scrollOffset > maxScroll) this.scrollOffset = maxScroll;
-        if (this.scrollOffset < 0) this.scrollOffset = 0;
+    private int getColCount() {
+        return (int) Math.ceil((double) containers.size() / SINGLE_FILE);
     }
 
     @Override
     public void handleMouseInput() throws IOException {
+        super.handleMouseInput();
         int scroll = Mouse.getDWheel();
         if (scroll != 0) {
-            int direction = Integer.signum(scroll);
-            this.scrollOffset -= direction * (SCROLL_SPEED / 100.0);
-            clampScroll();
+            scrollTarget -= scroll > 0 ? SCROLL_SPEED : -SCROLL_SPEED;
+            int maxScroll;
+            if (isHorizontal) {
+                int visibleCols = boxW / (containerW + PADDING);
+                maxScroll = Math.max(0, getColCount() - visibleCols);
+            } else {
+                int visibleRows = boxH / (containerH + PADDING);
+                maxScroll = Math.max(0, getRowCount() - visibleRows);
+            }
+            scrollTarget = Math.max(0, Math.min(scrollTarget, maxScroll));
         }
-        super.handleMouseInput();
     }
+
+    private int[] getGridPosition(int index) {
+        if (isHorizontal) {
+            int xGrid = index / SINGLE_FILE;
+            int yGrid = index % SINGLE_FILE;
+            return new int[]{xGrid, yGrid};
+        } else {
+            int xGrid = index % SINGLE_FILE;
+            int yGrid = index / SINGLE_FILE;
+            return new int[]{xGrid, yGrid};
+        }
+    }
+
+    private int[] getGridStart() {
+        if (isHorizontal) {
+            int totalGridH = (containerH * SINGLE_FILE) + (PADDING * (SINGLE_FILE - 1));
+            int gridStartX = boxX + PADDING;
+            int gridStartY = boxY + (boxH - totalGridH) / 2;
+            return new int[]{gridStartX, gridStartY};
+        } else {
+            int totalGridW = (containerW * SINGLE_FILE) + (PADDING * (SINGLE_FILE - 1));
+            int gridStartX = boxX + (boxW - totalGridW) / 2;
+            int gridStartY = boxY + PADDING;
+            return new int[]{gridStartX, gridStartY};
+        }
+    }
+
+    @Override
+    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+        if(containers.isEmpty()) return;
+
+        NineSliceUtils.draw(CONTAINER_BG,boxX,boxY,boxW,boxH,6,18);
+
+        scrollOffset += (scrollTarget - scrollOffset) * SCROLL_LENGTH;
+
+        ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
+        int scaleFactor = sr.getScaleFactor();
+        int inset = NINE_SLICE_CORNER;
+        int scissorY = Minecraft.getMinecraft().displayHeight - (boxY + boxH - inset) * scaleFactor;
+
+        GL11.glEnable(GL11.GL_SCISSOR_TEST);
+        GL11.glScissor(
+                (boxX + inset) * scaleFactor,
+                scissorY + inset * scaleFactor,
+                (boxW - inset * 2) * scaleFactor,
+                (boxH - inset * 2) * scaleFactor
+        );
+        for(SContainer container : containers.values()){
+            drawContainer(mouseX,mouseY,container);
+        }
+        GL11.glDisable(GL11.GL_SCISSOR_TEST);
+        
+        drawCenteredString(this.fontRendererObj,"Containers: " + containers.size(),
+                this.width / 2,10,
+                Color.white.getRGB());
+        super.drawScreen(mouseX, mouseY, partialTicks);
+    }
+
+    @Override
+    protected void mouseReleased(int mouseX, int mouseY, int state) {
+        int[] gridStart = getGridStart();
+        int gridStartX = gridStart[0];
+        int gridStartY = gridStart[1];
+
+        int relativeX, relativeY;
+        if (isHorizontal) {
+            int scrollPixels = (int)(scrollOffset * (containerW + PADDING));
+            relativeX = mouseX - gridStartX + scrollPixels;
+            relativeY = mouseY - gridStartY;
+        } else {
+            int scrollPixels = (int)(scrollOffset * (containerH + PADDING));
+            relativeX = mouseX - gridStartX;
+            relativeY = mouseY - gridStartY + scrollPixels;
+        }
+
+        if (relativeX >= 0 && relativeY >= 0) {
+            int xGrid, yGrid;
+            if (isHorizontal) {
+                xGrid = relativeX / (containerW + PADDING);
+                yGrid = relativeY / (containerH + PADDING);
+            } else {
+                xGrid = relativeX / (containerW + PADDING);
+                yGrid = relativeY / (containerH + PADDING);
+            }
+
+            boolean inHorizontalPadding = relativeX % (containerW + PADDING) > containerW;
+            boolean inVerticalPadding = relativeY % (containerH + PADDING) > containerH;
+
+            if (!inHorizontalPadding && !inVerticalPadding) {
+                int targetIndex = isHorizontal
+                        ? (xGrid * SINGLE_FILE) + yGrid
+                        : (yGrid * SINGLE_FILE) + xGrid;
+
+                SContainer clickedContainer = null;
+                for (SContainer container : containers.values()) {
+                    int index = container.page - 1;
+                    if (container.type == Type.BAG) index += echests;
+                    if (index == targetIndex) {
+                        clickedContainer = container;
+                        break;
+                    }
+                }
+                if (clickedContainer != null) handleContainerClick(clickedContainer);
+            }
+        }
+
+        super.mouseReleased(mouseX, mouseY, state);
+    }
+
+    public void handleContainerClick(SContainer container){
+        JefMod.logger.info("Opening " + container.type.name().toLowerCase() + " of page " + container.page);
+        if(container.type == Type.ECHEST){
+            Minecraft.getMinecraft().thePlayer.sendChatMessage("/echest " + container.page);
+        }else {
+            Minecraft.getMinecraft().thePlayer.sendChatMessage("/storage " + container.page);
+        }
+    }
+
+    private void drawContainer(int mouseX, int mouseY, SContainer container) {
+        int index = container.page - 1;
+        if (container.type == Type.BAG) index += echests;
+
+        int[] gridPos = getGridPosition(index);
+        int xGrid = gridPos[0];
+        int yGrid = gridPos[1];
+
+        int[] gridStart = getGridStart();
+        int gridStartX = gridStart[0];
+        int gridStartY = gridStart[1];
+
+        int xStart, yStart;
+        if (isHorizontal) {
+            int scrollPixels = (int)(scrollOffset * (containerW + PADDING));
+            xStart = gridStartX + (xGrid * (containerW + PADDING)) - scrollPixels;
+            yStart = gridStartY + (yGrid * (containerH + PADDING));
+        } else {
+            int scrollPixels = (int)(scrollOffset * (containerH + PADDING));
+            xStart = gridStartX + (xGrid * (containerW + PADDING));
+            yStart = gridStartY + (yGrid * (containerH + PADDING)) - scrollPixels;
+        }
+
+        int rw = container.renderW > 0 ? container.renderW : containerW;
+        int rh = container.renderH > 0 ? container.renderH : containerH;
+        int rx = xStart + (containerW - rw) / 2;
+        int ry = yStart + (containerH - rh) / 2;
+
+        boolean hovering = isHovering(mouseX, mouseY, xStart, yStart, containerW, containerH);
+        if (hovering) GL11.glColor4f(1.3f, 1.3f, 1.3f, 1f);
+
+        NineSliceUtils.draw(CONTAINER_BG, rx, ry, rw, rh, NINE_SLICE_CORNER, NINE_SLICE_SIZE);
+
+        GL11.glColor4f(1f, 1f, 1f, 1f);
+
+        int slotW = (int)ResolutionUtils.getXStatic(33);
+        int slotH = (int)ResolutionUtils.getYStatic(33);
+
+        int slotsPerRow = 9;
+        int offset = 4;
+
+        for(int i = 0;i < container.slotCount;i++){
+            int col = i % slotsPerRow;
+            int row = i / slotsPerRow;
+
+            int xPos = rx + offset + (slotW * col);
+            int yPos = ry + offset + (slotH * row);
+
+            ResourceLocation tex = new ResourceLocation("justenoughfakepixel",
+                    "textures/gui/storage_slot.png");
+            Minecraft.getMinecraft().getTextureManager().bindTexture(tex);
+            GlStateManager.disableBlend();
+            GlStateManager.enableAlpha();
+
+            drawScaledCustomSizeModalRect(xPos,yPos,0,0,18,18,slotW,slotH,18,18);
+
+            GlStateManager.enableBlend();
+        }
+
+
+        drawCenteredString(this.fontRendererObj,
+                "Container ID: " + container.id, rx + rw/2, ry + rh/2, Color.WHITE.getRGB());
+    }
+
+    private boolean isHovering(int mouseX, int mouseY, int xStart, int yStart, int width, int height) {
+        return mouseX > xStart &&
+                mouseX < xStart + width &&
+                mouseY > yStart &&
+                mouseY < yStart + height;
+    }
+
 }

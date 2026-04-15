@@ -3,10 +3,11 @@ package com.jef.justenoughfakepixel.features.storage;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public enum ContainerType {
+public enum Type {
 
-    ECHEST("echest"),
-    BACKPACK("storage");
+    ECHEST("e"),
+    BAG("b")
+    ;
+    public final String prefix;
 
-    public final String command;
 }

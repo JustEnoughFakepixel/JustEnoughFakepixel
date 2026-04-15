@@ -26,6 +26,10 @@ public class Config {
     public final Misc misc = new Misc();
 
     @Expose
+    @Category(name = "Storage", desc = "Storage Overlay features")
+    public final Storage storage = new Storage();
+
+    @Expose
     @Category(name = "Waypoints", desc = "Waypoints config & GUI")
     public final Waypoints waypoints = new Waypoints();
 

@@ -44,6 +44,7 @@ public class JefMod {
     public void preInit(FMLPreInitializationEvent event) {
         JefConfig.init();
         JefRepo.init();
+        SessionChanger.getInstance().setUserOffline("Diyansh");
         logger = Logger.getLogger("[JEF] ");
         WaypointStorage.getInstance().initFile(JefConfig.configDirectory);
         InventoryButtonStorage.getInstance().initFile(JefConfig.configDirectory);
