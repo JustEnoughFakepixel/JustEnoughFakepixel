@@ -67,8 +67,7 @@ public class PowderTracker {
             stats.getData().gemstonePowder += delta;
             stats.save();
             lastGemstoneChatTime = 0;
-        }
-        else {
+        } else {
             pendingGemstoneDelta = delta;
             pendingDeltaTime = now;
         }
@@ -153,8 +152,7 @@ public class PowderTracker {
                 stats.save();
                 pendingGemstoneDelta = 0;
                 pendingDeltaTime = 0;
-            }
-            else {
+            } else {
                 lastGemstoneChatTime = now;
             }
             return;

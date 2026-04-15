@@ -120,7 +120,7 @@ public class PowderOverlay extends Overlay {
                 long compacted = preview ? 5L : d.hardStoneCompacted;
                 String rate = preview ? "1.5K" : PowderStats.fmtRate(stats.hardStoneInfo.perHour);
                 if (!preview && raw + compacted == 0) return null;
-                return String.format("§a%s Hard Stone §8(%s compact) §7(%s/h)", PowderStats.fmtNum(raw), PowderStats.fmtNum(compacted), rate);
+                return String.format("§a%s Enchanted Hard Stone §8(%s compact) §7(%s/h)", PowderStats.fmtNum(raw), PowderStats.fmtNum(compacted), rate);
             }
             default: {
                 int gemIndex = ordinal - 11;

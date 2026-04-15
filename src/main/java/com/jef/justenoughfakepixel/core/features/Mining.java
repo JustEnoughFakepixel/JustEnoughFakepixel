@@ -108,7 +108,7 @@ public class Mining {
             "§53 Ascension Ropes",                                  // 7
             "§92 Wishing Compasses",                                // 8
             "§61 Jungle Hearts",                                    // 9
-            "§a512 Hard Stone §8(5 compact) §7(1.5K/h)", // 10
+            "§a512 Enchanted Hard Stone §8(5 compact) §7(1.5K/h)", // 10
             "§51-§93-§a4-§f0 §cRuby",         // 11
             "§51-§93-§a4-§f0 §bSapphire",     // 12
             "§51-§93-§a4-§f0 §6Amber",        // 13
