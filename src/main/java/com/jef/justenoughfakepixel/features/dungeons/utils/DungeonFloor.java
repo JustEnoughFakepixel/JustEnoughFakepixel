@@ -25,6 +25,14 @@ public enum DungeonFloor {
         return this == F6 || this == M6;
     }
 
+    public boolean isF3orM3() {
+        return this == F3 || this == M3;
+    }
+
+    public boolean isF2orM2() {
+        return this == F2 || this == M2;
+    }
+
     public static DungeonFloor fromString(String s) {
         return Arrays.stream(values())
                 .filter(f -> f.name().equalsIgnoreCase(s))

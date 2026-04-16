@@ -2,16 +2,16 @@ package com.jef.justenoughfakepixel;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.data.ApiHandler;
+import com.jef.justenoughfakepixel.features.diana.DianaStats;
 import com.jef.justenoughfakepixel.features.dungeons.caseopening.CitManager;
+import com.jef.justenoughfakepixel.features.fishing.trophy.TrophyFishStorage;
+import com.jef.justenoughfakepixel.features.mining.powder.PowderStats;
 import com.jef.justenoughfakepixel.features.misc.invbuttons.InventoryButtonStorage;
 import com.jef.justenoughfakepixel.features.misc.invbuttons.SkyblockItemCache;
 import com.jef.justenoughfakepixel.features.misc.pet.CurrentPetTracker;
 import com.jef.justenoughfakepixel.features.misc.pet.PetCache;
 import com.jef.justenoughfakepixel.features.scoreboard.MaxwellPowerSync;
 import com.jef.justenoughfakepixel.features.waypoints.WaypointStorage;
-import com.jef.justenoughfakepixel.features.diana.DianaStats;
-import com.jef.justenoughfakepixel.features.mining.powder.PowderStats;
-import com.jef.justenoughfakepixel.features.fishing.trophy.TrophyFishStorage;
 import com.jef.justenoughfakepixel.init.JefEventRegistrar;
 import com.jef.justenoughfakepixel.repo.JefRepo;
 import com.jef.justenoughfakepixel.repo.RepoHandler;
@@ -24,17 +24,11 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 
 import java.util.logging.Logger;
 
-@Mod(
-        modid = JefMod.MODID,
-        name = JefMod.NAME,
-        version = JefMod.VERSION,
-        clientSideOnly = true,
-        guiFactory = "com.jef.justenoughfakepixel.JefGuiFactory"
-)
+@Mod(modid = JefMod.MODID, name = JefMod.NAME, version = JefMod.VERSION, clientSideOnly = true, guiFactory = "com.jef.justenoughfakepixel.JefGuiFactory")
 public class JefMod {
 
-    public static final String MODID   = "justenoughfakepixel";
-    public static final String NAME    = "JustEnoughFakepixel";
+    public static final String MODID = "justenoughfakepixel";
+    public static final String NAME = "JustEnoughFakepixel";
     public static final String VERSION = "1.2.6";
 
     public static JefConfig config;
@@ -71,8 +65,7 @@ public class JefMod {
         new CitManager();
 
 
-        if (JefConfig.feature.misc.showCurrentPet)
-            PetCache.getInstance().warmupTextures();
+        if (JefConfig.feature.misc.showCurrentPet) PetCache.getInstance().warmupTextures();
 
         MinecraftForge.EVENT_BUS.register(this);
         JefEventRegistrar.registerAll();

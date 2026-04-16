@@ -6,8 +6,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * All config annotation types in one place.
- *
  * <p>Structural:
  * <ul>
  *   <li>{@link Category}              – marks a field as a config category</li>
@@ -31,7 +29,8 @@ import java.lang.annotation.Target;
  */
 public final class ConfigAnnotations {
 
-    private ConfigAnnotations() {}
+    private ConfigAnnotations() {
+    }
 
     // Structural
 
@@ -39,6 +38,7 @@ public final class ConfigAnnotations {
     @Target(ElementType.FIELD)
     public @interface Category {
         String name();
+
         String desc();
     }
 
@@ -46,7 +46,9 @@ public final class ConfigAnnotations {
     @Target(ElementType.FIELD)
     public @interface ConfigOption {
         String name();
+
         String desc();
+
         int subcategoryId() default -1;
     }
 
@@ -66,18 +68,21 @@ public final class ConfigAnnotations {
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
-    public @interface ConfigEditorBoolean {}
+    public @interface ConfigEditorBoolean {
+    }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     public @interface ConfigEditorButton {
         String runnableId() default "";
+
         String buttonText() default "";
     }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
-    public @interface ConfigEditorColour {}
+    public @interface ConfigEditorColour {
+    }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
@@ -89,6 +94,7 @@ public final class ConfigAnnotations {
     @Target(ElementType.FIELD)
     public @interface ConfigEditorDropdown {
         String[] values();
+
         int initialIndex() default 0;
     }
 
@@ -98,22 +104,28 @@ public final class ConfigAnnotations {
         int defaultKey();
     }
 
-    /** Named SliderAnnotation to avoid clashing with the GuiElementSlider class. */
+    /**
+     * Named SliderAnnotation to avoid clashing with the GuiElementSlider class.
+     */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     public @interface ConfigEditorSliderAnnotation {
         float minValue();
+
         float maxValue();
+
         float minStep();
     }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
-    public @interface ConfigEditorStyle {}
+    public @interface ConfigEditorStyle {
+    }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
-    public @interface ConfigEditorText {}
+    public @interface ConfigEditorText {
+    }
 
     /**
      * Renders the current mod version at 2× scale with a "Check for Updates" button.
@@ -121,5 +133,6 @@ public final class ConfigAnnotations {
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
-    public @interface ConfigEditorVersionDisplay {}
+    public @interface ConfigEditorVersionDisplay {
+    }
 }

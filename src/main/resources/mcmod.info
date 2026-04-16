@@ -2,13 +2,13 @@
   {
     "modid": "${modid}",
     "name": "JustEnoughFakepixel",
-    "description": "A QOL mod for fakepixel skyblock",
+    "description": "A QoL mod for fakepixel skyblock",
     "version": "${version}",
     "mcversion": "${mcversion}",
     "url": "https://github.com/hamlook/JustEnoughFakepixel",
     "updateUrl": "",
     "authorList": ["bighidkxd"],
-    "credits": "Credit to the authors of Notenoughupdates, Notenoughfakepixel, Coleweight",
+    "credits": "internet Protocol, Whispering & Mxhooman.",
     "logoFile": "assets/justenoughfakepixel/logo.png",
     "screenshots": [],
     "dependencies": []
