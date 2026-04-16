@@ -1,8 +1,8 @@
 package com.jef.justenoughfakepixel.core.config.gui.config;
 
 import com.google.gson.annotations.Expose;
-import com.jef.justenoughfakepixel.core.config.gui.config.ConfigAnnotations.*;
 import com.jef.justenoughfakepixel.core.config.editors.*;
+import com.jef.justenoughfakepixel.core.config.gui.config.ConfigAnnotations.*;
 
 import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
@@ -10,63 +10,6 @@ import java.util.List;
 
 public class ConfigProcessor {
 
-    public static class ProcessedCategory {
-
-        public final String name;
-        public final String desc;
-        public final LinkedHashMap<String, ProcessedOption> options = new LinkedHashMap<>();
-
-        public ProcessedCategory(String name, String desc) {
-            this.name = name;
-            this.desc = desc;
-        }
-    }
-
-    public static class ProcessedOption {
-
-        public final String name;
-        public final String desc;
-        public final int subcategoryId;
-        public GuiOptionEditor editor;
-
-        public int accordionId = -1;
-
-        private final Field field;
-        private final Object container;
-
-        public ProcessedOption(String name, String desc, int subcategoryId, Field field, Object container) {
-            this.name = name;
-            this.desc = desc;
-            this.subcategoryId = subcategoryId;
-
-            this.field = field;
-            this.container = container;
-        }
-
-        public Object get() {
-            try {
-                return field.get(container);
-            } catch (Exception e) {
-                return null;
-            }
-        }
-
-        public boolean set(Object value) {
-            try {
-                if (field.getType() == int.class && value instanceof Number) {
-                    field.set(container, ((Number) value).intValue());
-                } else {
-                    field.set(container, value);
-                }
-                return true;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-    }
-
-    // CHANGED: Accept generic config root object so GUI template is standalone from jef Configuration.
     public static LinkedHashMap<String, ProcessedCategory> create(Object config) {
         LinkedHashMap<String, ProcessedCategory> processedConfig = new LinkedHashMap<>();
         for (Field categoryField : config.getClass().getDeclaredFields()) {
@@ -99,8 +42,6 @@ public class ConfigProcessor {
                         GuiOptionEditor editor = null;
                         Class<?> optionType = optionField.getType();
 
-                        // Version display — must come before the generic checks so Void fields
-                        // don't fall through to an unmatched branch and get silently dropped.
                         if (optionField.isAnnotationPresent(ConfigEditorVersionDisplay.class)) {
                             editor = new GuiOptionEditorVersionDisplay(option);
                         }
@@ -159,5 +100,59 @@ public class ConfigProcessor {
             }
         }
         return processedConfig;
+    }
+
+    public static class ProcessedCategory {
+
+        public final String name;
+        public final String desc;
+        public final LinkedHashMap<String, ProcessedOption> options = new LinkedHashMap<>();
+
+        public ProcessedCategory(String name, String desc) {
+            this.name = name;
+            this.desc = desc;
+        }
+    }
+
+    public static class ProcessedOption {
+
+        public final String name;
+        public final String desc;
+        public final int subcategoryId;
+        private final Field field;
+        private final Object container;
+        public GuiOptionEditor editor;
+        public int accordionId = -1;
+
+        public ProcessedOption(String name, String desc, int subcategoryId, Field field, Object container) {
+            this.name = name;
+            this.desc = desc;
+            this.subcategoryId = subcategoryId;
+
+            this.field = field;
+            this.container = container;
+        }
+
+        public Object get() {
+            try {
+                return field.get(container);
+            } catch (Exception e) {
+                return null;
+            }
+        }
+
+        public boolean set(Object value) {
+            try {
+                if (field.getType() == int.class && value instanceof Number) {
+                    field.set(container, ((Number) value).intValue());
+                } else {
+                    field.set(container, value);
+                }
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
     }
 }

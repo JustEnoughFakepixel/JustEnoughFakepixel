@@ -14,7 +14,8 @@ import java.util.Set;
 public class JefGuiFactory implements IModGuiFactory {
 
     @Override
-    public void initialize(Minecraft minecraft) {}
+    public void initialize(Minecraft minecraft) {
+    }
 
     @Override
     public Class<? extends GuiScreen> mainConfigGuiClass() {

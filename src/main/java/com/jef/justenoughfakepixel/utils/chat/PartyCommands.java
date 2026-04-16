@@ -34,10 +34,19 @@ public class PartyCommands {
             String arg1 = parts.length >= 2 ? parts[1] : null;
             String arg2 = parts.length >= 3 ? parts[2] : null;
             if (arg1 == null) {
-                respond("Usage: !pb <floor> | !pb <floor> br | !pb p1-p5");
+                ChatUtils.sendMessage("§6[JEF] §cMissing floor argument");
+                ChatUtils.sendMessage("§6[JEF] §eUsage:");
+                ChatUtils.sendMessage("§6[JEF]   §f!pb <floor> §7- Total run time");
+                ChatUtils.sendMessage("§6[JEF]   §f!pb <floor> br §7- Blood rush time");
+                ChatUtils.sendMessage("§6[JEF]   §f!pb <floor> p1-p5 §7- Phase times");
+                ChatUtils.sendMessage("§6[JEF] §eExamples:");
+                ChatUtils.sendMessage("§6[JEF]   §f!pb f7 §7- F7 total PB");
+                ChatUtils.sendMessage("§6[JEF]   §f!pb m7 p4 §7- M7 P4 (Necron) PB");
+                ChatUtils.sendMessage("§6[JEF]   §f!pb f2 p1 §7- F2 P1 (Scarf) PB");
                 return;
             }
-            respond(DungeonStats.getFormattedPb(arg1, arg2));
+            String result = DungeonStats.getFormattedPb(arg1, arg2);
+            if (result != null) respond(result);
             return;
         }
 

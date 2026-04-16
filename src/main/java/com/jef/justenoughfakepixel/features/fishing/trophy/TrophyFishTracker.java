@@ -145,9 +145,8 @@ public class TrophyFishTracker {
                     hasRarityLine = true;
                     TrophyRarity rarity = TrophyRarity.fromDisplayName(caught.group(1));
                     if (rarity == null) continue;
-                    int amount = caught.group(2) != null ? Integer.parseInt(caught.group(2)) : 1;
-                    if (storage.getCount(fishName, rarity) != amount) {
-                        storage.setCount(fishName, rarity, amount);
+                    if (storage.getCount(fishName, rarity) == 0) {
+                        storage.setCount(fishName, rarity, 1);
                         changed = true;
                     }
                     continue;
@@ -156,12 +155,6 @@ public class TrophyFishTracker {
                 Matcher empty = RANK_EMPTY.matcher(line);
                 if (empty.find()) {
                     hasRarityLine = true;
-                    TrophyRarity rarity = TrophyRarity.fromDisplayName(empty.group(1));
-                    if (rarity == null) continue;
-                    if (!storage.getFish().containsKey(fishName)) {
-                        storage.setCount(fishName, rarity, 0);
-                        changed = true;
-                    }
                 }
             }
 

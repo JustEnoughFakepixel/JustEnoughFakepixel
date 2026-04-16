@@ -87,6 +87,12 @@ public class Dungeons {
     public boolean dungeonStats = false;
 
     @Expose
+    @ConfigOption(name = "Show All Timers", desc = "Show all timers at once. When disabled, only shows the current active timer to reduce clutter")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 41)
+    public boolean dungeonStatsShowAll = true;
+
+    @Expose
     @ConfigOption(name = "Background Color", desc = "Background color of the stats overlay (alpha controls opacity)")
     @ConfigEditorColour
     @ConfigAccordionId(id = 41)

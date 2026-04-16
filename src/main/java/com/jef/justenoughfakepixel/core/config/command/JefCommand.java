@@ -1,9 +1,9 @@
 package com.jef.justenoughfakepixel.core.config.command;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
+import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.util.ChatComponentText;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
@@ -30,7 +30,7 @@ public class JefCommand extends SimpleCommand {
     public void execute(ICommandSender sender, String[] args) throws CommandException {
         if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
             JefConfig.reloadRepo();
-            sender.addChatMessage(new ChatComponentText("§a[JEF] §fRepo refresh triggered."));
+            ChatUtils.sendMessage("§a[JEF] §fRepo refresh triggered.");
         } else if (args.length == 0) {
             JefConfig.openGui();
         } else {
