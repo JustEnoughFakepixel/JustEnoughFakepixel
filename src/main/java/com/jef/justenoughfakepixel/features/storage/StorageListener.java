@@ -15,14 +15,10 @@ public class StorageListener {
 
 
     public boolean parsed = false;
-    public long lastParse = 0;
-    public long PARSE_INTERVAL = 10000;
 
     @SubscribeEvent
     public void onClose(GuiOpenEvent e){
-        if(e.gui == null){
-            lastParse = 0;
-        }
+        parsed = false;
     }
 
     @SubscribeEvent
@@ -34,29 +30,29 @@ public class StorageListener {
             String title = chest.getLowerChestInventory().getDisplayName().getUnformattedText();
             if(title == null) return;
             if(title.isEmpty()) return;
-            if(title.equals("Storage")){
-                if(parsed){
-                    if(System.currentTimeMillis() - lastParse > PARSE_INTERVAL){
-                        parsed = false;
-                    }
-                }
-                if(parsed){
-                    return;
-                }
-                JefMod.logger.info("Continuing from Parsed");
-
-                    lastParse = System.currentTimeMillis();
-                    JefMod.logger.info("Parse Time: " + lastParse);
-                    parsed = StorageOverlay.openGUI(chest);
+            if(parsed){
+                return;
             }
-            if (title.startsWith("Enderchest")) {
+            if(title.equals("Storage")){
+                JefMod.logger.info("Opening GUI");
+                parsed = StorageOverlay.openGUI(chest);
+                return;
+            }
+            if (title.startsWith("Ender Chest")) {
+                JefMod.logger.info("Analyzing EChest");
                 SContainer container = StorageParser.parseEchest(chest);
+                parsed = container != null;
                 if(container == null) return;
                 StorageOverlay.containers.put(container.id,container);
                 StorageSaving.saveStorageData(StorageOverlay.containers.values());
+                return;
             }
-            if(title.split(" ")[1].equalsIgnoreCase("backpack")){
+            String[] words = title.split(" ");
+            if(words.length < 2) return;
+            if(words[1].equalsIgnoreCase("backpack")){
+                JefMod.logger.info("Analyzing Bag");
                 SContainer container = StorageParser.parseBackpack(chest);
+                parsed = container != null;
                 if(container == null) return;
                 StorageOverlay.containers.put(container.id,container);
                 StorageSaving.saveStorageData(StorageOverlay.containers.values());

@@ -22,11 +22,15 @@ public class StorageSaving {
         }
         for(File file : folder.listFiles()) {
             try {
+                if(!file.exists()){
+                    file.createNewFile();
+                    continue;
+                }
                 SContainer container = gson.fromJson(new FileReader(file), SContainer.class);
                 if(container != null){
                     map.put(container.id,container);
                 }
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 JefMod.logger.info("Error while trying to load " + file.getName() + " ERROR: " + e.getMessage());
                 e.printStackTrace();
             }

@@ -2,6 +2,7 @@ package com.jef.justenoughfakepixel.features.storage;
 
 import com.jef.justenoughfakepixel.JefMod;
 import com.jef.justenoughfakepixel.core.JefConfig;
+import com.jef.justenoughfakepixel.utils.render.ItemRenderUtils;
 import com.jef.justenoughfakepixel.utils.render.NineSliceUtils;
 import com.jef.justenoughfakepixel.utils.render.ResolutionUtils;
 import net.minecraft.client.Minecraft;
@@ -47,9 +48,7 @@ public class StorageOverlay extends GuiScreen {
 
     public static boolean openGUI(ContainerChest parser){
         containers = new LinkedHashMap<>(StorageSaving.loadStorageData());
-        if(containers.isEmpty()) {
-            containers = StorageParser.parseOverlay(parser);
-        }
+        containers = StorageParser.parseOverlay(parser,containers);
         if(containers.isEmpty()) return false;
         SCROLL_SPEED = JefConfig.feature.storage.scrollSpeed;
         isHorizontal = JefConfig.feature.storage.horizontal;
@@ -276,6 +275,7 @@ public class StorageOverlay extends GuiScreen {
             int xPos = rx + offset + (slotW * col);
             int yPos = ry + offset + (slotH * row);
 
+            GlStateManager.pushMatrix();
             ResourceLocation tex = new ResourceLocation("justenoughfakepixel",
                     "textures/gui/storage_slot.png");
             Minecraft.getMinecraft().getTextureManager().bindTexture(tex);
@@ -283,8 +283,9 @@ public class StorageOverlay extends GuiScreen {
             GlStateManager.enableAlpha();
 
             drawScaledCustomSizeModalRect(xPos,yPos,0,0,18,18,slotW,slotH,18,18);
-
             GlStateManager.enableBlend();
+            GlStateManager.popMatrix();
+            ItemRenderUtils.renderItemIcon(mc,container.getStack(i),xPos+7,yPos+8);
         }
 
 

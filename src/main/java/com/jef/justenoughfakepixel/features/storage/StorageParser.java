@@ -21,7 +21,7 @@ public class StorageParser {
         int page;
         try{
             page = Integer.parseInt(
-                    String.valueOf(title.charAt(title.indexOf("/") - 1))
+                    String.valueOf(title.charAt(title.indexOf(")") - 1))
             );
         } catch (NumberFormatException e) {
             JefMod.logger.info("Error While Getting page from " + title);
@@ -29,11 +29,12 @@ public class StorageParser {
         }
 
         HashMap<Integer, ItemStack> itemList = new HashMap<>();
-        for(int i = 9; i< chest.inventorySlots.size();i++) {
-            Slot slot = chest.getSlot(i);
-            if (slot.getStack() != null) {
-                itemList.put(i, slot.getStack());
-            }
+        JefMod.logger.info("Chest Size: " + chest.getLowerChestInventory().getSizeInventory());
+        for(int i = 9; i < chest.getLowerChestInventory().getSizeInventory();i++){
+            ItemStack item = chest.getSlot(i).getStack();
+            if(item == null) continue;
+            JefMod.logger.info(item.getDisplayName() + " | " + chest.getInventory().indexOf(item));
+            itemList.put(i - 9, item);
         }
         boolean empty = false;
         ItemStack stack = chest.getSlot(0).getStack();
@@ -45,7 +46,7 @@ public class StorageParser {
             }
         }
         int renderH = 200;
-        if(chest.inventorySlots.size() > 9){
+        if(chest.getLowerChestInventory().getSizeInventory() <= 18){
             renderH = 70;
         }
         SContainer container = new SContainer(itemList,page,Type.ECHEST,renderH,false);
@@ -100,7 +101,7 @@ public class StorageParser {
     }
 
 
-    public static LinkedHashMap<String,SContainer> parseOverlay(ContainerChest chest){
+    public static LinkedHashMap<String,SContainer> parseOverlay(ContainerChest chest, LinkedHashMap<String, SContainer> containers){
         LinkedHashMap<String,SContainer> chests = new LinkedHashMap<>();
         for(int j = 0;j < 9;j++){
             int slot = 9 + j;
@@ -112,12 +113,13 @@ public class StorageParser {
             if (!title.contains("Ender") || !(Block.getBlockFromItem(stack.getItem()) instanceof BlockStainedGlassPane)) continue;
 
             int renderH = 200;
-
-            if(title.contains("Locked")){
-                chests.put(id,new SContainer(new HashMap<>(),i,Type.ECHEST,renderH,true));
-            }else {
-                chests.put(id,new SContainer(new HashMap<>(),i,Type.ECHEST,renderH,false));
+            SContainer container = new SContainer(new HashMap<>(),i,Type.ECHEST,renderH,title.contains("Locked"));
+            if(containers.containsKey(id)){
+                SContainer parent = containers.get(id);
+                container.renderH = parent.renderH;
+                container.slots = new HashMap<>(parent.slots);
             }
+            chests.put(id,container);
         }
 
         for(int j = 0; j < 18;j++){
@@ -139,11 +141,13 @@ public class StorageParser {
                 default: renderH = 200; break;
             }
             JefMod.logger.info(name + " | " + renderH);
-            if(title.startsWith("Empty")){
-                chests.put(id,new SContainer(new HashMap<>(),i,Type.BAG,renderH,true));
-            }else {
-                chests.put(id,new SContainer(new HashMap<>(),i,Type.BAG,renderH,false));
+            SContainer container = new SContainer(new HashMap<>(),i,Type.ECHEST,renderH,title.startsWith("Empty"));
+            if(containers.containsKey(id)){
+                SContainer parent = containers.get(id);
+                container.renderH = parent.renderH;
+                container.slots = new HashMap<>(parent.slots);
             }
+            chests.put(id,container);
         }
 
         return chests;
