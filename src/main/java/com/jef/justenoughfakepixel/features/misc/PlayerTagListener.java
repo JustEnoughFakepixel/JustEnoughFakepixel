@@ -3,7 +3,6 @@ package com.jef.justenoughfakepixel.features.misc;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.repo.PlayerTagRepo;
 import com.jef.justenoughfakepixel.repo.data.PlayerTagData;
-import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
 import net.minecraft.event.HoverEvent;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
@@ -19,59 +18,73 @@ import java.util.regex.Pattern;
 public class PlayerTagListener {
 
     private static final Pattern CHAT_PATTERN = Pattern.compile(
-            "^(.*?)([A-Za-z0-9_]{1,16})(\\s*:\\s*.+)$"
+            "^(.*\\s)([A-Za-z0-9_]{1,16})\\s*:\\s*(.+)$"
     );
 
-    @SubscribeEvent(priority = EventPriority.HIGH)
+    @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
     public void onChat(ClientChatReceivedEvent event) {
-        // Only process server chat (type 1), ignore system/action bar messages
-        if (!ChatUtils.isFromServer(event)) return;
 
-        String plain = ChatUtils.clean(event);
-
-        // Skip party, guild, private messages — only modify public/all chat
-        if (ChatUtils.isPartyMessage(plain)) return;
-        if (ChatUtils.isMsgReceived(plain)) return;
-        if (ChatUtils.isMsgSent(plain)) return;
+        String formatted = event.message.getFormattedText();
+        String plain = StringUtils.stripControlCodes(formatted);
 
         Matcher m = CHAT_PATTERN.matcher(plain);
         if (!m.matches()) return;
 
-        String prefix = m.group(1); // All the prefix junk before the IGN
-        String ign    = m.group(2); // The player's IGN
-        String tail   = m.group(3); // ": message"
+        String ign = m.group(2);
 
         PlayerTagData.Entry entry = PlayerTagRepo.getTag(ign);
         if (entry == null) return;
 
-        // Build the tag string: §b[DEV] §c✦§r
-        String tagStr = entry.buildTag();
+        int plainIgnEnd = plain.indexOf(ign) + ign.length();
+        if (plain.indexOf(ign) == -1) return;
 
-        // Rebuild the chat line with tag injected right before the IGN:
-        // <all prefix junk>§b[DEV] §c✦§r kanishka007: message
+        int formattedEnd = mapToFormatted(formatted, plainIgnEnd);
+        if (formattedEnd == -1) return;
+
+        String beforeTag = formatted.substring(0, formattedEnd);
+        String afterTag  = formatted.substring(formattedEnd);
+
+        String tagStr = " §r" + entry.buildTag() + "§r";
+
         if (entry.hover != null && !entry.hover.isEmpty()) {
-            // Split into three sibling components so the hover only applies to the tag
-            IChatComponent prefixComp = new ChatComponentText(prefix);
-            IChatComponent tagComp    = new ChatComponentText(tagStr);
-            IChatComponent nameComp   = new ChatComponentText(ign + tail);
+            IChatComponent part1   = new ChatComponentText(beforeTag);
+            IChatComponent tagComp = new ChatComponentText(tagStr);
+            IChatComponent part2   = new ChatComponentText(afterTag);
 
-            // hover text supports § colors written in the JSON
             tagComp.getChatStyle().setChatHoverEvent(
-                new HoverEvent(
-                    HoverEvent.Action.SHOW_TEXT,
-                    new ChatComponentText(entry.hover)
-                )
+                    new HoverEvent(
+                            HoverEvent.Action.SHOW_TEXT,
+                            new ChatComponentText(entry.hover)
+                    )
             );
 
-            prefixComp.appendSibling(tagComp);
-            prefixComp.appendSibling(nameComp);
-            event.message = prefixComp;
+            part1.appendSibling(tagComp);
+            part1.appendSibling(part2);
+            event.message = part1;
         } else {
-            // No hover — just a plain string replacement
-            event.message = new ChatComponentText(prefix + tagStr + ign + tail);
+            event.message = new ChatComponentText(beforeTag + tagStr + afterTag);
         }
     }
-    public PlayerTagListener() {
-        System.out.println("PlayerTagListener loaded");
+
+    /** Maps a plain-text index (no § codes) to its position in formatted text. */
+    private int mapToFormatted(String formatted, int targetPlainIndex) {
+        int plainCounter = 0;
+
+        for (int i = 0; i < formatted.length(); i++) {
+            if (formatted.charAt(i) == '§') {
+                i++;
+                continue;
+            }
+
+            if (plainCounter == targetPlainIndex) {
+                return i;
+            }
+
+            plainCounter++;
+        }
+
+        if (plainCounter == targetPlainIndex) return formatted.length();
+
+        return -1;
     }
 }
