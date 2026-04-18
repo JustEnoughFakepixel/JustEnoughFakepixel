@@ -3,6 +3,7 @@ package com.jef.justenoughfakepixel.features.storage;
 import com.jef.justenoughfakepixel.JefMod;
 import com.jef.justenoughfakepixel.utils.render.ResolutionUtils;
 import lombok.AllArgsConstructor;
+import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
@@ -69,6 +70,10 @@ public class SContainer {
             JefMod.logger.info("Error While trying to convert " + encodedItem + " to Itemstack");
             return null;
         }
+    }
+
+    public void draw(int mouseX, int mouseY, Minecraft mc){
+
     }
 
     private int getSlotCount(int renderH){

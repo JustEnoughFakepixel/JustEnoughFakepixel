@@ -2,6 +2,7 @@ package com.jef.justenoughfakepixel;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.data.ApiHandler;
+import com.jef.justenoughfakepixel.features.capes.CapeManager;
 import com.jef.justenoughfakepixel.features.diana.DianaStats;
 import com.jef.justenoughfakepixel.features.dungeons.caseopening.CitManager;
 import com.jef.justenoughfakepixel.features.fishing.trophy.TrophyFishStorage;
@@ -47,6 +48,7 @@ public class JefMod {
         PetCache.getInstance().initFile(JefConfig.configDirectory);
         CurrentPetTracker.getInstance().initFile(JefConfig.configDirectory);
         TrophyFishStorage.getInstance().initFile(JefConfig.configDirectory);
+        CapeManager.initialise(false);
     }
 
     @Mod.EventHandler

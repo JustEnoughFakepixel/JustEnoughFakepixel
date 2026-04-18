@@ -3,6 +3,7 @@ package com.jef.justenoughfakepixel.core;
 import com.google.gson.annotations.Expose;
 import com.jef.justenoughfakepixel.core.config.gui.config.ConfigAnnotations.Category;
 import com.jef.justenoughfakepixel.core.features.*;
+import com.jef.justenoughfakepixel.features.capes.CapeManager;
 
 import java.awt.*;
 import java.net.URI;
@@ -28,6 +29,10 @@ public class Config {
     @Expose
     @Category(name = "Storage", desc = "Storage Overlay features")
     public final Storage storage = new Storage();
+
+    @Expose
+    @Category(name = "Cosmetics", desc = "Capes and Cosmetics Feature")
+    public final Cosmetics cosmetics = new Cosmetics();
 
     @Expose
     @Category(name = "Waypoints", desc = "Waypoints config & GUI")
@@ -123,6 +128,8 @@ public class Config {
             case "openItemAbilityTimerEditor":
                 JefConfig.openItemAbilityTimerEditor();
                 break;
+            case "reloadCapes":
+                CapeManager.reload();
             case "openDiscord":
                 openUrl("https://discord.gg/tdMFbmhFTb");
                 break;
