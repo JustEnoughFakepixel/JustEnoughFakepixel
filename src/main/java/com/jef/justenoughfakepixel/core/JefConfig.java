@@ -103,6 +103,7 @@ public class JefConfig {
         RepoHandler.refresh(JefRepo.KEY_TIMERS);
         RepoHandler.refresh(JefRepo.KEY_PLAYERSIZES);
         RepoHandler.refresh(JefRepo.KEY_UPDATE);
+        RepoHandler.refresh(JefRepo.KEY_TAGS);
     }
 
     public static void openGui() {
