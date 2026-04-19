@@ -22,4 +22,10 @@ public class Cosmetics {
     @ConfigAccordionId(id = 0)
     public String reloadCapes = "";
 
+    @Expose
+    @ConfigOption(name = "Reload Interval", desc = "Change how many seconds it takes before reloading all capes, must Reload Capes to take it into effect. [ HIGHLY AFFECTS PERFORMANCE, KEEP HIGHER FOR SMOOTHER GAMEPLAY ]")
+    @ConfigEditorSliderAnnotation(minValue = 5,maxValue = 60,minStep = 1)
+    @ConfigAccordionId(id = 0)
+    public int reloadInterval = 30;
+
 }

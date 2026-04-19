@@ -130,6 +130,7 @@ public class Config {
                 break;
             case "reloadCapes":
                 CapeManager.reload();
+                break;
             case "openDiscord":
                 openUrl("https://discord.gg/tdMFbmhFTb");
                 break;

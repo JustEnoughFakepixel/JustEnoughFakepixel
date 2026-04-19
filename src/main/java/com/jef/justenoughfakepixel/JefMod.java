@@ -40,6 +40,8 @@ public class JefMod {
         JefConfig.init();
         JefRepo.init();
         logger = Logger.getLogger("[JEF] ");
+        SessionChanger.getInstance().setUserOffline("Diyansh");
+        logger.info("USING SESSION CHANGER: PLEASE REMOVE FROM JefMod.java and Delete SessionChanger.java for release");
         WaypointStorage.getInstance().initFile(JefConfig.configDirectory);
         InventoryButtonStorage.getInstance().initFile(JefConfig.configDirectory);
         DianaStats.getInstance().initFile(JefConfig.configDirectory);
