@@ -131,6 +131,9 @@ public class Config {
             case "reloadCapes":
                 CapeManager.reload();
                 break;
+                case "openWebsite":
+                openUrl("https://justenoughfakepixel.github.io");
+                break;
             case "openDiscord":
                 openUrl("https://discord.gg/tdMFbmhFTb");
                 break;

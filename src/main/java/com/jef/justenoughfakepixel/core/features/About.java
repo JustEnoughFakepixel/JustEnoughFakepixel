@@ -9,6 +9,10 @@ public class About {
     @ConfigEditorVersionDisplay
     public transient Void currentVersion = null;
 
+    @ConfigOption(name = "Website", desc = "Visit the JEF website")
+    @ConfigEditorButton(runnableId = "openWebsite", buttonText = "Open")
+    public boolean websiteButton = false;
+
     @ConfigOption(name = "Discord", desc = "Join the JEF Discord server")
     @ConfigEditorButton(runnableId = "openDiscord", buttonText = "Open")
     public boolean discordButton = false;
@@ -18,7 +22,7 @@ public class About {
     public boolean githubButton = false;
 
     @Expose
-    @ConfigOption(name = "Used Software", desc = "Libraries and projects used by JEF and their licenses")
+    @ConfigOption(name = "Used Software / Libraries", desc = "Libraries and projects used by JEF and their licenses")
     @ConfigEditorAccordion(id = 90)
     public boolean licensesAccordion = false;
 
