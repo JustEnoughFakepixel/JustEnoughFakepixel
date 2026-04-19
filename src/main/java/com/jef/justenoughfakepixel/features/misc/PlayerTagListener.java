@@ -11,6 +11,7 @@ import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,68 +24,89 @@ public class PlayerTagListener {
 
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
     public void onChat(ClientChatReceivedEvent event) {
-
-        String formatted = event.message.getFormattedText();
-        String plain = StringUtils.stripControlCodes(formatted);
+        String plain = StringUtils.stripControlCodes(event.message.getFormattedText());
 
         Matcher m = CHAT_PATTERN.matcher(plain);
         if (!m.matches()) return;
 
         String ign = m.group(2);
-
         PlayerTagData.Entry entry = PlayerTagRepo.getTag(ign);
         if (entry == null) return;
 
-        int plainIgnEnd = plain.indexOf(ign) + ign.length();
-        if (plain.indexOf(ign) == -1) return;
+        IChatComponent tagComp = buildTagComponent(entry);
+        if (tagComp == null) return;
 
-        int formattedEnd = mapToFormatted(formatted, plainIgnEnd);
-        if (formattedEnd == -1) return;
+        // Inject into the existing component tree — preserves all ClickEvents
+        injectAfterIgn(event.message, ign, tagComp);
+    }
 
-        String beforeTag = formatted.substring(0, formattedEnd);
-        String afterTag  = formatted.substring(formattedEnd);
+    /**
+     * Walks the component tree and inserts tagComp right after the sibling
+     * whose unformatted text contains the IGN. Mutates in-place so the
+     * original ClickEvents on all other siblings are untouched.
+     */
+    private boolean injectAfterIgn(IChatComponent root, String ign, IChatComponent tagComp) {
+        List<IChatComponent> siblings = root.getSiblings();
+        for (int i = 0; i < siblings.size(); i++) {
+            IChatComponent sib = siblings.get(i);
+            String sibText = sib.getUnformattedTextForChat();
 
-        String tagStr = " §r" + entry.buildTag() + "§r";
+            int idx = ignEndIndex(sibText, ign);
+            if (idx != -1) {
+                String before = sibText.substring(0, idx);
+                String after  = sibText.substring(idx);
 
-        if (entry.hover != null && !entry.hover.isEmpty()) {
-            IChatComponent part1   = new ChatComponentText(beforeTag);
-            IChatComponent tagComp = new ChatComponentText(tagStr);
-            IChatComponent part2   = new ChatComponentText(afterTag);
+                ChatComponentText beforeComp = new ChatComponentText(before);
+                beforeComp.setChatStyle(sib.getChatStyle().createDeepCopy());
 
+                ChatComponentText afterComp = new ChatComponentText(after);
+                afterComp.setChatStyle(sib.getChatStyle().createDeepCopy());
+
+                // Re-attach sib's own children to afterComp
+                for (IChatComponent child : sib.getSiblings()) {
+                    afterComp.appendSibling(child);
+                }
+
+                siblings.set(i, beforeComp);
+                siblings.add(i + 1, tagComp);
+                siblings.add(i + 2, afterComp);
+                return true;
+            }
+
+            if (injectAfterIgn(sib, ign, tagComp)) return true;
+        }
+        return false;
+    }
+
+    /** Returns the index just after ign inside text (case-insensitive), or -1. */
+    private int ignEndIndex(String text, String ign) {
+        int idx = text.toLowerCase().indexOf(ign.toLowerCase());
+        return idx == -1 ? -1 : idx + ign.length();
+    }
+
+    /**
+     * Builds the tag component:
+     *   Inline: colored unicode icon only  (e.g. §9✦)
+     *   Hover:  text field                 (e.g. §9[Developer])
+     */
+    private IChatComponent buildTagComponent(PlayerTagData.Entry entry) {
+        char sym = entry.resolveSymbol();
+        if (sym == 0) return null;
+
+        ChatComponentText tagComp = new ChatComponentText(
+                " §r" + entry.resolveUnicodeColor() + sym + "§r"
+        );
+
+        String hoverText = entry.text != null ? entry.text : "";
+        if (!hoverText.isEmpty()) {
             tagComp.getChatStyle().setChatHoverEvent(
                     new HoverEvent(
                             HoverEvent.Action.SHOW_TEXT,
-                            new ChatComponentText(entry.hover)
+                            new ChatComponentText(hoverText)
                     )
             );
-
-            part1.appendSibling(tagComp);
-            part1.appendSibling(part2);
-            event.message = part1;
-        } else {
-            event.message = new ChatComponentText(beforeTag + tagStr + afterTag);
-        }
-    }
-
-    /** Maps a plain-text index (no § codes) to its position in formatted text. */
-    private int mapToFormatted(String formatted, int targetPlainIndex) {
-        int plainCounter = 0;
-
-        for (int i = 0; i < formatted.length(); i++) {
-            if (formatted.charAt(i) == '§') {
-                i++;
-                continue;
-            }
-
-            if (plainCounter == targetPlainIndex) {
-                return i;
-            }
-
-            plainCounter++;
         }
 
-        if (plainCounter == targetPlainIndex) return formatted.length();
-
-        return -1;
+        return tagComp;
     }
 }

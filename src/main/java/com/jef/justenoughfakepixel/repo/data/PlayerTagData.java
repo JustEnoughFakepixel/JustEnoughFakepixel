@@ -11,55 +11,49 @@ public class PlayerTagData {
 
     public static class Entry {
 
-        /** The player's IGN (case-insensitive match) */
+        /** The player's IGN (case-insensitive match). */
         @SerializedName("name")
         public String name;
 
         /**
-         * The colored text shown before the unicode, e.g. "§b[DEV]"
+         * Label shown on hover, e.g. "§b[Developer]".
          * Supports § or \u00A7 for colors.
+         * NOT shown inline in chat — hover only.
          */
         @SerializedName("text")
         public String text;
 
         /**
-         * Unicode codepoint for the symbol shown AFTER the text, e.g. "U+2726"
-         * Resolves to the actual character at runtime.
+         * Unicode codepoint for the icon shown inline, e.g. "U+2726" -> '✦'
+         * This is the ONLY thing shown in chat next to the username.
          */
         @SerializedName("unicodeSymbol")
         public String unicodeSymbol;
 
         /**
-         * Hex color for the unicode symbol, e.g. "#FF5555"
+         * Hex color for the unicode icon, e.g. "#5555FF".
          * Converted to nearest Minecraft §-color at runtime.
          */
         @SerializedName("unicodeColor")
         public String unicodeColor;
 
-        /**
-         * Hover tooltip text. Supports § or \u00A7 for colors.
-         */
-        @SerializedName("hover")
-        public String hover;
-
         // ----------------------------------------------------------------
         // Helpers
         // ----------------------------------------------------------------
 
-        /** Converts "U+2726" → '✦', returns 0 on failure. */
+        /** Converts "U+2726" to '✦', returns 0 on failure. */
         public char resolveSymbol() {
             if (unicodeSymbol == null) return 0;
             try {
                 String hex = unicodeSymbol.toUpperCase().replace("U+", "").trim();
                 int cp = Integer.parseInt(hex, 16);
-                // Only BMP codepoints are safely cast to char; skip surrogates
                 if (cp >= 0 && cp <= 0xFFFF) return (char) cp;
             } catch (NumberFormatException ignored) {}
             return 0;
         }
 
         /**
-         * Converts "#FF5555" → nearest Minecraft §-color code string (e.g. "§c").
+         * Converts "#5555FF" to nearest Minecraft §-color string (e.g. "§9").
          * Falls back to "§f" (white) if null or unparseable.
          */
         public String resolveUnicodeColor() {
@@ -77,37 +71,35 @@ public class PlayerTagData {
         }
 
         /**
-         * Builds the full tag string to inject into chat.
-         * Format:  <colored text><space><unicodeColor><symbol>§r<space>
-         * Example: §b[DEV] §c✦§r
+         * What to show inline in chat: ONLY the colored icon.
+         * Returns empty string if no symbol is defined.
          */
-        public String buildTag() {
-            String t = text != null ? text : "";
+        public String buildInlineIcon() {
             char sym = resolveSymbol();
-            String symPart = sym != 0 ? (resolveUnicodeColor() + sym) : "";
-            return t + (symPart.isEmpty() ? "" : " " + symPart) + "§r ";
+            if (sym == 0) return "";
+            return " §r" + resolveUnicodeColor() + sym + "§r";
         }
 
         // ----------------------------------------------------------------
         // Internal: nearest Minecraft color by Euclidean RGB distance
         // ----------------------------------------------------------------
         private static final int[][] MC_COLORS = {
-            {0,   0,   0  }, // §0 black
-            {0,   0,   170}, // §1 dark_blue
-            {0,   170, 0  }, // §2 dark_green
-            {0,   170, 170}, // §3 dark_aqua
-            {170, 0,   0  }, // §4 dark_red
-            {170, 0,   170}, // §5 dark_purple
-            {255, 170, 0  }, // §6 gold
-            {170, 170, 170}, // §7 gray
-            {85,  85,  85 }, // §8 dark_gray
-            {85,  85,  255}, // §9 blue
-            {85,  255, 85 }, // §a green
-            {85,  255, 255}, // §b aqua
-            {255, 85,  85 }, // §c red
-            {255, 85,  255}, // §d light_purple
-            {255, 255, 85 }, // §e yellow
-            {255, 255, 255}, // §f white
+                {0,   0,   0  }, // §0 black
+                {0,   0,   170}, // §1 dark_blue
+                {0,   170, 0  }, // §2 dark_green
+                {0,   170, 170}, // §3 dark_aqua
+                {170, 0,   0  }, // §4 dark_red
+                {170, 0,   170}, // §5 dark_purple
+                {255, 170, 0  }, // §6 gold
+                {170, 170, 170}, // §7 gray
+                {85,  85,  85 }, // §8 dark_gray
+                {85,  85,  255}, // §9 blue
+                {85,  255, 85 }, // §a green
+                {85,  255, 255}, // §b aqua
+                {255, 85,  85 }, // §c red
+                {255, 85,  255}, // §d light_purple
+                {255, 255, 85 }, // §e yellow
+                {255, 255, 255}, // §f white
         };
 
         private static String nearestMinecraftColor(int r, int g, int b) {
