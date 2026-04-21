@@ -24,7 +24,7 @@ import java.util.LinkedHashMap;
 public class StorageRenderer extends Gui {
 
     private static final int PADDING = 5;
-    private static final int ROW_SPACING = 15;
+    private static final int ROW_SPACING = 8;
     private static final int INVENTORY_HEIGHT = 76;
     private static final float SCROLL_LENGTH = 0.2f;
     private static final int SEARCH_BAR_WIDTH = 200;
@@ -33,6 +33,8 @@ public class StorageRenderer extends Gui {
     private static final ResourceLocation SLOT_TEXTURE = new ResourceLocation("justenoughfakepixel", "textures/gui/storage_slot.png");
     private static final int NINE_SLICE_CORNER = 6;
     private static final int NINE_SLICE_SIZE = 18;
+    private static final int SLOT_SIZE = 16;
+    private static final int SLOTS_PER_ROW = 9;
 
     private final LinkedHashMap<String, SContainer> containers;
     private final java.util.HashMap<String, Boolean> searchCache = new java.util.HashMap<>();
@@ -43,10 +45,10 @@ public class StorageRenderer extends Gui {
     private int containersPerRow = 3;
     private int inventoryX, inventoryY;
     private int storageAreaH;
-    private float scrollOffset = 0;
-    private float scrollTarget = 0;
-    private float scrollSpeed = 1f;
-    private ItemStack hoveredItem = null;
+    private float scrollOffset;
+    private float scrollTarget;
+    private float scrollSpeed;
+    private ItemStack hoveredItem;
     private int hoveredX = -1;
     private int hoveredY = -1;
     private GuiTextField searchField;
@@ -59,10 +61,27 @@ public class StorageRenderer extends Gui {
     public StorageRenderer(LinkedHashMap<String, SContainer> containers) {
         this.containers = containers;
         this.scrollSpeed = JefConfig.feature.storage.scrollSpeed;
-        scrollOffset = 0;
-        scrollTarget = 0;
         initLayout();
         initSearchBar();
+    }
+
+    private void drawBackground() {
+        int width = ResolutionUtils.getWidth();
+        int height = ResolutionUtils.getHeight();
+        GlStateManager.disableLighting();
+        GlStateManager.disableFog();
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        drawGradientRect(0, 0, width, height, -1072689136, -804253680);
+        GlStateManager.disableBlend();
+    }
+
+    private void drawPanelBackground(int x, int y, int width, int height) {
+        GlStateManager.disableBlend();
+        GlStateManager.color(1f, 1f, 1f, 1f);
+        drawRect(x, y, x + width, y + height, 0xFF000000);
+        GlStateManager.enableBlend();
+        NineSliceUtils.draw(CONTAINER_BG, x, y, width, height, NINE_SLICE_CORNER, NINE_SLICE_SIZE);
     }
 
     private void initSearchBar() {
@@ -72,16 +91,11 @@ public class StorageRenderer extends Gui {
         searchField = SearchBar.createStorageSearchBar(searchBarX, searchBarY, SEARCH_BAR_WIDTH);
     }
 
-    public LinkedHashMap<String, SContainer> getContainers() {
-        return containers;
-    }
-
     private void initLayout() {
         int width = ResolutionUtils.getWidth();
         int height = ResolutionUtils.getHeight();
 
         containerW = 170;
-        containerH = 120;
 
         int minContainerWidth = containerW + PADDING;
         int maxContainersPerRow = Math.max(3, (width - 40) / minContainerWidth);
@@ -157,17 +171,18 @@ public class StorageRenderer extends Gui {
         }
 
         int rows = (int) Math.ceil(container.slotCount / 9.0);
-        int slotSize = 16;
         int titleHeight = 18;
         int bottomPadding = 4;
-        int height = titleHeight + (rows * slotSize) + bottomPadding;
+        int height = titleHeight + (rows * 16) + bottomPadding;
 
         containerHeightCache.put(cacheKey, height);
         return height;
     }
 
-    public void render(int mouseX, int mouseY, float partialTicks) {
+    public void render(int mouseX, int mouseY) {
         if (containers.isEmpty()) return;
+
+        drawBackground();
 
         hoveredItem = null;
         hoveredX = -1;
@@ -181,10 +196,7 @@ public class StorageRenderer extends Gui {
 
         SearchBar.drawStorageSearchBar(searchField);
 
-        GlStateManager.color(1f, 1f, 1f, 1f);
-        GlStateManager.enableBlend();
-        drawRect(boxX, boxY, boxX + boxW, boxY + boxH, 0xFF000000);
-        NineSliceUtils.draw(CONTAINER_BG, boxX, boxY, boxW, boxH, 6, 18);
+        drawPanelBackground(boxX, boxY, boxW, boxH);
 
         scrollOffset += (scrollTarget - scrollOffset) * SCROLL_LENGTH;
 
@@ -206,7 +218,7 @@ public class StorageRenderer extends Gui {
 
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
 
-        renderPlayerInventory(mouseX, mouseY, fr);
+        renderPlayerInventory(mouseX, mouseY);
 
         if (hoveredItem != null) {
             TextRenderUtils.drawItemTooltip(hoveredItem, hoveredX, hoveredY, fr);
@@ -216,12 +228,12 @@ public class StorageRenderer extends Gui {
     private void renderSlot(int x, int y, ItemStack stack, boolean matchesSearch, int mouseX, int mouseY) {
         Minecraft.getMinecraft().getTextureManager().bindTexture(SLOT_TEXTURE);
         GlStateManager.color(matchesSearch && !searchText.isEmpty() ? 0.5f : 1f, 1.0f, 1f, 1f);
-        drawModalRectWithCustomSizedTexture(x, y, 0, 0, 16, 16, 16, 16);
+        drawModalRectWithCustomSizedTexture(x, y, 0, 0, SLOT_SIZE, SLOT_SIZE, SLOT_SIZE, SLOT_SIZE);
         GlStateManager.color(1f, 1f, 1f, 1f);
 
         ItemRenderUtils.drawItemStackOverlay(stack, x, y);
 
-        if (isHovering(mouseX, mouseY, x, y, 16, 16)) {
+        if (isHovering(mouseX, mouseY, x, y, SLOT_SIZE, SLOT_SIZE) && isSlotVisible(x, y)) {
             if (stack != null) {
                 hoveredItem = stack;
                 hoveredX = mouseX;
@@ -237,23 +249,31 @@ public class StorageRenderer extends Gui {
         GlStateManager.enableBlend();
         GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
         GlStateManager.colorMask(true, true, true, false);
-        drawRect(x, y, x + 16, y + 16, 0x80FFFFFF);
+        drawRect(x, y, x + SLOT_SIZE, y + SLOT_SIZE, 0x80FFFFFF);
         GlStateManager.colorMask(true, true, true, true);
         GlStateManager.disableBlend();
     }
 
-    private void renderPlayerInventory(int mouseX, int mouseY, FontRenderer fr) {
+    private void renderPlayerInventory(int mouseX, int mouseY) {
         ItemStack[] playerItems = Minecraft.getMinecraft().thePlayer.inventory.mainInventory;
 
+        drawInventoryBackground();
+        renderInventorySlots(playerItems, mouseX, mouseY);
+
+        GlStateManager.color(1f, 1f, 1f, 1f);
+        GlStateManager.disableBlend();
+    }
+
+    private void drawInventoryBackground() {
         int invPanelX = inventoryX - 5;
         int invPanelY = inventoryY - 4;
         int invPanelW = 172;
         int invPanelH = INVENTORY_HEIGHT + 4 + 5;
-        GlStateManager.color(1f, 1f, 1f, 1f);
-        GlStateManager.enableBlend();
-        drawRect(invPanelX, invPanelY, invPanelX + invPanelW, invPanelY + invPanelH, 0xFF000000);
-        NineSliceUtils.draw(CONTAINER_BG, invPanelX, invPanelY, invPanelW, invPanelH, 6, 18);
 
+        drawPanelBackground(invPanelX, invPanelY, invPanelW, invPanelH);
+    }
+
+    private void renderInventorySlots(ItemStack[] playerItems, int mouseX, int mouseY) {
         for (int i = 0; i < 27; i++) {
             renderSlot(inventoryX + (i % 9) * 18, inventoryY + (i / 9) * 18, playerItems[i + 9], false, mouseX, mouseY);
         }
@@ -261,9 +281,6 @@ public class StorageRenderer extends Gui {
         for (int i = 0; i < 9; i++) {
             renderSlot(inventoryX + i * 18, inventoryY + 58, playerItems[i], false, mouseX, mouseY);
         }
-
-        GlStateManager.color(1f, 1f, 1f, 1f);
-        GlStateManager.disableBlend();
     }
 
     public void handleScroll(int dWheel) {
@@ -273,10 +290,6 @@ public class StorageRenderer extends Gui {
         float step = (containerH + PADDING) * scrollSpeed;
         scrollTarget -= dWheel > 0 ? step : -step;
         scrollTarget = Math.max(0, Math.min(scrollTarget, maxScroll));
-    }
-
-    public boolean isMouseOverOverlay(int mouseX, int mouseY) {
-        return mouseX >= boxX && mouseX <= boxX + boxW && mouseY >= boxY && mouseY <= boxY + boxH;
     }
 
     private int getMaxScroll() {
@@ -417,7 +430,7 @@ public class StorageRenderer extends Gui {
 
         int totalGridW = (containerW * containersPerRow) + (PADDING * (containersPerRow - 1));
         int gridStartX = boxX + (boxW - totalGridW) / 2;
-        int gridStartY = boxY + 10 + PADDING;
+        int gridStartY = boxY + 6 + PADDING;
         cachedGridStart = new int[]{gridStartX, gridStartY};
         return cachedGridStart;
     }
@@ -442,32 +455,34 @@ public class StorageRenderer extends Gui {
     }
 
     private void drawContainer(int mouseX, int mouseY, SContainer container, FontRenderer fr, boolean isActive) {
+        ContainerRenderInfo renderInfo = calculateContainerRenderInfo(container);
+        if (!renderInfo.isVisible) return;
+
+        drawContainerBackground(renderInfo, isActive, mouseX, mouseY);
+        drawContainerTitle(container, renderInfo, fr, isActive);
+        drawContainerSlots(container, renderInfo, mouseX, mouseY);
+    }
+
+    private ContainerRenderInfo calculateContainerRenderInfo(SContainer container) {
         int index = getVisibleIndex(container);
-
         int[] gridPos = getGridPosition(index);
-        int xGrid = gridPos[0];
-        int yGrid = gridPos[1];
-
         int[] gridStart = getGridStart();
-        int gridStartX = gridStart[0];
-        int gridStartY = gridStart[1];
 
         int scrollPixels = (int) scrollOffset;
+        int yOffset = getRowYOffset(gridPos[1]);
 
-        int yOffset = getRowYOffset(yGrid);
+        int x = gridStart[0] + (gridPos[0] * (containerW + PADDING));
+        int y = gridStart[1] + yOffset - scrollPixels;
+        int width = containerW;
+        int height = getContainerDisplayHeight(container);
 
-        int xStart = gridStartX + (xGrid * (containerW + PADDING));
-        int yStart = gridStartY + yOffset - scrollPixels;
+        boolean isVisible = y + height > boxY + 10 && y < boxY + storageAreaH - 10;
 
-        int rw = containerW;
-        int rh = getContainerDisplayHeight(container);
-        int rx = xStart;
-        int ry = yStart;
+        return new ContainerRenderInfo(x, y, width, height, isVisible);
+    }
 
-        boolean isVisible = ry + rh > boxY + 10 && ry < boxY + storageAreaH - 10;
-        if (!isVisible) return;
-
-        boolean hovering = isHovering(mouseX, mouseY, xStart, yStart, rw, rh);
+    private void drawContainerBackground(ContainerRenderInfo info, boolean isActive, int mouseX, int mouseY) {
+        boolean hovering = isHovering(mouseX, mouseY, info.x, info.y, info.width, info.height);
 
         GlStateManager.color(1f, 1f, 1f, 1f);
         GlStateManager.enableBlend();
@@ -480,33 +495,47 @@ public class StorageRenderer extends Gui {
             GlStateManager.color(1.3f, 1.3f, 1.3f, 1f);
         }
 
-        NineSliceUtils.draw(CONTAINER_BG, rx, ry, rw, rh, NINE_SLICE_CORNER, NINE_SLICE_SIZE);
-
+        NineSliceUtils.draw(CONTAINER_BG, info.x, info.y, info.width, info.height, NINE_SLICE_CORNER, NINE_SLICE_SIZE);
         GlStateManager.color(1f, 1f, 1f, 1f);
+    }
 
-        String title = container.type == Type.ECHEST ? "§6Ender Chest " + container.page : "§aBackpack " + container.page;
-        if (isActive) title = "§e§l» §r" + title + " §e§l«";
-        if (container.locked) title += " §c(Locked)";
-        if (container.empty) title += " §7(Empty)";
+    private void drawContainerTitle(SContainer container, ContainerRenderInfo info, FontRenderer fr, boolean isActive) {
+        String title = buildContainerTitle(container, isActive);
+        drawCenteredString(fr, title, info.x + info.width / 2, info.y + 4, Color.WHITE.getRGB());
+    }
 
-        drawCenteredString(fr, title, rx + rw / 2, ry + 4, Color.WHITE.getRGB());
+    private String buildContainerTitle(SContainer container, boolean isActive) {
+        String baseTitle = container.type == Type.ECHEST ? "§6Ender Chest " + container.page : "§aBackpack " + container.page;
 
-        int slotSize = 16;
-        int slotSpacing = 16;
-        int slotsPerRow = 9;
-        int gridWidth = (slotSpacing * slotsPerRow);
-        int startX = rx + (rw - gridWidth) / 2;
-        int startY = ry + 18;
+        if (isActive) {
+            baseTitle = "§e§l» §r" + baseTitle + " §e§l«";
+        }
+
+        if (container.locked) {
+            baseTitle += " §c(Locked)";
+        }
+
+        if (container.empty) {
+            baseTitle += " §7(Empty)";
+        }
+
+        return baseTitle;
+    }
+
+    private void drawContainerSlots(SContainer container, ContainerRenderInfo info, int mouseX, int mouseY) {
+        int gridWidth = SLOT_SIZE * SLOTS_PER_ROW;
+        int startX = info.x + (info.width - gridWidth) / 2;
+        int startY = info.y + 16;
 
         GlStateManager.enableBlend();
         GlStateManager.color(1f, 1f, 1f, 1f);
         GlStateManager.disableLighting();
 
         for (int i = 0; i < container.slotCount; i++) {
-            int col = i % slotsPerRow;
-            int row = i / slotsPerRow;
-            int xPos = startX + (col * slotSpacing);
-            int yPos = startY + (row * slotSpacing);
+            int col = i % SLOTS_PER_ROW;
+            int row = i / SLOTS_PER_ROW;
+            int xPos = startX + (col * SLOT_SIZE);
+            int yPos = startY + (row * SLOT_SIZE);
             ItemStack stack = container.getStack(i);
             renderSlot(xPos, yPos, stack, itemMatchesSearch(stack), mouseX, mouseY);
         }
@@ -520,6 +549,30 @@ public class StorageRenderer extends Gui {
         return mouseX > xStart && mouseX < xStart + width && mouseY > yStart && mouseY < yStart + height;
     }
 
+    private boolean isSlotVisible(int slotX, int slotY) {
+        int slotEndX = slotX + SLOT_SIZE;
+        int slotEndY = slotY + SLOT_SIZE;
+
+        int inset = NINE_SLICE_CORNER;
+        int storageLeft = boxX + inset;
+        int storageRight = boxX + boxW - inset;
+        int storageTop = boxY + inset;
+        int storageBottom = boxY + storageAreaH - inset;
+
+        int invLeft = inventoryX;
+        int invRight = inventoryX + 162;
+        int invTop = inventoryY;
+        int invBottom = inventoryY + INVENTORY_HEIGHT;
+
+        boolean inStorageArea = slotX < storageRight && slotEndX > storageLeft &&
+                slotY < storageBottom && slotEndY > storageTop;
+
+        boolean inInventoryArea = slotX < invRight && slotEndX > invLeft &&
+                slotY < invBottom && slotEndY > invTop;
+
+        return inStorageArea || inInventoryArea;
+    }
+
     public boolean isClickingPlayerInventory(int mouseX, int mouseY) {
         return mouseX >= inventoryX && mouseX < inventoryX + 162 && mouseY >= inventoryY && mouseY < inventoryY + INVENTORY_HEIGHT;
     }
@@ -528,16 +581,12 @@ public class StorageRenderer extends Gui {
         int slotIndex = slot.getSlotIndex();
 
         if (slotIndex >= 0 && slotIndex < 9) {
-            int itemX = inventoryX + slotIndex * 18;
-            int itemY = inventoryY + 58;
-            return isHovering(mouseX, mouseY, itemX, itemY, 16, 16);
+            return checkSlotHover(mouseX, mouseY, inventoryX + slotIndex * 18, inventoryY + 58);
         }
 
         if (slotIndex >= 9 && slotIndex < 36) {
             int adjustedIndex = slotIndex - 9;
-            int itemX = inventoryX + (adjustedIndex % 9) * 18;
-            int itemY = inventoryY + (adjustedIndex / 9) * 18;
-            return isHovering(mouseX, mouseY, itemX, itemY, 16, 16);
+            return checkSlotHover(mouseX, mouseY, inventoryX + (adjustedIndex % 9) * 18, inventoryY + (adjustedIndex / 9) * 18);
         }
 
         return false;
@@ -550,46 +599,74 @@ public class StorageRenderer extends Gui {
         SContainer activeContainer = containers.get(activeId);
         if (activeContainer == null) return false;
 
-        int index = getVisibleIndex(activeContainer);
-        int[] gridPos = getGridPosition(index);
-        int xGrid = gridPos[0];
-        int yGrid = gridPos[1];
+        ContainerPosition pos = calculateContainerPosition(activeContainer);
+        if (!pos.isVisible) return false;
 
+        return checkActiveContainerSlotHover(slot, mouseX, mouseY, pos);
+    }
+
+    private boolean checkSlotHover(int mouseX, int mouseY, int slotX, int slotY) {
+        return isHovering(mouseX, mouseY, slotX, slotY, SLOT_SIZE, SLOT_SIZE);
+    }
+
+    private ContainerPosition calculateContainerPosition(SContainer container) {
+        int index = getVisibleIndex(container);
+        int[] gridPos = getGridPosition(index);
         int[] gridStart = getGridStart();
-        int gridStartX = gridStart[0];
-        int gridStartY = gridStart[1];
 
         int scrollPixels = (int) scrollOffset;
-        int yOffset = getRowYOffset(yGrid);
+        int yOffset = getRowYOffset(gridPos[1]);
 
-        int xStart = gridStartX + (xGrid * (containerW + PADDING));
-        int yStart = gridStartY + yOffset - scrollPixels;
+        int xStart = gridStart[0] + (gridPos[0] * (containerW + PADDING));
+        int yStart = gridStart[1] + yOffset - scrollPixels;
 
-        int rw = containerW;
-        int rh = getContainerDisplayHeight(activeContainer);
-        int rx = xStart;
-        int ry = yStart;
+        boolean isVisible = yStart + getContainerDisplayHeight(container) > boxY + 10 && yStart < boxY + storageAreaH - 10;
 
-        boolean isVisible = ry + rh > boxY + 10 && ry < boxY + storageAreaH - 10;
-        if (!isVisible) return false;
+        return new ContainerPosition(xStart, yStart, isVisible);
+    }
 
-        int slotSpacing = 16;
-        int slotsPerRow = 9;
-        int gridWidth = (slotSpacing * slotsPerRow);
-        int startX = rx + (rw - gridWidth) / 2;
-        int startY = ry + 18;
+    private boolean checkActiveContainerSlotHover(net.minecraft.inventory.Slot slot, int mouseX, int mouseY, ContainerPosition pos) {
+        int gridWidth = SLOT_SIZE * SLOTS_PER_ROW;
+        int startX = pos.x + (containerW - gridWidth) / 2;
+        int startY = pos.y + 16;
 
         int slotIndex = slot.getSlotIndex();
         int storageSlotIndex = slotIndex - 9;
+
+        SContainer activeContainer = containers.get(StorageManager.getActiveContainerId());
         if (storageSlotIndex < 0 || storageSlotIndex >= activeContainer.slotCount) {
             return false;
         }
-        int col = storageSlotIndex % slotsPerRow;
-        int row = storageSlotIndex / slotsPerRow;
 
-        int xPos = startX + (col * slotSpacing);
-        int yPos = startY + (row * slotSpacing);
+        int col = storageSlotIndex % SLOTS_PER_ROW;
+        int row = storageSlotIndex / SLOTS_PER_ROW;
+        int xPos = startX + (col * SLOT_SIZE);
+        int yPos = startY + (row * SLOT_SIZE);
 
-        return isHovering(mouseX, mouseY, xPos, yPos, 16, 16);
+        return isHovering(mouseX, mouseY, xPos, yPos, SLOT_SIZE, SLOT_SIZE);
+    }
+
+    private static class ContainerRenderInfo {
+        final int x, y, width, height;
+        final boolean isVisible;
+
+        ContainerRenderInfo(int x, int y, int width, int height, boolean isVisible) {
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            this.isVisible = isVisible;
+        }
+    }
+
+    private static class ContainerPosition {
+        final int x, y;
+        final boolean isVisible;
+
+        ContainerPosition(int x, int y, boolean isVisible) {
+            this.x = x;
+            this.y = y;
+            this.isVisible = isVisible;
+        }
     }
 }

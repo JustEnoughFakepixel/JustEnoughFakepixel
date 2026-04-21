@@ -2,7 +2,9 @@ package com.jef.justenoughfakepixel.features.storage;
 
 import com.jef.justenoughfakepixel.features.storage.data.StorageData;
 import com.jef.justenoughfakepixel.features.storage.render.StorageRenderer;
-import com.jef.justenoughfakepixel.features.storage.utils.*;
+import com.jef.justenoughfakepixel.features.storage.utils.SContainer;
+import com.jef.justenoughfakepixel.features.storage.utils.StorageListener;
+import com.jef.justenoughfakepixel.features.storage.utils.StorageParser;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
@@ -18,14 +20,25 @@ public class StorageManager {
     @Getter
     private static String activeContainerId = null;
     @Getter
-    private static StorageOverlay currentGui = null;
-    @Getter
     private static StorageRenderer renderer = null;
     @Getter
     private static boolean overlayActive = false;
+    private static long transitionStartTime = 0;
+    @Getter
+    private static boolean isTransitioning = false;
+    private static boolean wasMouseLocked = false;
+    private static final long TRANSITION_TIMEOUT = 5000;
 
     public static void setActiveContainer(String containerId) {
         activeContainerId = containerId;
+        endTransition();
+    }
+
+    private static void endTransition() {
+        if (isTransitioning && !wasMouseLocked) {
+            com.jef.justenoughfakepixel.features.farming.mouse.LockMouse.setLocked(false);
+        }
+        isTransitioning = false;
     }
 
     public static boolean initializeOverlay(ContainerChest parser) {
@@ -48,14 +61,23 @@ public class StorageManager {
         return true;
     }
 
-    public static void renderOverlay(int mouseX, int mouseY, float partialTicks) {
+    public static void renderOverlay(int mouseX, int mouseY) {
         if (renderer == null && !StorageData.containers.isEmpty()) {
             renderer = new StorageRenderer(StorageData.containers);
             overlayActive = true;
         }
 
+        if (isTransitioning) {
+            long elapsed = System.currentTimeMillis() - transitionStartTime;
+            if (elapsed > TRANSITION_TIMEOUT) {
+                System.out.println("[JEF DEBUG] Transition timeout - closing overlay");
+                closeOverlay();
+                return;
+            }
+        }
+
         if (renderer != null && overlayActive) {
-            renderer.render(mouseX, mouseY, partialTicks);
+            renderer.render(mouseX, mouseY);
         }
     }
 
@@ -86,58 +108,36 @@ public class StorageManager {
         return renderer.handleKeyTyped(typedChar, keyCode);
     }
 
-    public static boolean openOverlay(ContainerChest parser) {
-        if (StorageData.containers.isEmpty()) {
-            StorageData.loadContainers();
-        }
-
-        LinkedHashMap<String, SContainer> containers = StorageParser.parseOverlay(parser, StorageData.containers);
-
-        if (containers.isEmpty()) {
-            return false;
-        }
-
-        StorageData.containers = containers;
-
-        return true;
-    }
-
-    public static StorageOverlay createGui(ContainerChest parser) {
-        if (StorageData.containers.isEmpty()) {
-            StorageData.loadContainers();
-        }
-
-        LinkedHashMap<String, SContainer> containers = StorageParser.parseOverlay(parser, StorageData.containers);
-
-        if (containers.isEmpty()) {
-            return null;
-        }
-
-        StorageData.containers = containers;
-
-        currentGui = new StorageOverlay(parser, containers);
-        activeContainerId = null;
-
-        return currentGui;
-    }
-
     public static void switchToContainer(String containerId) {
         SContainer container = StorageData.containers.get(containerId);
-        if (container == null) {
-            return;
+        if (container == null) return;
+
+        isTransitioning = true;
+        transitionStartTime = System.currentTimeMillis();
+        wasMouseLocked = com.jef.justenoughfakepixel.features.farming.mouse.LockMouse.isLocked();
+        if (!wasMouseLocked) {
+            com.jef.justenoughfakepixel.features.farming.mouse.LockMouse.setLocked(true);
         }
 
         StorageListener.setSwitchingContainer(true);
-
         Minecraft.getMinecraft().thePlayer.closeScreen();
 
-        final String command;
-        if (container.type == Type.ECHEST) {
-            command = "/echest " + container.page;
-        } else {
-            command = "/storage " + container.page;
-        }
+        String command = buildContainerCommand(container);
+        executeCommandDelayed(command);
+    }
 
+    private static String buildContainerCommand(SContainer container) {
+        switch (container.type) {
+            case ECHEST:
+                return "/echest " + container.page;
+            case BAG:
+                return "/storage " + container.page;
+            default:
+                throw new IllegalArgumentException("Unknown container type: " + container.type);
+        }
+    }
+
+    private static void executeCommandDelayed(String command) {
         new Thread(() -> {
             try {
                 Thread.sleep(100);
@@ -150,24 +150,6 @@ public class StorageManager {
         }).start();
     }
 
-
-    private static int getStorageSlotForContainer(SContainer container) {
-
-
-        if (container.type == Type.ECHEST) {
-            if (container.page >= 1 && container.page <= 5) {
-                return 9 + (container.page - 1);
-            }
-        } else if (container.type == Type.BAG) {
-            if (container.page >= 1 && container.page <= 18) {
-                return 27 + (container.page - 1);
-            }
-        }
-
-        return -1;
-    }
-
-
     public static boolean isClickingPlayerInventory(int mouseX, int mouseY) {
         if (renderer == null) return false;
         return renderer.isClickingPlayerInventory(mouseX, mouseY);
@@ -176,9 +158,12 @@ public class StorageManager {
     public static void closeOverlay() {
         StorageData.saveContainers();
         activeContainerId = null;
-        currentGui = null;
         renderer = null;
         overlayActive = false;
+        if (isTransitioning && !wasMouseLocked) {
+            com.jef.justenoughfakepixel.features.farming.mouse.LockMouse.setLocked(false);
+        }
+        isTransitioning = false;
     }
 
 
@@ -186,11 +171,7 @@ public class StorageManager {
         if (!isOverlayActive() || renderer == null) return;
         if (!(Minecraft.getMinecraft().currentScreen instanceof GuiChest)) return;
 
-        GuiChest guiChest = (GuiChest) Minecraft.getMinecraft().currentScreen;
-        ContainerChest container = (ContainerChest) guiChest.inventorySlots;
-
         boolean isPlayerSlot = slotIn.inventory == Minecraft.getMinecraft().thePlayer.inventory;
-
 
         if (isPlayerSlot) {
             cir.setReturnValue(renderer.isMouseOverPlayerInventorySlot(slotIn, mouseX, mouseY));

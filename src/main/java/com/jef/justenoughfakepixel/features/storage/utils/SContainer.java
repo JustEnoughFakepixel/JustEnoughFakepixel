@@ -3,7 +3,6 @@ package com.jef.justenoughfakepixel.features.storage.utils;
 import com.jef.justenoughfakepixel.DebugLogger;
 import com.jef.justenoughfakepixel.features.storage.data.ItemData;
 import lombok.AllArgsConstructor;
-import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 
 import java.util.HashMap;
@@ -32,9 +31,13 @@ public class SContainer {
 
         this.renderH = renderH;
         this.renderW = 307;
-        slotCount = getSlotCount(renderH);
+        this.slotCount = calculateSlotCount(renderH);
         DebugLogger.log(renderW + " | " + slotCount);
         this.locked = locked;
+    }
+
+    private static int calculateSlotCount(int renderH) {
+        return StorageUtils.getSlotCountFromRenderHeight(renderH);
     }
 
     private HashMap<Integer, ItemData> convertSlots(HashMap<Integer, ItemStack> slots) {
@@ -69,25 +72,6 @@ public class SContainer {
             if (data != null) {
                 slots.put(key, data);
             }
-        }
-    }
-
-    public void draw(int mouseX, int mouseY, Minecraft mc) {
-
-    }
-
-    private int getSlotCount(int renderH) {
-        switch (renderH) {
-            case 70:
-                return 9;
-            case 100:
-                return 18;
-            case 140:
-                return 27;
-            case 170:
-                return 36;
-            default:
-                return 45;
         }
     }
 

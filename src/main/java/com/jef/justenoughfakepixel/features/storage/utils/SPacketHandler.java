@@ -3,7 +3,6 @@ package com.jef.justenoughfakepixel.features.storage.utils;
 import com.jef.justenoughfakepixel.DebugLogger;
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.features.storage.StorageManager;
-import com.jef.justenoughfakepixel.features.storage.StorageOverlay;
 import com.jef.justenoughfakepixel.features.storage.data.StorageData;
 import com.jef.justenoughfakepixel.features.storage.data.StorageSaving;
 import net.minecraft.client.Minecraft;
@@ -21,20 +20,10 @@ import java.util.regex.Matcher;
 
 public class SPacketHandler {
 
-    private int currentWindowId = -1;
     private String currentContainerId = null;
-    private Type currentContainerType = null;
-    private int currentPage = -1;
-    private boolean onStorageMenu = false;
 
     public int getCurrentWindowId() {
-        if (Minecraft.getMinecraft().currentScreen instanceof StorageOverlay) {
-            StorageOverlay overlay = (StorageOverlay) Minecraft.getMinecraft().currentScreen;
-            return overlay.inventorySlots.windowId;
-        }
-
         if (!(Minecraft.getMinecraft().currentScreen instanceof GuiChest)) {
-            currentWindowId = -1;
             return -1;
         }
 
@@ -55,74 +44,79 @@ public class SPacketHandler {
 
         DebugLogger.log("Window opened: " + windowTitle);
 
-        currentWindowId = -1;
-        currentContainerId = null;
-        currentContainerType = null;
-        currentPage = -1;
-        onStorageMenu = false;
+        resetCurrentState();
 
         if (windowTitle.trim().equals("Storage")) {
-            onStorageMenu = true;
             DebugLogger.log("Opened Storage menu");
             return;
         }
 
+        handleContainerWindow(windowTitle);
+    }
+
+    private void resetCurrentState() {
+        currentContainerId = null;
+    }
+
+    private void handleContainerWindow(String windowTitle) {
+        ContainerInfo info = parseContainerInfo(windowTitle);
+        if (info == null) return;
+
+        currentContainerId = info.type.prefix + "-" + info.page;
+
+        ensureContainerExists(info);
+        updateActiveContainer();
+    }
+
+    private ContainerInfo parseContainerInfo(String windowTitle) {
         Matcher backpackMatcher = StorageParser.BACKPACK_N_N.matcher(windowTitle);
         if (backpackMatcher.matches()) {
             try {
-                currentPage = Integer.parseInt(backpackMatcher.group(2));
-                currentContainerType = Type.BAG;
-                currentContainerId = Type.BAG.prefix + "-" + currentPage;
-
+                int page = Integer.parseInt(backpackMatcher.group(2));
                 String sizeType = backpackMatcher.group(1);
-                int renderH = StorageParser.getBackpackRenderHeight(sizeType);
-                int storageSlots = getSlotCountFromRenderH(renderH);
-
-                DebugLogger.log("Backpack " + sizeType + " has " + storageSlots + " storage slots");
-
-                if (!StorageData.containers.containsKey(currentContainerId)) {
-                    SContainer container = new SContainer(new java.util.HashMap<>(), currentPage, Type.BAG, renderH, false);
-                    container.slotCount = storageSlots;
-                    StorageData.containers.put(currentContainerId, container);
-                } else {
-                    SContainer existing = StorageData.containers.get(currentContainerId);
-                    existing.slotCount = storageSlots;
-                    existing.renderH = renderH;
-                }
-
-                if (StorageManager.getCurrentGui() != null || StorageManager.isOverlayActive()) {
-                    StorageManager.setActiveContainer(currentContainerId);
-                }
-
-                return;
+                return new ContainerInfo(Type.BAG, page, sizeType);
             } catch (NumberFormatException e) {
                 DebugLogger.log("Failed to parse backpack slot number: " + windowTitle);
             }
         }
 
-        Matcher echestPageMatcher = StorageParser.ECHEST_PAGE_N.matcher(windowTitle);
-        if (echestPageMatcher.matches()) {
+        Matcher echestMatcher = StorageParser.ECHEST_PAGE_N.matcher(windowTitle);
+        if (echestMatcher.matches()) {
             try {
-                currentPage = Integer.parseInt(echestPageMatcher.group(1));
-                currentContainerType = Type.ECHEST;
-                currentContainerId = Type.ECHEST.prefix + "-" + currentPage;
-
-                if (!StorageData.containers.containsKey(currentContainerId)) {
-                    SContainer container = new SContainer(new java.util.HashMap<>(), currentPage, Type.ECHEST, 200, false);
-                    container.slotCount = 45;
-                    StorageData.containers.put(currentContainerId, container);
-                    DebugLogger.log("Created new Ender Chest page " + currentPage + " with default 45 slots");
-                } else {
-                    DebugLogger.log("Using existing Ender Chest page " + currentPage);
-                }
-
-                if (StorageManager.getCurrentGui() != null || StorageManager.isOverlayActive()) {
-                    StorageManager.setActiveContainer(currentContainerId);
-                }
-
+                int page = Integer.parseInt(echestMatcher.group(1));
+                return new ContainerInfo(Type.ECHEST, page, null);
             } catch (NumberFormatException e) {
                 DebugLogger.log("Failed to parse ender chest page number: " + windowTitle);
             }
+        }
+
+        return null;
+    }
+
+    private void ensureContainerExists(ContainerInfo info) {
+        if (!StorageData.containers.containsKey(currentContainerId)) {
+            int renderH = info.type == Type.ECHEST ? 200 : StorageParser.getBackpackRenderHeight(info.sizeType);
+            int slotCount = StorageUtils.getSlotCountFromRenderHeight(renderH);
+
+            SContainer container = new SContainer(new java.util.HashMap<>(), info.page, info.type, renderH, false);
+            container.slotCount = slotCount;
+            StorageData.containers.put(currentContainerId, container);
+
+            DebugLogger.log("Created new " + info.type.name() + " page " + info.page + " with " + slotCount + " slots");
+        } else {
+            SContainer existing = StorageData.containers.get(currentContainerId);
+            if (info.type == Type.BAG && info.sizeType != null) {
+                int renderH = StorageParser.getBackpackRenderHeight(info.sizeType);
+                existing.slotCount = StorageUtils.getSlotCountFromRenderHeight(renderH);
+                existing.renderH = renderH;
+            }
+            DebugLogger.log("Using existing " + info.type.name() + " page " + info.page);
+        }
+    }
+
+    private void updateActiveContainer() {
+        if (StorageManager.isOverlayActive()) {
+            StorageManager.setActiveContainer(currentContainerId);
         }
     }
 
@@ -131,11 +125,7 @@ public class SPacketHandler {
             DebugLogger.log("Closing container: " + currentContainerId);
         }
 
-        currentWindowId = -1;
         currentContainerId = null;
-        currentContainerType = null;
-        currentPage = -1;
-        onStorageMenu = false;
     }
 
     public void handleSetSlot(S2FPacketSetSlot packet) {
@@ -184,7 +174,7 @@ public class SPacketHandler {
             int chestSize = inv.getSizeInventory();
             int rows = chestSize / 9;
             int storageSlots = (rows - 1) * 9;
-            int renderH = StorageParser.calculateRenderHeight(rows - 1);
+            int renderH = StorageUtils.calculateRenderHeight(rows - 1);
 
             container.slotCount = storageSlots;
             container.renderH = renderH;
@@ -242,29 +232,18 @@ public class SPacketHandler {
     }
 
     public void reset() {
-        currentWindowId = -1;
         currentContainerId = null;
-        currentContainerType = null;
-        currentPage = -1;
-        onStorageMenu = false;
     }
 
-    private int getSlotCountFromRenderH(int renderH) {
-        switch (renderH) {
-            case 70:
-                return 9;
-            case 100:
-                return 18;
-            case 140:
-                return 27;
-            case 170:
-                return 36;
-            case 200:
-                return 45;
-            case 230:
-                return 54;
-            default:
-                return 45;
+    private static class ContainerInfo {
+        final Type type;
+        final int page;
+        final String sizeType;
+
+        ContainerInfo(Type type, int page, String sizeType) {
+            this.type = type;
+            this.page = page;
+            this.sizeType = sizeType;
         }
     }
 }

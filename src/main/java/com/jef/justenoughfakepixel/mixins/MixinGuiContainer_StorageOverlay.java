@@ -15,8 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinGuiContainer_StorageOverlay {
 
     @Inject(method = "isMouseOverSlot", at = @At("HEAD"), cancellable = true)
-    public void isMouseOverSlot(Slot slotIn, int mouseX, int mouseY,
-                                CallbackInfoReturnable<Boolean> cir) {
+    public void isMouseOverSlot(Slot slotIn, int mouseX, int mouseY, CallbackInfoReturnable<Boolean> cir) {
         StorageManager.overrideIsMouseOverSlot(slotIn, mouseX, mouseY, cir);
     }
 

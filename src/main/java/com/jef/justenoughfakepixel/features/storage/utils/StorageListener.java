@@ -14,7 +14,6 @@ import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.input.Mouse;
 
@@ -25,10 +24,6 @@ public class StorageListener {
     private static boolean switchingContainer = false;
     private boolean shouldRenderOverlay = false;
     private boolean overlayInitialized = false;
-
-    public static boolean shouldRenderStorageOverlay() {
-        return Minecraft.getMinecraft().currentScreen instanceof GuiChest && StorageManager.isOverlayActive();
-    }
 
     @SubscribeEvent
     public void onChatMessage(ClientChatReceivedEvent event) {
@@ -48,18 +43,13 @@ public class StorageListener {
         if (!JefConfig.feature.storage.enabled) return;
 
         if (event.gui == null) {
-            if (!switchingContainer) {
-                shouldRenderOverlay = false;
-                overlayInitialized = false;
-                StorageManager.closeOverlay();
-            }
+            handleGuiClose();
             return;
         }
 
         if (!(event.gui instanceof GuiChest)) {
             if (!switchingContainer) {
-                shouldRenderOverlay = false;
-                overlayInitialized = false;
+                resetOverlayState();
             }
             return;
         }
@@ -70,22 +60,52 @@ public class StorageListener {
         ContainerChest chest = (ContainerChest) guiChest.inventorySlots;
         String title = chest.getLowerChestInventory().getDisplayName().getUnformattedText();
 
-        if (title != null && title.equals("Storage")) {
-            shouldRenderOverlay = true;
-            overlayInitialized = false;
-            switchingContainer = false;
-        } else if (title != null && StorageParser.isStorageContainer(title)) {
-            if (!StorageData.containers.isEmpty() || shouldRenderOverlay) {
-                shouldRenderOverlay = true;
-                overlayInitialized = true;
-                switchingContainer = false;
-            }
-        } else {
-            if (!switchingContainer) {
-                shouldRenderOverlay = false;
-                overlayInitialized = false;
-            }
+        handleStorageGuiOpen(title);
+    }
+
+    private void handleGuiClose() {
+        if (!switchingContainer) {
+            resetOverlayState();
+            StorageManager.closeOverlay();
         }
+    }
+
+    private void resetOverlayState() {
+        shouldRenderOverlay = false;
+        overlayInitialized = false;
+    }
+
+    private void handleStorageGuiOpen(String title) {
+        if (title == null) return;
+
+        switch (getStorageGuiType(title)) {
+            case STORAGE_MENU:
+                shouldRenderOverlay = true;
+                overlayInitialized = false;
+                switchingContainer = false;
+                break;
+            case STORAGE_CONTAINER:
+                if (!StorageData.containers.isEmpty() || shouldRenderOverlay) {
+                    shouldRenderOverlay = true;
+                    overlayInitialized = true;
+                    switchingContainer = false;
+                }
+                break;
+            case OTHER:
+                if (!switchingContainer) {
+                    resetOverlayState();
+                }
+                break;
+        }
+    }
+
+    private StorageGuiType getStorageGuiType(String title) {
+        if (title.equals("Storage")) {
+            return StorageGuiType.STORAGE_MENU;
+        } else if (StorageParser.isStorageContainer(title)) {
+            return StorageGuiType.STORAGE_CONTAINER;
+        }
+        return StorageGuiType.OTHER;
     }
 
     @SubscribeEvent
@@ -109,13 +129,6 @@ public class StorageListener {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void onDrawScreenPre(GuiScreenEvent.DrawScreenEvent.Pre event) {
-        if (!shouldRenderOverlay || !overlayInitialized) return;
-        if (!JefConfig.feature.storage.enabled) {
-        }
-    }
-
     @SubscribeEvent
     public void onMouseInput(GuiScreenEvent.MouseInputEvent.Pre event) {
         if (!shouldRenderOverlay || !overlayInitialized) return;
@@ -126,21 +139,35 @@ public class StorageListener {
         int mouseX = Mouse.getX() * guiChest.width / Minecraft.getMinecraft().displayWidth;
         int mouseY = guiChest.height - Mouse.getY() * guiChest.height / Minecraft.getMinecraft().displayHeight - 1;
 
-        int dWheel = Mouse.getEventDWheel();
-        if (dWheel != 0) {
-            StorageManager.handleMouseInput();
+        if (handleScrollInput()) {
             event.setCanceled(true);
             return;
         }
 
-        int button = Mouse.getEventButton();
-        if (button != 0 && button != 1) return;
+        if (handleClickInput(mouseX, mouseY, guiChest)) {
+            event.setCanceled(true);
+        }
+    }
 
-        if (isClickingPlayerInventory(mouseX, mouseY)) return;
-        if (isClickingActiveContainerSlots(mouseX, mouseY, guiChest)) return;
+    private boolean handleScrollInput() {
+        int dWheel = Mouse.getEventDWheel();
+        if (dWheel != 0) {
+            StorageManager.handleMouseInput();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean handleClickInput(int mouseX, int mouseY, GuiChest guiChest) {
+        int button = Mouse.getEventButton();
+        if (button != 0 && button != 1) return false;
+
+        if (isClickingPlayerInventory(mouseX, mouseY) || isClickingActiveContainerSlots(mouseX, mouseY, guiChest)) {
+            return false;
+        }
 
         StorageManager.handleMouseInput();
-        event.setCanceled(true);
+        return true;
     }
 
     private boolean isClickingPlayerInventory(int mouseX, int mouseY) {
@@ -170,7 +197,9 @@ public class StorageListener {
 
         char typedChar = org.lwjgl.input.Keyboard.getEventCharacter();
 
-        StorageManager.handleKeyTyped(typedChar, keyCode);
+        if (StorageManager.handleKeyTyped(typedChar, keyCode)) {
+            event.setCanceled(true);
+        }
     }
 
     @SubscribeEvent
@@ -179,7 +208,7 @@ public class StorageListener {
         if (!JefConfig.feature.storage.enabled) return;
         if (!(event.gui instanceof GuiChest)) return;
 
-        StorageManager.renderOverlay(event.mouseX, event.mouseY, event.renderPartialTicks);
+        StorageManager.renderOverlay(event.mouseX, event.mouseY);
         com.jef.justenoughfakepixel.utils.render.ItemRenderUtils.renderHeldCursorItem();
     }
 
@@ -193,6 +222,10 @@ public class StorageListener {
         ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
         int mouseX = Mouse.getX() * sr.getScaledWidth() / Minecraft.getMinecraft().displayWidth;
         int mouseY = sr.getScaledHeight() - Mouse.getY() * sr.getScaledHeight() / Minecraft.getMinecraft().displayHeight - 1;
-        StorageManager.renderOverlay(mouseX, mouseY, event.partialTicks);
+        StorageManager.renderOverlay(mouseX, mouseY);
+    }
+
+    private enum StorageGuiType {
+        STORAGE_MENU, STORAGE_CONTAINER, OTHER
     }
 }

@@ -99,7 +99,11 @@ public class CustomScoreboard extends Overlay {
     @Override public int     getBgColor()    { return ChromaColour.specialToChromaRGB(JefConfig.feature.scoreboard.scoreboardBg); }
     @Override public int     getCornerRadius(){ return (int) JefConfig.feature.scoreboard.cornerRadius; }
     @Override protected boolean extraGuard() { return isActive(); }
-    @Override protected boolean isEnabled()  { return isActive() && !Minecraft.getMinecraft().gameSettings.showDebugInfo; }
+    @Override protected boolean isEnabled()  {
+        return isActive()
+                && !Minecraft.getMinecraft().gameSettings.showDebugInfo
+                && !com.jef.justenoughfakepixel.features.storage.StorageManager.isOverlayActive();
+    }
 
     private static String formatPowder(long v) {
         if (v >= 1_000_000) return String.format("%.1fM", v / 1_000_000.0);
