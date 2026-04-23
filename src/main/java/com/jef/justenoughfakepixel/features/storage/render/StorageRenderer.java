@@ -84,6 +84,8 @@ public class StorageRenderer extends Gui {
     private int cachedVisibleCount = -1;
     private int cachedMaxScroll = -1;
     private int[] cachedGridStart = null;
+    private boolean needsScrollToActive = false;
+    private String lastActiveContainerId = null;
 
     public StorageRenderer(LinkedHashMap<String, SContainer> containers) {
         this.containers = containers;
@@ -243,6 +245,9 @@ public class StorageRenderer extends Gui {
         SearchBar.drawStorageSearchBar(searchField);
 
         drawPanelBackground(boxX, boxY, boxW, boxH);
+
+        // Scroll to active container if needed
+        scrollToActiveContainerIfNeeded();
 
         scrollOffset += (scrollTarget - scrollOffset) * SCROLL_LENGTH;
 
@@ -417,7 +422,7 @@ public class StorageRenderer extends Gui {
             float scrollDelta = (deltaY / scrollableTrackHeight) * maxScroll;
 
             scrollTarget = Math.max(0, Math.min(maxScroll, dragStartScroll + scrollDelta));
-            scrollOffset = scrollTarget; 
+            scrollOffset = scrollTarget;
         }
     }
 
@@ -428,6 +433,68 @@ public class StorageRenderer extends Gui {
         float step = (containerH + PADDING) * scrollSpeed;
         scrollTarget -= dWheel > 0 ? step : -step;
         scrollTarget = Math.max(0, Math.min(scrollTarget, maxScroll));
+    }
+
+    private void scrollToActiveContainerIfNeeded() {
+        String activeId = StorageManager.getActiveContainerId();
+
+        // Check if active container changed or if we need to scroll to it
+        if (activeId != null && (!activeId.equals(lastActiveContainerId) || needsScrollToActive)) {
+            scrollToContainer(activeId);
+            lastActiveContainerId = activeId;
+            needsScrollToActive = false;
+        } else if (activeId == null) {
+            lastActiveContainerId = null;
+        }
+    }
+
+    private void scrollToContainer(String containerId) {
+        if (containerId == null) return;
+
+        SContainer container = containers.get(containerId);
+        if (container == null) return;
+
+        // Find the container's position in the visible list
+        int visibleIndex = getVisibleIndex(container);
+        if (visibleIndex == -1) return;
+
+        // Calculate which row this container is in
+        int row = visibleIndex / containersPerRow;
+
+        // Calculate the Y offset for this row
+        int targetYOffset = getRowYOffset(row);
+
+        // Calculate the container's position
+        int containerY = targetYOffset;
+        int containerHeight = getContainerDisplayHeight(container);
+
+        // Calculate visible area
+        int visibleHeight = storageAreaH - 20; // Account for padding
+
+        // Check if container is already fully visible
+        int currentScrollPixels = (int) scrollOffset;
+        int containerTop = containerY - currentScrollPixels;
+        int containerBottom = containerTop + containerHeight;
+
+        if (containerTop >= 0 && containerBottom <= visibleHeight) {
+            // Container is already fully visible, no need to scroll
+            return;
+        }
+
+        // Scroll to show the container
+        // Try to center the container in the visible area
+        int targetScroll = containerY - (visibleHeight - containerHeight) / 2;
+
+        // Clamp to valid scroll range
+        int maxScroll = getMaxScroll();
+        targetScroll = Math.max(0, Math.min(targetScroll, maxScroll));
+
+        scrollTarget = targetScroll;
+        scrollOffset = scrollTarget; // Instant scroll for better UX
+    }
+
+    public void requestScrollToActive() {
+        needsScrollToActive = true;
     }
 
     private int getMaxScroll() {

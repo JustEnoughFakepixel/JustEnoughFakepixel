@@ -24,4 +24,9 @@ public class Storage {
     @ConfigOption(name = "Active Container Highlight", desc = "How inactive backpacks are visually de-emphasised when one is selected")
     @ConfigEditorDropdown(values = {"Dim", "Classic"})
     public int activeContainerStyle = 0;
+
+    @Expose
+    @ConfigOption(name = "AutoJump to Active", desc = "Automatically scroll to the active container")
+    @ConfigEditorBoolean
+    public boolean autoScrollToActive = true;
 }

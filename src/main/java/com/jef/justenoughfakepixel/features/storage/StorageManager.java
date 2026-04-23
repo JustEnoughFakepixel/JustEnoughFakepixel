@@ -1,10 +1,10 @@
 package com.jef.justenoughfakepixel.features.storage;
 
+import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.features.storage.data.StorageData;
 import com.jef.justenoughfakepixel.features.storage.render.StorageRenderer;
 import com.jef.justenoughfakepixel.features.storage.utils.SContainer;
 import com.jef.justenoughfakepixel.features.storage.utils.StorageListener;
-import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.features.storage.utils.StorageParser;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import lombok.Getter;
@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
 @RegisterEvents
 public class StorageManager {
 
+    private static final long TRANSITION_TIMEOUT = 5000;
     @Getter
     private static String activeContainerId = null;
     @Getter
@@ -28,10 +29,19 @@ public class StorageManager {
     @Getter
     private static boolean isTransitioning = false;
     private static boolean wasMouseLocked = false;
-    private static final long TRANSITION_TIMEOUT = 5000;
+    private static boolean switchInitiatedFromOverlay = false;
 
     public static void setActiveContainer(String containerId) {
         activeContainerId = containerId;
+
+        // Only auto-scroll if enabled in config and switch was NOT initiated from overlay
+        if (JefConfig.feature.storage.autoScrollToActive && renderer != null && containerId != null && !switchInitiatedFromOverlay) {
+            renderer.requestScrollToActive();
+        }
+
+        // Reset the flag
+        switchInitiatedFromOverlay = false;
+
         endTransition();
     }
 
@@ -42,7 +52,9 @@ public class StorageManager {
         isTransitioning = false;
     }
 
-    /** Sets the mouse lock state without printing the "Mouse locked/unlocked" chat message. */
+    /**
+     * Sets the mouse lock state without printing the "Mouse locked/unlocked" chat message.
+     */
     private static void setMouseLockedSilent(boolean locked) {
         if (JefConfig.feature == null) return;
         JefConfig.feature.farming.lockMouse = locked;
@@ -65,6 +77,10 @@ public class StorageManager {
         renderer = new StorageRenderer(containers);
         overlayActive = true;
 
+        // Request scroll to active container
+        if (JefConfig.feature.storage.autoScrollToActive && renderer != null && activeContainerId != null) {
+            renderer.requestScrollToActive();
+        }
 
         return true;
     }
@@ -125,6 +141,9 @@ public class StorageManager {
         SContainer container = StorageData.containers.get(containerId);
         if (container == null) return;
 
+        // Mark that this switch was initiated from the overlay
+        switchInitiatedFromOverlay = true;
+
         isTransitioning = true;
         transitionStartTime = System.currentTimeMillis();
         wasMouseLocked = com.jef.justenoughfakepixel.features.farming.mouse.LockMouse.isLocked();
@@ -177,6 +196,12 @@ public class StorageManager {
             setMouseLockedSilent(false);
         }
         isTransitioning = false;
+    }
+
+    public static void requestScrollToActiveContainer() {
+        if (renderer != null) {
+            renderer.requestScrollToActive();
+        }
     }
 
 
