@@ -115,9 +115,7 @@ public class SPacketHandler {
     }
 
     private void updateActiveContainer() {
-        if (StorageManager.isOverlayActive()) {
-            StorageManager.setActiveContainer(currentContainerId);
-        }
+        StorageManager.setActiveContainer(currentContainerId);
     }
 
     public void handleCloseWindow(S2EPacketCloseWindow packet) {

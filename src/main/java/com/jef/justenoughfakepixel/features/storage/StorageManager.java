@@ -64,7 +64,7 @@ public class StorageManager {
 
         renderer = new StorageRenderer(containers);
         overlayActive = true;
-        activeContainerId = null;
+
 
         return true;
     }

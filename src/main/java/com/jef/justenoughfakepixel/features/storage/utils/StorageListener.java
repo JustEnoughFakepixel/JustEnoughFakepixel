@@ -85,11 +85,12 @@ public class StorageListener {
                 switchingContainer = false;
                 break;
             case STORAGE_CONTAINER:
-                if (!StorageData.containers.isEmpty() || shouldRenderOverlay) {
-                    shouldRenderOverlay = true;
-                    overlayInitialized = true;
-                    switchingContainer = false;
+                if (StorageData.containers.isEmpty()) {
+                    StorageData.loadContainers();
                 }
+                shouldRenderOverlay = true;
+                overlayInitialized = true;
+                switchingContainer = false;
                 break;
             case OTHER:
                 if (!switchingContainer) {
