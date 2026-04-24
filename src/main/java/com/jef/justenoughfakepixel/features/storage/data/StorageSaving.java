@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.jef.justenoughfakepixel.JefMod;
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.features.storage.utils.SContainer;
+import net.minecraft.client.Minecraft;
 
 import java.io.File;
 import java.io.FileReader;
@@ -18,6 +19,11 @@ public class StorageSaving {
 
     public static Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
+    private static File getStorageFolder() {
+        String username = Minecraft.getMinecraft().getSession().getUsername();
+        return new File(JefConfig.configDirectory, "storage/" + username);
+    }
+
     public static LinkedHashMap<String, SContainer> loadStorageData() {
         TreeMap<String, SContainer> sorted = new TreeMap<>((a, b) -> {
             String[] partsA = a.split("-", 2);
@@ -30,7 +36,7 @@ public class StorageSaving {
                 return partsA[1].compareTo(partsB[1]);
             }
         });
-        File folder = new File(JefConfig.configDirectory, "storage");
+        File folder = getStorageFolder();
         if (!folder.exists()) {
             folder.mkdirs();
             return new LinkedHashMap<>();
@@ -42,7 +48,7 @@ public class StorageSaving {
                     continue;
                 }
                 SContainer container = gson.fromJson(new FileReader(file), SContainer.class);
-                if (container != null) {
+                if (container != null && !container.empty) {
                     sorted.put(container.id, container);
                 }
             } catch (IOException e) {
@@ -54,11 +60,12 @@ public class StorageSaving {
     }
 
     public static void saveStorageData(Collection<SContainer> containers) {
-        File folder = new File(JefConfig.configDirectory, "storage");
+        File folder = getStorageFolder();
         if (!folder.exists()) {
             folder.mkdirs();
         }
         for (SContainer container : containers) {
+            if (container.empty) continue;
             File file = new File(folder, container.id + ".json");
             try {
                 if (!file.exists()) {

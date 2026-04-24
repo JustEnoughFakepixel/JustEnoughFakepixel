@@ -69,13 +69,17 @@ public class StorageParser {
             if (stack == null) continue;
 
             String id = Type.BAG.prefix + "-" + page;
-            String title = stack.getDisplayName();
-            boolean empty = title.startsWith("Empty");
+
+            // Skip empty backpack placeholder slots (stained glass pane named "§cEmpty Backpack Slot N")
+            if (Block.getBlockFromItem(stack.getItem()) instanceof BlockStainedGlassPane) {
+                String rawName = stack.getDisplayName();
+                if (ColorUtils.stripColor(rawName).startsWith("Empty Backpack Slot")) continue;
+            }
 
             int renderH = extractBackpackRenderHeight(stack);
             int slotCount = StorageUtils.getSlotCountFromRenderHeight(renderH);
 
-            SContainer container = getOrCreateContainer(loadedContainers, id, page, Type.BAG, empty, renderH, slotCount);
+            SContainer container = getOrCreateContainer(loadedContainers, id, page, Type.BAG, false, renderH, slotCount);
             detectedContainers.put(id, container);
         }
     }
