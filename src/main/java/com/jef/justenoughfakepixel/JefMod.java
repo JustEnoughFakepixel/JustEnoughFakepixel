@@ -11,11 +11,15 @@ import com.jef.justenoughfakepixel.features.misc.invbuttons.InventoryButtonStora
 import com.jef.justenoughfakepixel.features.misc.invbuttons.SkyblockItemCache;
 import com.jef.justenoughfakepixel.features.misc.pet.CurrentPetTracker;
 import com.jef.justenoughfakepixel.features.misc.pet.PetCache;
+import com.jef.justenoughfakepixel.features.profile.GuiWaiter;
 import com.jef.justenoughfakepixel.features.scoreboard.MaxwellPowerSync;
 import com.jef.justenoughfakepixel.features.waypoints.WaypointStorage;
 import com.jef.justenoughfakepixel.init.JefEventRegistrar;
+import com.jef.justenoughfakepixel.mixins.MixinMinecraft;
 import com.jef.justenoughfakepixel.repo.JefRepo;
 import com.jef.justenoughfakepixel.repo.RepoHandler;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.Session;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -51,6 +55,7 @@ public class JefMod {
         CapeManager.initialise(false);
     }
 
+
     @Mod.EventHandler
     public void clientInit(FMLInitializationEvent event) {
         JefConfig.register();
@@ -65,10 +70,9 @@ public class JefMod {
         TrophyFishStorage.getInstance().load();
 
         new CitManager();
-
-
         if (JefConfig.feature.misc.showCurrentPet) PetCache.getInstance().warmupTextures();
 
+        MinecraftForge.EVENT_BUS.register(GuiWaiter.INSTANCE);
         MinecraftForge.EVENT_BUS.register(this);
         JefEventRegistrar.registerAll();
     }
