@@ -1,4 +1,4 @@
-package com.jef.justenoughfakepixel.core.features;
+package com.jef.justenoughfakepixel.core.features.farming;
 
 import com.google.gson.annotations.Expose;
 import com.jef.justenoughfakepixel.core.config.gui.config.ConfigAnnotations.*;

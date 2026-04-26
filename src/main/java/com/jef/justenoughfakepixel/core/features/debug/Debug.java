@@ -1,27 +1,15 @@
-package com.jef.justenoughfakepixel.core.features;
+package com.jef.justenoughfakepixel.core.features.debug;
 
 import com.google.gson.annotations.Expose;
 import com.jef.justenoughfakepixel.core.config.gui.config.ConfigAnnotations.*;
+import com.jef.justenoughfakepixel.core.features.debug.*;
 import org.lwjgl.input.Keyboard;
 
 public class Debug {
 
     @Expose
-    @ConfigOption(name = "Scoreboard Debug", desc = "Debug tools for the scoreboard")
-    @ConfigEditorAccordion(id = 44)
-    public boolean scoreboardDebugAccordion = false;
-
-    @Expose
-    @ConfigOption(name = "Enable", desc = "Enable scoreboard debug mode (allows the debug key to print scoreboard JSON to chat)")
-    @ConfigEditorBoolean
-    @ConfigAccordionId(id = 44)
-    public boolean scoreboardDebug = false;
-
-    @Expose
-    @ConfigOption(name = "Debug Key", desc = "Print scoreboard JSON to chat (only works when Scoreboard Debug is enabled)")
-    @ConfigEditorKeybind(defaultKey = Keyboard.KEY_NONE)
-    @ConfigAccordionId(id = 44)
-    public int scoreboardDebugKey = Keyboard.KEY_NONE;
+    @Category(name = "Scoreboard Debug", desc = "Debug tools for the scoreboard")
+    public ScoreboardDebugConfig scoreboardDebugConfig = new ScoreboardDebugConfig();
 
     @Expose
     @ConfigOption(name = "Room Overlay: Show Hash", desc = "Show room hash in the dungeon room overlay when the room is not detected")
@@ -37,4 +25,8 @@ public class Debug {
     @ConfigOption(name = "Reload Repo", desc = "Re-fetch all data from the remote repo")
     @ConfigEditorButton(runnableId = "reloadRepo", buttonText = "Reload")
     public boolean reloadRepoButton = false;
+
+    // ── flat fields kept for runtime code compatibility ──────────────────────
+    @Expose public boolean scoreboardDebug = false;
+    @Expose public int scoreboardDebugKey = Keyboard.KEY_NONE;
 }

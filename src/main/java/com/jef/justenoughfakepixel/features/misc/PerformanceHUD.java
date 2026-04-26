@@ -159,8 +159,12 @@ public class PerformanceHUD extends Overlay {
                 out.add(C_LABEL + "Yaw: " + C_VAL + "180.0  " + C_LABEL + "Pitch: " + C_VAL + "0.0");
             } else {
                 net.minecraft.entity.player.EntityPlayer p = Minecraft.getMinecraft().thePlayer;
-                if (p != null)
-                    out.add(C_LABEL + "Yaw: " + C_VAL + String.format("%.1f", p.rotationYaw) + "  " + C_LABEL + "Pitch: " + C_VAL + String.format("%.1f", p.rotationPitch));
+                if (p != null) {
+                    float yaw = p.rotationYaw % 360.0f;
+                    if (yaw >= 180.0f) yaw -= 360.0f;
+                    if (yaw < -180.0f) yaw += 360.0f;
+                    out.add(C_LABEL + "Yaw: " + C_VAL + String.format("%.1f", yaw) + "  " + C_LABEL + "Pitch: " + C_VAL + String.format("%.1f", p.rotationPitch));
+                }
             }
         }
         return out;
