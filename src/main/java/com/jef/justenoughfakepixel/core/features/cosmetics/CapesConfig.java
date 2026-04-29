@@ -16,7 +16,7 @@ public class CapesConfig {
     public String reloadCapes = "";
 
     @Expose
-    @ConfigOption(name = "Reload Interval", desc = "Change how many seconds it takes before reloading all capes, must Reload Capes to take it into effect. [ HIGHLY AFFECTS PERFORMANCE, KEEP HIGHER FOR SMOOTHER GAMEPLAY ]")
+    @ConfigOption(name = "Reload Interval", desc = "Change how many minutes it takes before reloading all capes, must Reload Capes to take it into effect. [ HIGHLY AFFECTS PERFORMANCE, KEEP HIGHER FOR SMOOTHER GAMEPLAY ]")
     @ConfigEditorSliderAnnotation(minValue = 5, maxValue = 60, minStep = 1)
-    public int reloadInterval = 30;
+    public int reloadInterval = 15;
 }

@@ -20,7 +20,7 @@ public class CapeManager {
 
     private static final HashMap<String, Long> lastFetched = new HashMap<>();
 
-    private static long POLL_INTERVAL_MS = 30_000;
+    private static long POLL_INTERVAL_MS = 900000;
 
     private static final String API_URL = "https://cape-api-pi.vercel.app";
     public static final String MOD_SECRET = "a7c0e73c-3b0b-4789-8c80-741dd09ba1bc";
@@ -75,7 +75,7 @@ public class CapeManager {
             for (String playerName : new HashSet<>(activeCapes.keySet())) {
                 String id = fetchIDFromAPI(playerName);
                 activeCapes.put(playerName, id == null ? "none" : id);
-                try { Thread.sleep(100); } catch (InterruptedException ignored) {} // gentle throttle
+                try { Thread.sleep(100); } catch (InterruptedException ignored) {}
             }
         }, "CapeRefreshAll").start();
     }

@@ -3,8 +3,10 @@ package com.jef.justenoughfakepixel.mixins;
 import com.jef.justenoughfakepixel.JefMod;
 import com.jef.justenoughfakepixel.features.capes.Cape;
 import com.jef.justenoughfakepixel.features.capes.CapeManager;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.network.NetworkPlayerInfo;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,6 +38,11 @@ public class MixinAbstractClientPlayer {
             }
             return;
         }
+        EntityPlayer player = Minecraft.getMinecraft().theWorld.getPlayerEntityByName(user);
+        if(player == null) return;
+        if(Minecraft.getMinecraft().thePlayer.getPosition().distanceSq(
+                player.getPosition()
+        ) > 65536) return;
 
         CapeManager.fetchCapeAsync(user);
         if (!CapeManager.hasCape(user)) {  return; }
