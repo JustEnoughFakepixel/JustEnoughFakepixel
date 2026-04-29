@@ -1,6 +1,7 @@
 package com.jef.justenoughfakepixel.features.misc
 
 import com.jef.justenoughfakepixel.utils.ColorUtils
+import com.jef.justenoughfakepixel.utils.item.ItemUtils
 import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraft.client.gui.inventory.GuiContainer
 import net.minecraft.inventory.ContainerChest
@@ -25,11 +26,23 @@ object ProtectionChecks {
 
         for (i in 0 until size) {
             val stack = inventory.getStackInSlot(i) ?: continue
-            if (!stack.hasDisplayName()) continue
 
-            val displayName = ColorUtils.stripColor(stack.displayName)
-            if (displayName == "Sell Item") {
-                return true
+            // Check display name for "Sell Item" button
+            if (stack.hasDisplayName()) {
+                val displayName = ColorUtils.stripColor(stack.displayName)
+                if (displayName == "Sell Item") {
+                    return true
+                }
+            }
+
+            // Check lore for buyback button (after item is sold)
+            val loreLines = ItemUtils.getLoreLines(stack)
+            for (line in loreLines) {
+                val cleanLine = ColorUtils.stripColor(line).lowercase()
+
+                if (cleanLine.contains("click to buyback")) {
+                    return true
+                }
             }
         }
 
