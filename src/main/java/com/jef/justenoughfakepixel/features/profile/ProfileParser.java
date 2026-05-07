@@ -6,6 +6,7 @@ import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.features.profile.data.*;
 
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.util.*;
 
 import com.jef.justenoughfakepixel.features.profile.data.bags.AccessoryData;
@@ -73,7 +74,7 @@ public class ProfileParser {
                 dungeonData[0], slayerData[0],wardrobeData[0],petsData[0],storageData[0],
                 bagsData[0],collectionData[0]);
         profileData.put(base.playerName, profile);
-        writeToJson(profile);
+//        writeToJson(profile);
         SupabaseHandler.pushProfileAsync(base.playerName, profile);
         parsing = false;
         JefMod.logger.info("[ProfileParser] Saved profile: " + base.playerName);
@@ -343,29 +344,40 @@ public class ProfileParser {
         String title = ColorUtils.stripColor(
                 container.getLowerChestInventory().getDisplayName().getUnformattedText()
         ).trim();
-        if (!title.startsWith("View") && !title.endsWith("Collections")) return data;
 
-        for(int i = 19;i < 44;i++){
+        // FIX 1: Logical OR (||) instead of AND (&&) to correctly reject bad menus
+        if (!title.startsWith("View") || !title.endsWith("Collections")) return data;
+
+        for(int i = 19; i < 44; i++){
             if(i % 9 == 0 || (i + 1) % 9 == 0) continue;
             ItemStack stack = container.getSlot(i).getStack();
             if(stack == null || stack.getDisplayName().isEmpty()) continue;
+
             String name = ColorUtils.stripColor(stack.getDisplayName()).trim();
-            CollectionType type = CollectionType.get(name);
-
-            if(type == null) continue;
             String[] words = name.split(" ");
-            if(words.length < 2) continue;
+            if (words.length < 1) continue;
 
-            int level = -1;
-            long curExp = -1,reqExp = -1;
+            String lastWord = words[words.length - 1];
+            int level = 0;
+            String baseName = name;
 
-            try{
-                level = Integer.parseInt(words[words.length-1]);
-            } catch (NumberFormatException ignored) {}
-            if(level < 0) continue;
+            try {
+                level = RomanNumeralParser.parse(lastWord);
+                baseName = name.substring(0, name.lastIndexOf(lastWord)).trim();
+            } catch (IllegalArgumentException e) {
+                try {
+                    level = Integer.parseInt(lastWord);
+                    baseName = name.substring(0, name.lastIndexOf(lastWord)).trim();
+                } catch (NumberFormatException ex) {
+                    level = 0;
+                }
+            }
 
+            CollectionType type = CollectionType.get(baseName);
+            if (type == null) continue;
+
+            long curExp = -1, reqExp = -1;
             List<String> lore = getLore(stack);
-            if(lore.isEmpty()) continue;
 
             for(String s : lore){
                 if (s.contains("/") && !s.contains(" ")) {
@@ -376,7 +388,7 @@ public class ProfileParser {
                     } catch (Exception ignored) {}
                 }
             }
-            data.put(type,new CollectionData(level,curExp,reqExp));
+            data.put(type, new CollectionData(level, curExp, reqExp));
         }
 
         return data;
@@ -1144,16 +1156,24 @@ public class ProfileParser {
 
     public static void writeToJson(ProfileData data) {
         if (data == null) return;
-        File file = new File(JefConfig.configDirectory, "profile.txt");
+        File file = new File(JefConfig.configDirectory, "profile.bin");
         if (!file.exists()) {
             try { file.createNewFile(); }
-            catch (IOException e) { JefMod.logger.info("Error creating profile.txt"); return; }
+            catch (IOException e) { JefMod.logger.info("Error creating profile.bin"); return; }
         }
 
         try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(ProfileCompressor.compressJSON(GSON.toJson(data)));
         } catch (Exception e) {
-            JefMod.logger.info("Error writing to profile.txt");
+            JefMod.logger.info("Error writing to profile.bin");
         }
+        File file1 = new File(JefConfig.configDirectory, "profile.json");
+        if (!file.exists()) {
+            try { file.createNewFile(); }
+            catch (IOException e) { JefMod.logger.info("Error creating profile.json"); return; }
+        }
+        try(FileWriter writer = new FileWriter(file1)){
+            writer.write(GSON.toJson(data));
+        }catch (IOException e) { JefMod.logger.info("Error writing to profile.json"); return; }
     }
 }
