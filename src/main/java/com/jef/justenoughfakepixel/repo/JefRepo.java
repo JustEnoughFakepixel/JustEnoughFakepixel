@@ -9,6 +9,7 @@ public class JefRepo {
     public static final String KEY_ENCHANTS = "enchants";
     public static final String KEY_TIMERS = "timers";
     public static final String KEY_TAGS = "tags";
+    public static final String KEY_REPO = "repo";
     private static final String BASE = "https://raw.githubusercontent.com/JustEnoughFakepixel/JustEnoughFakepixel-REPO/main/";
 
     private JefRepo() {
@@ -20,6 +21,7 @@ public class JefRepo {
         RepoHandler.register(KEY_ENCHANTS, BASE + "data/enchants.json");
         RepoHandler.register(KEY_TIMERS, BASE + "data/timers.json");
         RepoHandler.register(KEY_TAGS, BASE + "data/tags.json");
+        RepoHandler.register(KEY_REPO, BASE + "data/repo.json");
         RepoHandler.warmupAll();
     }
 }

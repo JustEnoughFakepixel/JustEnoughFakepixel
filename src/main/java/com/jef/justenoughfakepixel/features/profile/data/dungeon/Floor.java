@@ -12,7 +12,7 @@ public enum Floor {
     FLOOR_FOUR("Floor IV","Thorn"),
     FLOOR_FIVE("Floor V","Livid"),
     FLOOR_SIX("Floor VI","Sadan"),
-    FLOOR_SEVEN("Floor VII","Maxor,Storm,Goldor and Necron"),
+    FLOOR_SEVEN("Floor VII","Maxor, Storm, Goldor and Necron"),
     ;
     public final String floorName,bossName;
 

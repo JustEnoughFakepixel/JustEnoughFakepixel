@@ -30,10 +30,10 @@ public class MixinAbstractClientPlayer {
                 player.getPosition()
         ) > 65536) return;
 
-        if(!CapeManager.hasCape(user)) {
+        if(CapeManager.doesntHaveCape(user)) {
             CapeManager.fetchCapeAsync(user);
         }
-        if (!CapeManager.hasCape(user)) {  return; }
+        if (CapeManager.doesntHaveCape(user)) {  return; }
 
         Cape cape = CapeManager.getCapeForPlayer(user);
         if (cape == null) {  return; }
