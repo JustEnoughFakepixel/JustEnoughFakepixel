@@ -932,7 +932,7 @@ public class ProfileParser {
         String displayName = stack.getDisplayName();
         String skyblockID = ItemUtils.getInternalName(stack);
         List<String> lore = getLoreColored(stack);
-        return new ItemData(displayName, lore, skyblockID);
+        return new ItemData(displayName, lore, skyblockID,stack.isItemEnchanted());
     }
 
 
