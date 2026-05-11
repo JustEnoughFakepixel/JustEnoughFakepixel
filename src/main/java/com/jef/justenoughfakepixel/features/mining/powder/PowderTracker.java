@@ -159,7 +159,7 @@ public class PowderTracker {
         }
 
         m = GEMSTONE_DROP.matcher(msg);
-        if (m.find()) {
+        if (m.find() && !msg.contains("PRISTINE")) {
             String key = PowderStats.gemKey(m.group(1), m.group(2));
             data.gemstones.put(key, data.gemstones.getOrDefault(key, 0L) + parseLong(m.group(3)));
             stats.save();
