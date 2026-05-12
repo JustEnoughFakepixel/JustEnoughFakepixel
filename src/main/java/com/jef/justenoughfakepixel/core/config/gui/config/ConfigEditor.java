@@ -58,6 +58,16 @@ public class ConfigEditor extends GuiElement {
     private int lastMouseX = 0;
     private int keyboardScrollXCutoff = 0;
 
+    // Key-repeat tracking for backspace/delete in the search field.
+    // handleKeyboardPresses() is called every render frame (like the arrow-key scroll
+    // polling above it), so we can simulate OS-style repeat by checking isKeyDown()
+    // and firing deletions at a fixed rate after an initial delay.
+    private static final long SEARCH_REPEAT_DELAY_MS = 500; // ms before repeat begins
+    private static final long SEARCH_REPEAT_RATE_MS  =  50; // ms between repeat ticks (~20/s)
+    private int  searchRepeatKey   = 0;
+    private long searchRepeatStart = 0;
+    private long searchRepeatLast  = 0;
+
     public ConfigEditor(Object config) {
         this(config, null);
     }
@@ -895,6 +905,30 @@ public class ConfigEditor extends GuiElement {
             target.resetTimer();
             if (target.getTarget() >= 0) {
                 target.setTarget(target.getTarget() - 5);
+            }
+        }
+
+        if (searchField.getFocus()) {
+            int heldKey = 0;
+            if      (Keyboard.isKeyDown(Keyboard.KEY_BACK))   heldKey = Keyboard.KEY_BACK;
+            else if (Keyboard.isKeyDown(Keyboard.KEY_DELETE))  heldKey = Keyboard.KEY_DELETE;
+
+            if (heldKey != 0) {
+                long now = System.currentTimeMillis();
+                if (searchRepeatKey != heldKey) {
+
+                    searchRepeatKey   = heldKey;
+                    searchRepeatStart = now;
+                    searchRepeatLast  = now;
+                } else if (now - searchRepeatStart >= SEARCH_REPEAT_DELAY_MS
+                        && now - searchRepeatLast  >= SEARCH_REPEAT_RATE_MS) {
+                    searchRepeatLast = now;
+                    String old = searchField.getText();
+                    searchField.keyTyped((char) 0, heldKey);
+                    if (!searchField.getText().equals(old)) search();
+                }
+            } else {
+                searchRepeatKey = 0;
             }
         }
     }
