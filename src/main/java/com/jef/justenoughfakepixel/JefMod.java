@@ -42,7 +42,6 @@ public class JefMod {
         JefStorageManager.initAll(JefConfig.configDirectory);
         // ProtectedItemStorage uses .init() rather than .initFile(), so it stays manual for now.
         ProtectedItemStorage.INSTANCE.init(JefConfig.configDirectory);
-        ((MixinMinecraft) Minecraft.getMinecraft()).setSession(new Session("galerage","galerage","0","legacy"));
         CapeManager.initialise(false);
     }
 
