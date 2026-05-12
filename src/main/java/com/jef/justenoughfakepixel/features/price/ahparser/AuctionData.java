@@ -1,13 +1,13 @@
 package com.jef.justenoughfakepixel.features.price.ahparser;
 
-import com.jef.justenoughfakepixel.features.price.ahparser.data.AuctionCategory;
 import com.jef.justenoughfakepixel.features.price.ahparser.data.AuctionItem;
+import lombok.AllArgsConstructor;
 
-import java.util.EnumMap;
-import java.util.List;
+import java.util.Collection;
 
+@AllArgsConstructor
 public class AuctionData {
 
-    public EnumMap<AuctionCategory, List<AuctionItem>> itemsMap;
+    public Collection<AuctionItem> itemsMap;
 
 }

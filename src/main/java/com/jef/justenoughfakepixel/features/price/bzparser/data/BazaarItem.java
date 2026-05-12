@@ -7,6 +7,5 @@ public class BazaarItem {
 
     public String SKYBLOCK_ID;
     public float instaBuy,instaSell;
-    public float buyOrder,sellOrder;
 
 }

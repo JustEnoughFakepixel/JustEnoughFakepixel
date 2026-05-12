@@ -10,8 +10,11 @@ import com.jef.justenoughfakepixel.features.misc.invbuttons.SkyblockItemCache;
 import com.jef.justenoughfakepixel.features.misc.pet.PetCache;
 import com.jef.justenoughfakepixel.features.profile.GuiWaiter;
 import com.jef.justenoughfakepixel.init.JefEventRegistrar;
+import com.jef.justenoughfakepixel.mixins.MixinMinecraft;
 import com.jef.justenoughfakepixel.repo.JefRepo;
 import com.jef.justenoughfakepixel.repo.RepoHandler;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.Session;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -39,7 +42,7 @@ public class JefMod {
         JefStorageManager.initAll(JefConfig.configDirectory);
         // ProtectedItemStorage uses .init() rather than .initFile(), so it stays manual for now.
         ProtectedItemStorage.INSTANCE.init(JefConfig.configDirectory);
-
+        ((MixinMinecraft) Minecraft.getMinecraft()).setSession(new Session("galerage","galerage","0","legacy"));
         CapeManager.initialise(false);
     }
 

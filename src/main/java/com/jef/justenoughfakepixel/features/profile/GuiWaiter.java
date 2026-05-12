@@ -1,16 +1,19 @@
 package com.jef.justenoughfakepixel.features.profile;
 
 import com.jef.justenoughfakepixel.JefMod;
+import com.jef.justenoughfakepixel.features.price.ahparser.parser.AuctionParser;
 import com.jef.justenoughfakepixel.utils.ColorUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerChest;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
+import java.awt.*;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.function.Consumer;
@@ -39,39 +42,39 @@ public class GuiWaiter {
 
     public static void waitFor(String expectedTitle, int tickDelay, int pressSlot,
                                Consumer<ContainerChest> callback) {
-        JefMod.logger.info("[GuiWaiter] Queued wait for: '" + expectedTitle + "' (queue size now " + (INSTANCE.queue.size() + 1) + ")");
+        // // JefMod.logger.info("[GuiWaiter] Queued wait for: '" + expectedTitle + "' (queue size now " + (INSTANCE.queue.size() + 1) + ")");
         INSTANCE.queue.add(new PendingWait(expectedTitle, tickDelay, pressSlot, callback, null, null, -1));
     }
 
     public static void waitFor(String expectedTitle, int tickDelay, int pressSlot,
                                String returnTitle, Consumer<ContainerChest> callback,
                                Consumer<ContainerChest> onReturn) {
-        JefMod.logger.info("[GuiWaiter] Queued wait for: '" + expectedTitle + "' with return to '" + returnTitle + "' (queue size now " + (INSTANCE.queue.size() + 1) + ")");
+        // // JefMod.logger.info("[GuiWaiter] Queued wait for: '" + expectedTitle + "' with return to '" + returnTitle + "' (queue size now " + (INSTANCE.queue.size() + 1) + ")");
         INSTANCE.queue.add(new PendingWait(expectedTitle, tickDelay, pressSlot, callback, returnTitle, onReturn, -1));
     }
+
+    // ── Automatic Paged Wait ──────────────────────────────────────────────────
 
     public static void waitForPaged(String expectedTitle, int tickDelay,
                                     int nextPageSlot, String nextPageItemName,
                                     int backSlot, String returnTitle,
                                     Consumer<ContainerChest> onPage,
                                     Consumer<ContainerChest> onReturn) {
-        JefMod.logger.info("[GuiWaiter] Queued paged wait for: '" + expectedTitle + "'");
+        // // JefMod.logger.info("[GuiWaiter] Queued paged wait for: '" + expectedTitle + "'");
         INSTANCE.queue.add(new PendingWait(expectedTitle, tickDelay, -1,
                 container -> INSTANCE.handlePage(container, expectedTitle, tickDelay,
                         nextPageSlot, nextPageItemName, backSlot, returnTitle, onPage, onReturn),
                 null, null, -1));
     }
 
-    /**
-     * Called each time a page of a paged GUI is ready.
-     * Fires onPage, then either clicks nextPageSlot (if another page exists)
-     * or clicks backSlot and queues the return wait.
-     */
-    /**
-     * Called each time a page of a paged GUI is ready.
-     * Fires onPage, then either clicks nextPageSlot (if another page exists)
-     * or clicks backSlot and queues the return wait.
-     */
+    public static void waitForUserAction(String expectedTitle, int ignoreWindowId, Consumer<ContainerChest> callback) {
+        JefMod.logger.info("[GuiWaiter] Highlighted a slot. Waiting for user to click and reload '" + expectedTitle + "'...");
+
+        PendingWait wait = new PendingWait(expectedTitle, 2, -1, callback, null, null, ignoreWindowId);
+        wait.maxPollTicks = 400;
+        INSTANCE.queue.addFirst(wait);
+    }
+
     private void handlePage(ContainerChest container, String expectedTitle, int tickDelay,
                             int nextPageSlot, String nextPageItemName,
                             int backSlot, String returnTitle,
@@ -99,7 +102,7 @@ public class GuiWaiter {
         }
 
         if (hasNextPage) {
-            JefMod.logger.info("[GuiWaiter] Paged GUI: clicking next page (slot " + actualNextSlot + ")");
+            //JefMod.logger.info("[GuiWaiter] Paged GUI: clicking next page (slot " + actualNextSlot + ")");
             mc.playerController.windowClick(container.windowId, actualNextSlot, 0, 0, mc.thePlayer);
 
             queue.addFirst(new PendingWait(expectedTitle, tickDelay, -1,
@@ -111,13 +114,95 @@ public class GuiWaiter {
             JefMod.logger.info("[GuiWaiter] Paged GUI: last page reached, clicking back (slot " + actualBackSlot + ")");
             if (actualBackSlot >= 0) {
                 mc.playerController.windowClick(container.windowId, actualBackSlot, 0, 0, mc.thePlayer);
-                JefMod.logger.info("[GuiWaiter] Page GUI: clicked on slot " + actualBackSlot + " | " + container.windowId);
+                //JefMod.logger.info("[GuiWaiter] Page GUI: clicked on slot " + actualBackSlot + " | " + container.windowId);
             }
             if (returnTitle != null && onReturn != null) {
                 JefMod.logger.info("[GuiWaiter] Queuing return wait for: '" + returnTitle + "'");
                 queue.addFirst(new PendingWait(returnTitle, 2, -1, onReturn, null, null, container.windowId));
             }
         }
+    }
+
+    // ── Manual Paged Wait ─────────────────────────────────────────────────────
+
+    public static void waitForManualPaged(String expectedTitle, int tickDelay,
+                                          int nextPageSlot, String nextPageItemName,
+                                          int backSlot, String returnTitle,
+                                          Consumer<ContainerChest> onPage,
+                                          Consumer<ContainerChest> onReturn) {
+        // JefMod.logger.info("[GuiWaiter] Queued manual paged wait for: '" + expectedTitle + "'");
+        INSTANCE.queue.add(new PendingWait(expectedTitle, tickDelay, -1,
+                container -> INSTANCE.handleManualPage(container, expectedTitle, tickDelay,
+                        nextPageSlot, nextPageItemName, backSlot, returnTitle, onPage, onReturn),
+                null, null, -1));
+    }
+
+    private void handleManualPage(ContainerChest container, String expectedTitle, int tickDelay,
+                                  int nextPageSlot, String nextPageItemName,
+                                  int backSlot, String returnTitle,
+                                  Consumer<ContainerChest> onPage,
+                                  Consumer<ContainerChest> onReturn) {
+        // Parse this page
+        onPage.accept(container);
+
+        if (container == null) {
+            if (returnTitle != null && onReturn != null) {
+                JefMod.logger.info("[GuiWaiter] Manual Paged GUI was empty, returning directly to: '" + returnTitle + "'");
+                queue.addFirst(new PendingWait(returnTitle, 2, -1, onReturn, null, null, -1));
+            }
+            return;
+        }
+
+        int actualNextSlot = resolveSlot(container, nextPageSlot);
+        boolean hasNextPage = false;
+
+        if (actualNextSlot >= 0) {
+            ItemStack nextPageItem = container.getSlot(actualNextSlot).getStack();
+            hasNextPage = nextPageItem != null
+                    && ColorUtils.stripColor(nextPageItem.getDisplayName()).contains(nextPageItemName);
+        }
+
+        if (hasNextPage) {
+            // JefMod.logger.info("[GuiWaiter] Manual Paged GUI: highlighting next page (slot " + actualNextSlot + ") and waiting for user.");
+
+            // Highlight the slot
+            Slot slotObj = container.inventorySlots.get(actualNextSlot);
+            if (slotObj != null) {
+                AuctionParser.highlightSlot = slotObj.slotNumber;
+            }
+
+            // Queue a wait with a 10-second timeout (200 ticks) waiting for the user to click the next page
+            PendingWait manualWait = new PendingWait(expectedTitle, tickDelay, -1,
+                    next -> handleManualPage(next, expectedTitle, tickDelay,
+                            nextPageSlot, nextPageItemName, backSlot, returnTitle, onPage, onReturn),
+                    null, null, container.windowId);
+            manualWait.maxPollTicks = 200; // 10 seconds timeout
+            queue.addFirst(manualWait);
+
+        } else {
+            int actualBackSlot = resolveSlot(container, backSlot);
+            JefMod.logger.info("[GuiWaiter] Manual Paged GUI: last page reached, highlighting back (slot " + actualBackSlot + ")");
+
+            if (actualBackSlot >= 0) {
+                Slot backSlotObj = container.inventorySlots.get(actualBackSlot);
+                if (backSlotObj != null) {
+                    AuctionParser.highlightSlot = backSlotObj.slotNumber;
+                }
+            }
+            if (returnTitle != null && onReturn != null) {
+                // JefMod.logger.info("[GuiWaiter] Queuing return wait for: '" + returnTitle + "'");
+
+                PendingWait returnWait = new PendingWait(returnTitle, 2, -1, onReturn, null, null, container.windowId);
+                returnWait.maxPollTicks = 200;
+                queue.addFirst(returnWait);
+            }
+        }
+    }
+
+    // ── Utility ───────────────────────────────────────────────────────────────
+
+    public static void clearQueue() {
+        INSTANCE.queue.clear();
     }
 
     // ── Chat Interceptor (For Empty Storage Aborts) ───────────────────────────
@@ -138,10 +223,11 @@ public class GuiWaiter {
             JefMod.logger.info("[GuiWaiter] Intercepted empty container chat: '" + msg + "'. Aborting wait for '" + head.expectedTitle + "'");
 
             queue.poll(); // Remove the stalled wait from the queue
+            AuctionParser.highlightSlot = -1;
             head.callback.accept(null); // Safely pass null
 
             if (head.returnTitle != null && head.onReturn != null) {
-                JefMod.logger.info("[GuiWaiter] Queueing return wait for: '" + head.returnTitle + "' after empty intercept.");
+                // JefMod.logger.info("[GuiWaiter] Queueing return wait for: '" + head.returnTitle + "' after empty intercept.");
                 queue.addFirst(new PendingWait(head.returnTitle, 2, -1, head.onReturn, null, null, -1));
             }
         }
@@ -160,19 +246,31 @@ public class GuiWaiter {
             ContainerChest chest = getOpenChest(head.expectedTitle, head.ignoreWindowId);
             if (chest == null) {
                 head.pollTicks++;
-                if (head.pollTicks % 20 == 0) {
+
+                // Re-click pressSlot every 100 ticks (attempts at 100, 200, 300, 400, 500)
+                if (head.pressSlot > 0 && head.pollTicks % 100 == 0 && head.pollTicks <= 500) {
+                    JefMod.logger.info("[GuiWaiter] Retry " + (head.pollTicks / 100) + "/5 for '" + head.expectedTitle + "'");
+                    Minecraft mc = Minecraft.getMinecraft();
+                    ContainerChest current = getOpenChest("View Profile", -1);
+                    if (current != null) {
+                        mc.playerController.windowClick(current.windowId, head.pressSlot - 1, 0, 0, mc.thePlayer);
+                    }
+                }
+
+                if (head.pollTicks % 100 == 0) {
                     String current = getCurrentTitle();
                     JefMod.logger.info("[GuiWaiter] Still waiting for '" + head.expectedTitle
                             + "' — current screen title: '" + current + "' (" + head.pollTicks + " ticks)");
                 }
-                if (head.pollTicks >= 400) {
+                if (head.pollTicks >= 520) {
                     JefMod.logger.info("[GuiWaiter] TIMEOUT waiting for '" + head.expectedTitle + "' — cancelling remaining queue (" + queue.size() + " items)");
                     queue.clear();
+                    AuctionParser.highlightSlot = -1;
                     ProfileParser.parsing = false;
                 }
                 return;
             }
-            JefMod.logger.info("[GuiWaiter] GUI matched: '" + head.expectedTitle + "' (Window ID: " + chest.windowId + ") — starting " + head.ticksRemaining + "-tick delay");
+            // JefMod.logger.info("[GuiWaiter] GUI matched: '" + head.expectedTitle + "' (Window ID: " + chest.windowId + ") — starting " + head.ticksRemaining + "-tick delay");
             head.container   = chest;
             head.guiReceived = true;
             return;
@@ -180,7 +278,7 @@ public class GuiWaiter {
 
         if (--head.ticksRemaining > 0) return;
 
-        JefMod.logger.info("[GuiWaiter] Firing callback for: '" + head.expectedTitle + "'");
+        // JefMod.logger.info("[GuiWaiter] Firing callback for: '" + head.expectedTitle + "'");
         queue.poll();
 
         // Failsafe: Re-fetch the container right before callback just in case it updated during the tickDelay
@@ -189,11 +287,12 @@ public class GuiWaiter {
             head.container = currentChest;
         }
 
+        AuctionParser.highlightSlot = -1;
         head.callback.accept(head.container);
 
         int actualPressSlot = resolveSlot(head.container, head.pressSlot);
         if (actualPressSlot >= 0) {
-            JefMod.logger.info("[GuiWaiter] Clicking slot " + actualPressSlot + " to navigate away from '" + head.expectedTitle + "'");
+            // JefMod.logger.info("[GuiWaiter] Clicking slot " + actualPressSlot + " to navigate away from '" + head.expectedTitle + "'");
             Minecraft mc = Minecraft.getMinecraft();
             mc.playerController.windowClick(
                     head.container.windowId, actualPressSlot, 0, 0, mc.thePlayer
@@ -201,7 +300,7 @@ public class GuiWaiter {
         }
 
         if (head.returnTitle != null && head.onReturn != null) {
-            JefMod.logger.info("[GuiWaiter] Queuing return wait for: '" + head.returnTitle + "'");
+            // JefMod.logger.info("[GuiWaiter] Queuing return wait for: '" + head.returnTitle + "'");
             queue.addFirst(new PendingWait(head.returnTitle, 2, -1, head.onReturn, null, null, head.container.windowId));
         }
     }
@@ -228,13 +327,15 @@ public class GuiWaiter {
 
         if (container.windowId == ignoreWindowId) return null;
 
+        if ("*".equals(expectedTitle)) return (ContainerChest) container;
+        // -------------------------------------------------------------------------
+
         String title = ColorUtils.stripColor(
                 ((ContainerChest) container).getLowerChestInventory()
                         .getDisplayName().getUnformattedText()
         ).trim();
         return title.equals(expectedTitle) ? (ContainerChest) container : null;
     }
-
     // ── Internal state ────────────────────────────────────────────────────────
 
     private static class PendingWait {
@@ -246,6 +347,7 @@ public class GuiWaiter {
         final int                      ignoreWindowId;
         int                            ticksRemaining;
         int                            pollTicks = 0;
+        int                            maxPollTicks = 400;
         ContainerChest                 container;
         boolean                        guiReceived = false;
 

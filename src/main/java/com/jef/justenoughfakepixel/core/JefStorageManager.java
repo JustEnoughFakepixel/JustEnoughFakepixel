@@ -23,16 +23,16 @@ import java.util.TimerTask;
 
 /**
  * SkyHanni-style centralised storage registry.
- *
+ *<p>
  * Every storage singleton is registered here as a one-liner enum entry.
  * JefMod only calls {@link #initAll} and {@link #loadAll} — it never
  * manually orchestrates individual storage classes again.
- *
+ *<p>
  * Adding a new storage file in the future:
  *   1. Make sure your class has {@code initFile(File)} and {@code load()} methods.
  *   2. Add one line to the enum below.
  *   3. That's it. JefMod.java does not need to change.
- *
+ *<p>
  * Mirrors: ConfigFileType + ConfigManager (SkyHanni).
  */
 public enum JefStorageManager {

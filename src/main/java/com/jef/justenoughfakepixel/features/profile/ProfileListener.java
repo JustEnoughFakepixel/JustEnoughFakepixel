@@ -15,7 +15,7 @@ import java.util.List;
 @RegisterEvents
 public class ProfileListener {
 
-    private static final List<String> PROFILE_TITLES = Arrays.asList(
+    public static final List<String> PROFILE_TITLES = Arrays.asList(
             "Select Profile", "View Profile", "View Inventory",
             "View Skills","View HOTM","View Dungeon Stats","View Storage",
             "View Slayers","View Wardrobe","View Pets","View Bags","Show Contents",

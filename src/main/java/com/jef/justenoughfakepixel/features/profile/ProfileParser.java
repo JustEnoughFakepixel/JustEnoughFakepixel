@@ -1193,8 +1193,8 @@ public class ProfileParser {
             JefMod.logger.info("Error writing to profile.bin");
         }
         File file1 = new File(JefConfig.configDirectory, "profile.json");
-        if (!file.exists()) {
-            try { file.createNewFile(); }
+        if (!file1.exists()) {
+            try { file1.createNewFile(); }
             catch (IOException e) { JefMod.logger.info("Error creating profile.json"); return; }
         }
         try(FileWriter writer = new FileWriter(file1)){
