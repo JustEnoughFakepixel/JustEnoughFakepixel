@@ -16,7 +16,7 @@
 # Features
 - A full feature list can be found [here](https://github.com/JustEnoughFakepixel/JustEnoughFakepixel/blob/main/docs/FEATURES.md)
 
-#How do I contribute ?
+# How do I contribute ?
 - A full comprehensive guide for contribution and compiling the mod yourself can be found [here](https://github.com/JustEnoughFakepixel/JustEnoughFakepixel/blob/main/docs/CONTRIBUTING.md)
 
 # 📋 IMPORTANT
