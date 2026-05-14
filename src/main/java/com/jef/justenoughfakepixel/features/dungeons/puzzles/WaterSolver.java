@@ -109,7 +109,7 @@ public class WaterSolver {
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.START) return;
-        if (!JefConfig.feature.dungeons.dungeonBreakerOverlay) return;
+        if (!JefConfig.feature.dungeons.dungeonBreaker.dungeonBreakerOverlay) return;
         if (!SkyblockData.isInDungeon()) return;
         if (mc.thePlayer == null || mc.theWorld == null) return;
 
@@ -137,7 +137,7 @@ public class WaterSolver {
 
     @SubscribeEvent
     public void onRenderWorld(RenderWorldLastEvent event) {
-        if (!JefConfig.feature.dungeons.dungeonBreakerOverlay) return;
+        if (!JefConfig.feature.dungeons.dungeonBreaker.dungeonBreakerOverlay) return;
         if (!inWaterRoom || solutions.isEmpty()) return;
         if (mc.thePlayer == null || mc.theWorld == null) return;
 
@@ -234,7 +234,7 @@ public class WaterSolver {
         }
         String newSlots = sb.length() == 3 ? sb.toString() : null;
         int newPattern = detectPattern();
-        boolean optimized = JefConfig.feature.dungeons.dungeonBreakerOverlay;
+        boolean optimized = JefConfig.feature.dungeons.dungeonBreaker.dungeonBreakerOverlay;
         if (newPattern == patternId && Objects.equals(newSlots, extendedSlots) && !leverPositions.isEmpty() && optimized == lastOptimized)
             return;
         lastOptimized = optimized;

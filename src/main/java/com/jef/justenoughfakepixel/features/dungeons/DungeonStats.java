@@ -9,7 +9,6 @@ import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
 import com.jef.justenoughfakepixel.utils.data.SkyblockData;
 import com.jef.justenoughfakepixel.utils.overlay.Overlay;
-import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.event.world.WorldEvent;
@@ -39,8 +38,12 @@ public class DungeonStats extends Overlay {
             {85, 221, 21}  // F7/M7
     };
 
-    @Getter
     private static DungeonStats instance;
+
+    // Manual getter for Kotlin interop
+    public static DungeonStats getInstance() {
+        return instance;
+    }
 
     private final DungeonTimers timers;
     private final DungeonEndStats endStats;
@@ -67,6 +70,10 @@ public class DungeonStats extends Overlay {
     public static boolean isInBossFight() {
         DungeonStats s = getInstance();
         return s != null && s.timers.getBossTime() > 0 && s.timers.getBossDeadTime() == 0;
+    }
+
+    public boolean isInStormPhase() {
+        return timers.getStormStart() > 0 && timers.getStormEnd() == 0;
     }
 
     public static String getFormattedPb(String arg1, String arg2) {
@@ -118,7 +125,7 @@ public class DungeonStats extends Overlay {
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END || ++tickCounter % 10 != 0) return;
-        if (JefConfig.feature == null || !JefConfig.feature.dungeons.dungeonStats) return;
+        if (JefConfig.feature == null || !JefConfig.feature.dungeons.dungeonOverlay.dungeonStats) return;
         if (mc.thePlayer == null) return;
 
         if (!timers.isInDungeon()) {
@@ -136,7 +143,7 @@ public class DungeonStats extends Overlay {
     @SubscribeEvent
     public void onChat(ClientChatReceivedEvent event) {
         if (ChatUtils.isFromServer(event)) return;
-        if (JefConfig.feature == null || !JefConfig.feature.dungeons.dungeonStats) return;
+        if (JefConfig.feature == null || !JefConfig.feature.dungeons.dungeonOverlay.dungeonStats) return;
         if (!timers.isInDungeon()) return;
 
         String clean = ChatUtils.clean(event);
@@ -215,22 +222,22 @@ public class DungeonStats extends Overlay {
 
     @Override
     public Position getPosition() {
-        return JefConfig.feature.dungeons.statsPos;
+        return JefConfig.feature.dungeons.dungeonOverlay.statsPos;
     }
 
     @Override
     public float getScale() {
-        return JefConfig.feature.dungeons.statsScale;
+        return JefConfig.feature.dungeons.dungeonOverlay.statsScale;
     }
 
     @Override
     public int getBgColor() {
-        return ChromaColour.specialToChromaRGB(JefConfig.feature.dungeons.statsBgColor);
+        return ChromaColour.specialToChromaRGB(JefConfig.feature.dungeons.dungeonOverlay.statsBgColor);
     }
 
     @Override
     public int getCornerRadius() {
-        return JefConfig.feature.dungeons.statsCornerRadius;
+        return JefConfig.feature.dungeons.dungeonOverlay.statsCornerRadius;
     }
 
     @Override
@@ -245,7 +252,7 @@ public class DungeonStats extends Overlay {
 
     @Override
     protected boolean isEnabled() {
-        return JefConfig.feature.dungeons.dungeonStats;
+        return JefConfig.feature.dungeons.dungeonOverlay.dungeonStats;
     }
 
     @Override

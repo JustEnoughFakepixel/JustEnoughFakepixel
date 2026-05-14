@@ -8,36 +8,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Format commit data
-        id: commits
-        run: |
-          COMMITS=$(jq -r '.commits[] | "• " + .message + " — " + .author.name' <<< '${{ toJson(github.event) }}')
-          echo "commits<<EOF" >> $GITHUB_OUTPUT
-          echo "$COMMITS" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
       - name: Send to Discord
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_PUSH }}
+          EVENT: ${{ toJson(github.event) }}
+          ACTOR: ${{ github.actor }}
+          REF: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+          TIMESTAMP: ${{ github.event.head_commit.timestamp }}
         run: |
-          curl -H "Content-Type: application/json" \
-          -X POST \
-          -d "{
-            \"embeds\": [{
-              \"title\": \"Push to \`${{ github.ref_name }}\`\",
-              \"description\": \"${{ steps.commits.outputs.commits }}\",
-              \"color\": 5763719,
-              \"fields\": [
-                {
-                  \"name\": \"Pushed by\",
-                  \"value\": \"${{ github.actor }}\",
-                  \"inline\": true
-                },
-                {
-                  \"name\": \"Commit\",
-                  \"value\": \"<https://github.com/${{ github.repository }}/commit/${{ github.sha }}>\",
-                  \"inline\": true
-                }
+          COMMITS=$(jq -r '.commits[] | "• " + .message + " — " + .author.name' <<< "$EVENT" | paste -sd '\n' -)
+          PAYLOAD=$(jq -n \
+            --arg title "Push to \`$REF\`" \
+            --arg description "$COMMITS" \
+            --arg actor "$ACTOR" \
+            --arg url "https://github.com/$REPO/commit/$SHA" \
+            --arg timestamp "$TIMESTAMP" \
+            '{embeds: [{
+              title: $title,
+              description: $description,
+              color: 5763719,
+              fields: [
+                {name: "Pushed by", value: $actor, inline: true},
+                {name: "Commit", value: ("<" + $url + ">"), inline: true}
               ],
-              \"timestamp\": \"${{ github.event.head_commit.timestamp }}\"
-            }]
-          }" \
-          ${{ secrets.DISCORD_WEBHOOK_PUSH }}
+              timestamp: $timestamp
+            }]}')
+          curl -H "Content-Type: application/json" -X POST -d "$PAYLOAD" "$WEBHOOK"

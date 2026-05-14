@@ -27,32 +27,32 @@ public class TrophyFishOverlay extends Overlay {
 
     @Override
     public Position getPosition() {
-        return JefConfig.feature.fishing.trophyFishPos;
+        return JefConfig.feature.fishing.trophyFish.trophyFishPos;
     }
 
     @Override
     public float getScale() {
-        return JefConfig.feature.fishing.trophyFishScale;
+        return JefConfig.feature.fishing.trophyFish.trophyFishScale;
     }
 
     @Override
     public int getBgColor() {
-        return ChromaColour.specialToChromaRGB(JefConfig.feature.fishing.trophyFishBgColor);
+        return ChromaColour.specialToChromaRGB(JefConfig.feature.fishing.trophyFish.trophyFishBgColor);
     }
 
     @Override
     public int getCornerRadius() {
-        return JefConfig.feature.fishing.trophyFishCornerRadius;
+        return JefConfig.feature.fishing.trophyFish.trophyFishCornerRadius;
     }
 
     @Override
     protected boolean isEnabled() {
-        return JefConfig.feature != null && JefConfig.feature.fishing.trophyOverlay;
+        return JefConfig.feature != null && JefConfig.feature.fishing.trophyFish.trophyOverlay;
     }
 
     @Override
     protected boolean extraGuard() {
-        if (!JefConfig.feature.fishing.trophyOnlyCrimson) return true;
+        if (!JefConfig.feature.fishing.trophyFish.trophyOnlyCrimson) return true;
         return SkyblockData.getCurrentLocation() == SkyblockData.Location.CRIMSON_ISLE;
     }
 

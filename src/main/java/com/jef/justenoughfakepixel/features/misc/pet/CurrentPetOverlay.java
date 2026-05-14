@@ -35,27 +35,27 @@ public class CurrentPetOverlay extends Overlay {
 
     @Override
     public Position getPosition() {
-        return JefConfig.feature.misc.currentPetPos;
+        return JefConfig.feature.misc.currentPet.currentPetPos;
     }
 
     @Override
     public float getScale() {
-        return JefConfig.feature.misc.currentPetScale;
+        return JefConfig.feature.misc.currentPet.currentPetScale;
     }
 
     @Override
     public int getBgColor() {
-        return ChromaColour.specialToChromaRGB(JefConfig.feature.misc.currentPetBgColor);
+        return ChromaColour.specialToChromaRGB(JefConfig.feature.misc.currentPet.currentPetBgColor);
     }
 
     @Override
     public int getCornerRadius() {
-        return JefConfig.feature.misc.currentPetCornerRadius;
+        return JefConfig.feature.misc.currentPet.currentPetCornerRadius;
     }
 
     @Override
     protected boolean isEnabled() {
-        return JefConfig.feature.misc.showCurrentPet && SkyblockData.isOnSkyblock();
+        return JefConfig.feature.misc.currentPet.showCurrentPet && SkyblockData.isOnSkyblock();
     }
 
     @Override

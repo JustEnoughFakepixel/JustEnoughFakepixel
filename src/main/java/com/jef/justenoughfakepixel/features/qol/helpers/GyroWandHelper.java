@@ -31,7 +31,7 @@ public class GyroWandHelper {
     }
 
     private boolean isEnabled() {
-        return JefConfig.feature != null && JefConfig.feature.qol.gyroWand;
+        return JefConfig.feature != null && JefConfig.feature.qol.gyroWandConfig.gyroWand;
     }
 
     private Vec3 getTargetPos(EntityPlayer player, float partialTicks) {
@@ -106,7 +106,7 @@ public class GyroWandHelper {
         double pz = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * event.partialTicks;
 
         float[] color = ItemCooldowns.isOnCooldown(GYRO_ID) ? COLOR_COOLDOWN : COLOR_READY;
-        float thickness = JefConfig.feature.qol.gyroWandThickness;
+        float thickness = JefConfig.feature.qol.gyroWandConfig.gyroWandThickness;
 
         try {
             GL11.glPushMatrix();

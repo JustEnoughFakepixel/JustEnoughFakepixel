@@ -22,6 +22,8 @@ import org.lwjgl.opengl.GL11;
 import java.awt.*;
 import java.util.LinkedHashMap;
 
+import com.jef.justenoughfakepixel.core.config.gui.GuiTextures;
+
 public class StorageRenderer extends Gui {
 
     private static final int PADDING = 5;
@@ -35,27 +37,15 @@ public class StorageRenderer extends Gui {
     private static final int SLOT_SIZE = 18;
     private static final int SLOTS_PER_ROW = 9;
 
-    /** Number of bundled overlay styles. Indices 0..STYLE_COUNT-1 map to textures/gui/storage/styleN_*.png */
-    public static final int STYLE_COUNT = 5;
-
-    private static final ResourceLocation[] STYLE_BG_TEXTURES   = new ResourceLocation[STYLE_COUNT];
-    private static final ResourceLocation[] STYLE_SLOT_TEXTURES  = new ResourceLocation[STYLE_COUNT];
-
-    static {
-        for (int i = 0; i < STYLE_COUNT; i++) {
-            STYLE_BG_TEXTURES[i]   = new ResourceLocation("justenoughfakepixel", "textures/gui/containers/style" + i + "_bg.png");
-            STYLE_SLOT_TEXTURES[i] = new ResourceLocation("justenoughfakepixel", "textures/gui/containers/style" + i + "_slot.png");
-        }
-    }
+    /** Number of bundled overlay styles – mirrors {@link GuiTextures#STORAGE_STYLE_COUNT}. */
+    public static final int STYLE_COUNT = GuiTextures.STORAGE_STYLE_COUNT;
 
     private ResourceLocation getContainerBg() {
-        int style = Math.max(0, Math.min(JefConfig.feature.storage.overlayStyle, STYLE_COUNT - 1));
-        return STYLE_BG_TEXTURES[style];
+        return GuiTextures.storageBackground(JefConfig.feature.storage.overlayStyle);
     }
 
     private ResourceLocation getSlotTexture() {
-        int style = Math.max(0, Math.min(JefConfig.feature.storage.overlayStyle, STYLE_COUNT - 1));
-        return STYLE_SLOT_TEXTURES[style];
+        return GuiTextures.storageSlot(JefConfig.feature.storage.overlayStyle);
     }
 
     private final LinkedHashMap<String, SContainer> containers;

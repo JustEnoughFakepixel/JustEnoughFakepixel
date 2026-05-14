@@ -30,8 +30,8 @@ public class WaypointRenderer {
         if (!state.enabled || !state.hasGroup()) return;
 
         if (JefConfig.feature != null) {
-            state.advanceRange = JefConfig.feature.waypoints.advanceRange;
-            state.advanceDelayMs = (long) JefConfig.feature.waypoints.advanceDelayMs;
+            state.advanceRange = JefConfig.feature.waypoints.autoAdvance.advanceRange;
+            state.advanceDelayMs = (long) JefConfig.feature.waypoints.autoAdvance.advanceDelayMs;
         }
 
         tickAdvance(state);
@@ -145,18 +145,18 @@ public class WaypointRenderer {
 
     private Color boxColor() {
         if (JefConfig.feature == null) return Color.YELLOW;
-        return argbToColor(ChromaColour.specialToChromaRGB(JefConfig.feature.waypoints.boxColour));
+        return argbToColor(ChromaColour.specialToChromaRGB(JefConfig.feature.waypoints.colors.boxColour));
     }
 
     private Color tracerColor() {
         if (JefConfig.feature == null) return Color.YELLOW;
-        return argbToColor(ChromaColour.specialToChromaRGB(JefConfig.feature.waypoints.tracerColour));
+        return argbToColor(ChromaColour.specialToChromaRGB(JefConfig.feature.waypoints.colors.tracerColour));
     }
 
     private int labelColor() {
         if (JefConfig.feature == null) return 0xFFFFFFFF;
         try {
-            return ChromaColour.specialToChromaRGB(JefConfig.feature.waypoints.labelColour);
+            return ChromaColour.specialToChromaRGB(JefConfig.feature.waypoints.colors.labelColour);
         } catch (Exception e) {
             return 0xFFFFFFFF;
         }
@@ -165,7 +165,7 @@ public class WaypointRenderer {
     private int distanceLabelColor() {
         if (JefConfig.feature == null) return 0xFF55FFFF;
         try {
-            return ChromaColour.specialToChromaRGB(JefConfig.feature.waypoints.distanceLabelColour);
+            return ChromaColour.specialToChromaRGB(JefConfig.feature.waypoints.colors.distanceLabelColour);
         } catch (Exception e) {
             return 0xFF55FFFF;
         }

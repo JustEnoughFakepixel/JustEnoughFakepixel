@@ -31,22 +31,22 @@ public class FetchurOverlay extends Overlay {
 
     @Override
     public Position getPosition() {
-        return JefConfig.feature.mining.fetchurOverlayPos;
+        return JefConfig.feature.mining.fetchur.fetchurOverlayPos;
     }
 
     @Override
     public float getScale() {
-        return JefConfig.feature.mining.fetchurOverlayScale;
+        return JefConfig.feature.mining.fetchur.fetchurOverlayScale;
     }
 
     @Override
     public int getBgColor() {
-        return ChromaColour.specialToChromaRGB(JefConfig.feature.mining.overlayBgColor);
+        return ChromaColour.specialToChromaRGB(JefConfig.feature.mining.fetchur.overlayBgColor);
     }
 
     @Override
     public int getCornerRadius() {
-        return JefConfig.feature.mining.overlayCornerRadius;
+        return JefConfig.feature.mining.fetchur.overlayCornerRadius;
     }
 
     @Override
@@ -56,7 +56,7 @@ public class FetchurOverlay extends Overlay {
 
     @Override
     protected boolean isEnabled() {
-        return JefConfig.feature.mining.showFetchurOverlay;
+        return JefConfig.feature.mining.fetchur.showFetchurOverlay;
     }
 
     @Override

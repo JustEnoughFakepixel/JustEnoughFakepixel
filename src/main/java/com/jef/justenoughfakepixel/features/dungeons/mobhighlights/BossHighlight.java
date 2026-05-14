@@ -39,7 +39,7 @@ public class BossHighlight {
         if (event.phase != TickEvent.Phase.END) return;
         if (JefConfig.feature == null) return;
 
-        boolean anyEnabled = JefConfig.feature.dungeons.bonzoHighlight != 2 || JefConfig.feature.dungeons.scarfHighlight != 2 || JefConfig.feature.dungeons.scarfMinionHighlight != 2 || JefConfig.feature.dungeons.professorHighlight != 2;
+        boolean anyEnabled = JefConfig.feature.dungeons.bossHighlight.bonzoHighlight != 2 || JefConfig.feature.dungeons.bossHighlight.scarfHighlight != 2 || JefConfig.feature.dungeons.bossHighlight.scarfMinionHighlight != 2 || JefConfig.feature.dungeons.bossHighlight.professorHighlight != 2;
         if (!anyEnabled) return;
 
         if (++tickCounter < 4) return;
@@ -60,15 +60,15 @@ public class BossHighlight {
 
             BossType type = null;
 
-            if (JefConfig.feature.dungeons.bonzoHighlight != 2 && name.contains("bonzo")) {
+            if (JefConfig.feature.dungeons.bossHighlight.bonzoHighlight != 2 && name.contains("bonzo")) {
                 type = BossType.BONZO;
-            } else if (JefConfig.feature.dungeons.scarfMinionHighlight != 2 && (name.contains("undead mage") || name.contains("undead archer") || name.contains("undead warrior") || name.contains("undead priest"))) {
+            } else if (JefConfig.feature.dungeons.bossHighlight.scarfMinionHighlight != 2 && (name.contains("undead mage") || name.contains("undead archer") || name.contains("undead warrior") || name.contains("undead priest"))) {
                 type = BossType.SCARF_MINION;
-            } else if (JefConfig.feature.dungeons.scarfHighlight != 2 && name.contains("scarf")) {
+            } else if (JefConfig.feature.dungeons.bossHighlight.scarfHighlight != 2 && name.contains("scarf")) {
                 type = BossType.SCARF;
-            } else if (JefConfig.feature.dungeons.professorHighlight != 2 && (name.contains("healthy") || name.contains("chaos") || name.contains("laser") || name.contains("rogue") || name.contains("reinforced"))) {
+            } else if (JefConfig.feature.dungeons.bossHighlight.professorHighlight != 2 && (name.contains("healthy") || name.contains("chaos") || name.contains("laser") || name.contains("rogue") || name.contains("reinforced"))) {
                 type = BossType.PROFESSOR_GUARDIAN;
-            } else if (JefConfig.feature.dungeons.professorHighlight != 2 && name.contains("professor")) {
+            } else if (JefConfig.feature.dungeons.bossHighlight.professorHighlight != 2 && name.contains("professor")) {
                 type = BossType.PROFESSOR;
             }
 
@@ -140,15 +140,15 @@ public class BossHighlight {
         if (JefConfig.feature == null) return 2;
         switch (type) {
             case BONZO:
-                return JefConfig.feature.dungeons.bonzoHighlight;
+                return JefConfig.feature.dungeons.bossHighlight.bonzoHighlight;
             case SCARF:
-                return JefConfig.feature.dungeons.scarfHighlight;
+                return JefConfig.feature.dungeons.bossHighlight.scarfHighlight;
             case SCARF_MINION:
-                return JefConfig.feature.dungeons.scarfMinionHighlight;
+                return JefConfig.feature.dungeons.bossHighlight.scarfMinionHighlight;
             case PROFESSOR:
-                return JefConfig.feature.dungeons.professorHighlight;
+                return JefConfig.feature.dungeons.bossHighlight.professorHighlight;
             case PROFESSOR_GUARDIAN:
-                return JefConfig.feature.dungeons.professorHighlight;
+                return JefConfig.feature.dungeons.bossHighlight.professorHighlight;
             default:
                 return 2;
         }
@@ -158,17 +158,17 @@ public class BossHighlight {
         String raw;
         switch (type) {
             case BONZO:
-                raw = JefConfig.feature.dungeons.bonzoColor;
+                raw = JefConfig.feature.dungeons.bossHighlight.bonzoColor;
                 break;
             case SCARF:
-                raw = JefConfig.feature.dungeons.scarfColor;
+                raw = JefConfig.feature.dungeons.bossHighlight.scarfColor;
                 break;
             case SCARF_MINION:
-                raw = JefConfig.feature.dungeons.scarfMinionColor;
+                raw = JefConfig.feature.dungeons.bossHighlight.scarfMinionColor;
                 break;
             case PROFESSOR:
             case PROFESSOR_GUARDIAN:
-                raw = JefConfig.feature.dungeons.professorColor;
+                raw = JefConfig.feature.dungeons.bossHighlight.professorColor;
                 break;
             default:
                 raw = "200:255:255:255:255";

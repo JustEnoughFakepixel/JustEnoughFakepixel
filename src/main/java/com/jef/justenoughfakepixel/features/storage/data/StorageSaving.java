@@ -2,6 +2,9 @@ package com.jef.justenoughfakepixel.features.storage.data;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.JsonReader;
 import com.jef.justenoughfakepixel.JefMod;
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.features.storage.utils.SContainer;
@@ -41,19 +44,26 @@ public class StorageSaving {
             folder.mkdirs();
             return new LinkedHashMap<>();
         }
-        for (File file : folder.listFiles()) {
-            try {
-                if (!file.exists()) {
-                    file.createNewFile();
-                    continue;
-                }
-                SContainer container = gson.fromJson(new FileReader(file), SContainer.class);
+
+        File[] files = folder.listFiles();
+        if (files == null) return new LinkedHashMap<>();
+
+        for (File file : files) {
+            if (!file.isFile() || file.length() == 0) continue;
+
+            try (FileReader fileReader = new FileReader(file);
+                 JsonReader jsonReader = new JsonReader(fileReader)) {
+
+                jsonReader.setLenient(true);
+                SContainer container = gson.fromJson(jsonReader, SContainer.class);
+
                 if (container != null && !container.empty) {
                     sorted.put(container.id, container);
                 }
-            } catch (IOException e) {
-                JefMod.logger.info("Error while trying to load " + file.getName() + " ERROR: " + e.getMessage());
-                e.printStackTrace();
+            } catch (JsonSyntaxException e) {
+                JefMod.logger.info("Malformed JSON in " + file.getName() + ": " + e.getMessage());
+            } catch (IOException | JsonIOException e) {
+                JefMod.logger.info("Failed to read file " + file.getName());
             }
         }
         return new LinkedHashMap<>(sorted);

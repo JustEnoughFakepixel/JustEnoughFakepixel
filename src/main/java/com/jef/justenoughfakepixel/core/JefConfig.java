@@ -1,7 +1,5 @@
 package com.jef.justenoughfakepixel.core;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.jef.justenoughfakepixel.core.config.command.JefCommand;
 import com.jef.justenoughfakepixel.core.config.editors.GuiPositionEditor;
 import com.jef.justenoughfakepixel.core.config.gui.GuiScreenElementWrapper;
@@ -25,6 +23,7 @@ import com.jef.justenoughfakepixel.features.scoreboard.CustomScoreboard;
 import com.jef.justenoughfakepixel.features.waypoints.WaypointGroupGui;
 import com.jef.justenoughfakepixel.repo.JefRepo;
 import com.jef.justenoughfakepixel.repo.RepoHandler;
+import com.jef.justenoughfakepixel.JefOptionsGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.settings.KeyBinding;
@@ -36,14 +35,11 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.io.File;
 
 public class JefConfig {
 
     public static final KeyBinding openGuiKey = new KeyBinding("Open JEF GUI", Keyboard.KEY_P, "JustEnoughFakepixel");
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().excludeFieldsWithoutExposeAnnotation().create();
     public static Config feature;
     public static File configDirectory = new File("config/JustEnoughFakepixel");
     public static GuiScreen screenToOpen = null;
@@ -51,6 +47,7 @@ public class JefConfig {
     private static int screenTicks = 0;
     private static boolean waypointManagerKeyWasDown = false;
     private static boolean powderToggleKeyWasDown = false;
+    private static boolean pristineToggleKeyWasDown = false;
     private static boolean registered = false;
 
     private static boolean isKeyOrMouseDown(int keyCode) {
@@ -76,11 +73,8 @@ public class JefConfig {
 
     private static void loadConfig() {
         if (configFile.exists()) {
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(Files.newInputStream(configFile.toPath()), StandardCharsets.UTF_8))) {
-                feature = GSON.fromJson(reader, Config.class);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            // Uses shared loadSafe for consistent corruption handling
+            feature = JefStorageManager.loadSafe(configFile, Config.class, JefGsonBuilder.GSON_STRICT);
         }
         if (feature == null) {
             feature = new Config();
@@ -89,14 +83,8 @@ public class JefConfig {
     }
 
     public static void saveConfig() {
-        try {
-            if (!configFile.exists()) configFile.createNewFile();
-            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(configFile.toPath()), StandardCharsets.UTF_8))) {
-                writer.write(GSON.toJson(feature));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // Uses shared saveAtomic — .tmp → verify → atomic rename, same as every other storage
+        JefStorageManager.saveAtomic(configFile, feature, JefGsonBuilder.GSON_STRICT);
     }
 
     public static void reloadRepo() {
@@ -121,26 +109,26 @@ public class JefConfig {
     public static void openStatsEditor() {
         if (feature == null) return;
         DungeonStats stats = DungeonStats.getInstance();
-        screenToOpen = new GuiPositionEditor(feature.dungeons.statsPos, stats::getOverlayWidth, stats::getOverlayHeight, () -> stats.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.dungeons.statsScale).withParent(Minecraft.getMinecraft().currentScreen);
+        screenToOpen = new GuiPositionEditor(feature.dungeons.dungeonOverlay.statsPos, stats::getOverlayWidth, stats::getOverlayHeight, () -> stats.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.dungeons.dungeonOverlay.statsScale).withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     public static void openDungeonRoomOverlayEditor() {
         if (feature == null) return;
         DungeonRoomOverlay overlay = DungeonRoomOverlay.getInstance();
         if (overlay == null) return;
-        screenToOpen = new GuiPositionEditor(feature.dungeons.dungeonRoomOverlayPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.dungeons.dungeonRoomOverlayScale).withParent(Minecraft.getMinecraft().currentScreen);
+        screenToOpen = new GuiPositionEditor(feature.dungeons.dungeonRoomOverlayConfig.dungeonRoomOverlayPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.dungeons.dungeonRoomOverlayConfig.dungeonRoomOverlayScale).withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     public static void openHudEditor() {
         if (feature == null) return;
         PerformanceHUD hud = PerformanceHUD.getInstance();
-        screenToOpen = new GuiPositionEditor(feature.misc.hudPos, hud::getOverlayWidth, hud::getOverlayHeight, () -> hud.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.misc.hudScale).withParent(Minecraft.getMinecraft().currentScreen);
+        screenToOpen = new GuiPositionEditor(feature.misc.performanceHudConfig.hudPos, hud::getOverlayWidth, hud::getOverlayHeight, () -> hud.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.misc.performanceHudConfig.hudScale).withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     public static void openFetchurEditor() {
         if (feature == null) return;
         FetchurOverlay fetchur = FetchurOverlay.getInstance();
-        screenToOpen = new GuiPositionEditor(feature.mining.fetchurOverlayPos, fetchur::getOverlayWidth, fetchur::getOverlayHeight, () -> fetchur.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.mining.fetchurOverlayScale).withParent(Minecraft.getMinecraft().currentScreen);
+        screenToOpen = new GuiPositionEditor(feature.mining.fetchur.fetchurOverlayPos, fetchur::getOverlayWidth, fetchur::getOverlayHeight, () -> fetchur.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.mining.fetchur.fetchurOverlayScale).withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     public static void openDianaOverlayEditor() {
@@ -157,7 +145,7 @@ public class JefConfig {
     public static void openSearchBarEditor() {
         if (feature == null) return;
         SearchBar sb = SearchBar.getInstance();
-        screenToOpen = new GuiPositionEditor(feature.misc.searchBarPos, sb::getOverlayWidth, sb::getOverlayHeight, () -> sb.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withParent(Minecraft.getMinecraft().currentScreen);
+        screenToOpen = new GuiPositionEditor(feature.misc.searchBarConfig.searchBarPos, sb::getOverlayWidth, sb::getOverlayHeight, () -> sb.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     public static void openCurrentPetEditor() {
@@ -165,7 +153,7 @@ public class JefConfig {
         CurrentPetOverlay overlay = CurrentPetOverlay.getInstance();
         if (overlay == null) return;
         overlay.render(true);
-        screenToOpen = new GuiPositionEditor(feature.misc.currentPetPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.misc.currentPetScale).withParent(Minecraft.getMinecraft().currentScreen);
+        screenToOpen = new GuiPositionEditor(feature.misc.currentPet.currentPetPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.misc.currentPet.currentPetScale).withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     public static void openItemPickupLogEditor() {
@@ -173,57 +161,79 @@ public class JefConfig {
         ItemPickupLog overlay = ItemPickupLog.getInstance();
         if (overlay == null) return;
         overlay.render(true);
-        screenToOpen = new GuiPositionEditor(feature.misc.itemPickupLogPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.misc.itemPickupLogScale).withParent(Minecraft.getMinecraft().currentScreen);
+        screenToOpen = new GuiPositionEditor(feature.misc.itemPickupLogConfig.itemPickupLogPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.misc.itemPickupLogConfig.itemPickupLogScale).withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     public static void openItemCooldownEditor() {
         if (feature == null) return;
         ItemCooldownOverlay overlay = ItemCooldownOverlay.getInstance();
         if (overlay == null) return;
-        screenToOpen = new GuiPositionEditor(feature.qol.itemCooldownPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.qol.itemCooldownScale).withParent(Minecraft.getMinecraft().currentScreen);
+        screenToOpen = new GuiPositionEditor(feature.qol.itemCooldown.itemCooldownPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.qol.itemCooldown.itemCooldownScale).withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     public static void openItemAbilityTimerEditor() {
         if (feature == null) return;
         ItemAbilityTimerOverlay overlay = ItemAbilityTimerOverlay.getInstance();
         if (overlay == null) return;
-        screenToOpen = new GuiPositionEditor(feature.qol.itemAbilityTimerPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.qol.itemAbilityTimerScale).withParent(Minecraft.getMinecraft().currentScreen);
+        screenToOpen = new GuiPositionEditor(feature.qol.abilityTimer.itemAbilityTimerPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.qol.abilityTimer.itemAbilityTimerScale).withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     public static void openItemInvincibilityEditor() {
         if (feature == null) return;
         ItemInvincibilityOverlay overlay = ItemInvincibilityOverlay.getInstance();
         if (overlay == null) return;
-        screenToOpen = new GuiPositionEditor(feature.qol.itemInvincibilityPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.qol.itemInvincibilityScale).withParent(Minecraft.getMinecraft().currentScreen);
+        screenToOpen = new GuiPositionEditor(feature.qol.invincibility.itemInvincibilityPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.qol.invincibility.itemInvincibilityScale).withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     public static void openPowderEditor() {
         if (feature == null) return;
         PowderOverlay overlay = PowderOverlay.getInstance();
         if (overlay == null) return;
-        screenToOpen = new GuiPositionEditor(feature.mining.powderOverlayPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.mining.powderOverlayScale).withParent(Minecraft.getMinecraft().currentScreen);
+        screenToOpen = new GuiPositionEditor(feature.mining.powderTrackerConfig.powderOverlayPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.mining.powderTrackerConfig.powderOverlayScale).withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     public static void openDungeonBreakerEditor() {
         if (feature == null) return;
         DungeonBreakerOverlay overlay = DungeonBreakerOverlay.getInstance();
         if (overlay == null) return;
-        screenToOpen = new GuiPositionEditor(feature.dungeons.dungeonBreakerPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.dungeons.dungeonBreakerScale).withParent(Minecraft.getMinecraft().currentScreen);
+        screenToOpen = new GuiPositionEditor(feature.dungeons.dungeonBreaker.dungeonBreakerPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.dungeons.dungeonBreaker.dungeonBreakerScale).withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     public static void openInvButtonEditor() {
         screenToOpen = new com.jef.justenoughfakepixel.features.misc.invbuttons.GuiInvButtonEditor();
     }
 
+    public static void openOptionsGui() {
+        screenToOpen = new JefOptionsGui();
+    }
+
     public static void openTrophyFishEditor() {
         if (feature == null) return;
         TrophyFishOverlay overlay = TrophyFishOverlay.getInstance();
         if (overlay == null) return;
-        screenToOpen = new GuiPositionEditor(feature.fishing.trophyFishPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.fishing.trophyFishScale).withParent(Minecraft.getMinecraft().currentScreen);
+        screenToOpen = new GuiPositionEditor(feature.fishing.trophyFish.trophyFishPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.fishing.trophyFish.trophyFishScale).withParent(Minecraft.getMinecraft().currentScreen);
+    }
+
+    public static void openBpsEditor() {
+        if (feature == null) return;
+        com.jef.justenoughfakepixel.features.farming.BPSOverlay overlay = com.jef.justenoughfakepixel.features.farming.BPSOverlay.getInstance();
+        assert overlay != null;
+        screenToOpen = new GuiPositionEditor(feature.farming.bps.bpsPosition, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.farming.bps.bpsScale).withParent(Minecraft.getMinecraft().currentScreen);
     }
 
     public static void resetPowderTracker() {
         PowderStats.getInstance().reset();
+    }
+
+    public static void openPristineEditor() {
+        if (feature == null) return;
+        com.jef.justenoughfakepixel.features.mining.pristine.PristineOverlay overlay = com.jef.justenoughfakepixel.features.mining.pristine.PristineOverlay.getInstance();
+        if (overlay == null) return;
+        screenToOpen = new GuiPositionEditor(feature.mining.pristineTrackerConfig.pristineOverlayPos, overlay::getOverlayWidth, overlay::getOverlayHeight, () -> overlay.render(true), JefConfig::saveConfig, JefConfig::saveConfig).withOverlayScale(feature.mining.pristineTrackerConfig.pristineOverlayScale).withParent(Minecraft.getMinecraft().currentScreen);
+    }
+
+    public static void resetPristineTracker() {
+        com.jef.justenoughfakepixel.features.mining.pristine.PristineStats.getInstance().reset();
     }
 
     @SubscribeEvent
@@ -247,10 +257,16 @@ public class JefConfig {
             openWaypointGroupGui();
         waypointManagerKeyWasDown = managerKeyDown;
 
-        if (feature != null && isKeyOrMouseDown(feature.mining.powderToggleKey) && !powderToggleKeyWasDown && Minecraft.getMinecraft().currentScreen == null) {
+        if (feature != null && isKeyOrMouseDown(feature.mining.powderTrackerConfig.powderToggleKey) && !powderToggleKeyWasDown && Minecraft.getMinecraft().currentScreen == null) {
             PowderStats.getInstance().toggleTracking();
         }
 
-        powderToggleKeyWasDown = feature != null && isKeyOrMouseDown(feature.mining.powderToggleKey);
+        powderToggleKeyWasDown = feature != null && isKeyOrMouseDown(feature.mining.powderTrackerConfig.powderToggleKey);
+
+        if (feature != null && isKeyOrMouseDown(feature.mining.pristineTrackerConfig.pristineToggleKey) && !pristineToggleKeyWasDown && Minecraft.getMinecraft().currentScreen == null) {
+            com.jef.justenoughfakepixel.features.mining.pristine.PristineStats.getInstance().toggleTracking();
+        }
+
+        pristineToggleKeyWasDown = feature != null && isKeyOrMouseDown(feature.mining.pristineTrackerConfig.pristineToggleKey);
     }
 }

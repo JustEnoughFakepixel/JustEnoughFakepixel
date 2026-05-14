@@ -30,22 +30,22 @@ public class InquisitorOverlay extends Overlay {
 
     @Override
     public Position getPosition() {
-        return JefConfig.feature.diana.inqHealthPos;
+        return JefConfig.feature.diana.inquisitorHp.inqHealthPos;
     }
 
     @Override
     public float getScale() {
-        return JefConfig.feature.diana.inqScale;
+        return JefConfig.feature.diana.inquisitorHp.inqScale;
     }
 
     @Override
     public int getBgColor() {
-        return ChromaColour.specialToChromaRGB(JefConfig.feature.diana.inqBgColor);
+        return ChromaColour.specialToChromaRGB(JefConfig.feature.diana.inquisitorHp.inqBgColor);
     }
 
     @Override
     public int getCornerRadius() {
-        return JefConfig.feature.diana.inqCornerRadius;
+        return JefConfig.feature.diana.inquisitorHp.inqCornerRadius;
     }
 
     @Override
@@ -55,7 +55,7 @@ public class InquisitorOverlay extends Overlay {
 
     @Override
     protected boolean isEnabled() {
-        return JefConfig.feature.diana.enabled && JefConfig.feature.diana.showInqHealthOverlay;
+        return JefConfig.feature.diana.enabled && JefConfig.feature.diana.inquisitorHp.showInqHealthOverlay;
     }
 
     @Override

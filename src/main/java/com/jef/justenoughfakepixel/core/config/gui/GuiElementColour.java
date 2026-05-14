@@ -19,14 +19,14 @@ import java.util.function.Consumer;
 
 public class GuiElementColour extends GuiElement {
 
-    public static final ResourceLocation colour_selector_dot   = new ResourceLocation("justenoughfakepixel:core/colour_selector_dot.png");
-    public static final ResourceLocation colour_selector_bar   = new ResourceLocation("justenoughfakepixel:core/colour_selector_bar.png");
-    public static final ResourceLocation colour_selector_bar_alpha  = new ResourceLocation("justenoughfakepixel:core/colour_selector_bar_alpha.png");
-    public static final ResourceLocation colour_selector_chroma = new ResourceLocation("justenoughfakepixel:core/colour_selector_chroma.png");
-
-    private static final ResourceLocation colourPickerLocation        = new ResourceLocation("mbcore:dynamic/colourpicker");
-    private static final ResourceLocation colourPickerBarValueLocation   = new ResourceLocation("mbcore:dynamic/colourpickervalue");
-    private static final ResourceLocation colourPickerBarOpacityLocation = new ResourceLocation("mbcore:dynamic/colourpickeropacity");
+    // ResourceLocations centralised in GuiTextures
+    private static final ResourceLocation colour_selector_dot           = GuiTextures.colour_selector_dot;
+    private static final ResourceLocation colour_selector_bar           = GuiTextures.colour_selector_bar;
+    private static final ResourceLocation colour_selector_bar_alpha     = GuiTextures.colour_selector_bar_alpha;
+    private static final ResourceLocation colour_selector_chroma        = GuiTextures.colour_selector_chroma;
+    private static final ResourceLocation colourPickerLocation          = GuiTextures.colourPickerLocation;
+    private static final ResourceLocation colourPickerBarValueLocation   = GuiTextures.colourPickerBarValueLocation;
+    private static final ResourceLocation colourPickerBarOpacityLocation = GuiTextures.colourPickerBarOpacityLocation;
 
     private final GuiElementTextField hexField = new GuiElementTextField("",
             GuiElementTextField.SCALE_TEXT | GuiElementTextField.FORCE_CAPS | GuiElementTextField.NO_SPACE);

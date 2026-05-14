@@ -30,27 +30,27 @@ public class DianaEventOverlay extends Overlay {
 
     @Override
     public Position getPosition() {
-        return JefConfig.feature.diana.eventOverlayPos;
+        return JefConfig.feature.diana.eventOverlay.eventOverlayPos;
     }
 
     @Override
     public float getScale() {
-        return JefConfig.feature.diana.eventScale;
+        return JefConfig.feature.diana.eventOverlay.eventScale;
     }
 
     @Override
     public int getBgColor() {
-        return ChromaColour.specialToChromaRGB(JefConfig.feature.diana.eventBgColor);
+        return ChromaColour.specialToChromaRGB(JefConfig.feature.diana.eventOverlay.eventBgColor);
     }
 
     @Override
     public int getCornerRadius() {
-        return JefConfig.feature.diana.eventCornerRadius;
+        return JefConfig.feature.diana.eventOverlay.eventCornerRadius;
     }
 
     @Override
     protected boolean isEnabled() {
-        return JefConfig.feature.diana.enabled && JefConfig.feature.diana.showEventOverlay;
+        return JefConfig.feature.diana.enabled && JefConfig.feature.diana.eventOverlay.showEventOverlay;
     }
 
     @Override

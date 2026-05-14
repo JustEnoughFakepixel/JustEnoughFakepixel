@@ -36,22 +36,22 @@ public class PowderOverlay extends Overlay {
 
     @Override
     public Position getPosition() {
-        return JefConfig.feature.mining.powderOverlayPos;
+        return JefConfig.feature.mining.powderTrackerConfig.powderOverlayPos;
     }
 
     @Override
     public float getScale() {
-        return JefConfig.feature.mining.powderOverlayScale;
+        return JefConfig.feature.mining.powderTrackerConfig.powderOverlayScale;
     }
 
     @Override
     public int getBgColor() {
-        return ChromaColour.specialToChromaRGB(JefConfig.feature.mining.powderBgColor);
+        return ChromaColour.specialToChromaRGB(JefConfig.feature.mining.powderTrackerConfig.powderBgColor);
     }
 
     @Override
     public int getCornerRadius() {
-        return JefConfig.feature.mining.powderCornerRadius;
+        return JefConfig.feature.mining.powderTrackerConfig.powderCornerRadius;
     }
 
     @Override
@@ -61,7 +61,7 @@ public class PowderOverlay extends Overlay {
 
     @Override
     protected boolean isEnabled() {
-        return JefConfig.feature.mining.powderTracker && PowderStats.getInstance().isTrackingEnabled() && SkyblockData.getCurrentLocation() == SkyblockData.Location.CRYSTAL_HOLLOWS;
+        return JefConfig.feature.mining.powderTrackerConfig.powderTracker && PowderStats.getInstance().isTrackingEnabled() && SkyblockData.getCurrentLocation() == SkyblockData.Location.CRYSTAL_HOLLOWS;
     }
 
     private String lineForEntry(int ordinal, PowderData d, PowderStats stats, boolean preview) {
@@ -136,7 +136,7 @@ public class PowderOverlay extends Overlay {
         PowderStats stats = PowderStats.getInstance();
         PowderData d = stats.getData();
 
-        for (Object entry : JefConfig.feature.mining.powderDisplayLines) {
+        for (Object entry : JefConfig.feature.mining.powderTrackerConfig.powderDisplayLines) {
             int ordinal = (entry instanceof Number) ? ((Number) entry).intValue() : -1;
             String line = lineForEntry(ordinal, d, stats, preview);
             if (line != null) lines.add(line);

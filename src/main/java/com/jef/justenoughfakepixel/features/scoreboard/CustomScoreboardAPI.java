@@ -17,11 +17,7 @@ public class CustomScoreboardAPI {
     }
 
     public static List<String> getUnclaimed() {
-        List<String> out = new ArrayList<>();
-        for (UnknownLinesHandler.Entry e : UnknownLinesHandler.recent) {
-            out.add(e.line);
-        }
-        return out;
+        return new ArrayList<>(UnknownLinesHandler.getSeen());
     }
 
     public static String toJson() {

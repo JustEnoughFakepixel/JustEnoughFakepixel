@@ -28,8 +28,8 @@ public class DamageSplashes {
     @SubscribeEvent
     public void onRenderLiving(RenderLivingEvent.Pre event) {
         if (JefConfig.feature == null) return;
-        boolean hideCrit = JefConfig.feature.qol.hideCritSplashes;
-        boolean hideNonCrit = JefConfig.feature.qol.hideNonCritSplashes;
+        boolean hideCrit = JefConfig.feature.qol.damageSplashes.hideCritSplashes;
+        boolean hideNonCrit = JefConfig.feature.qol.damageSplashes.hideNonCritSplashes;
         if (!hideCrit && !hideNonCrit) return;
 
         EntityLivingBase entity = event.entity;

@@ -30,27 +30,27 @@ public class DianaMobHealthOverlay extends Overlay {
 
     @Override
     public Position getPosition() {
-        return JefConfig.feature.diana.dianaMobHealthPos;
+        return JefConfig.feature.diana.dianaMobHp.dianaMobHealthPos;
     }
 
     @Override
     public float getScale() {
-        return JefConfig.feature.diana.mobScale;
+        return JefConfig.feature.diana.dianaMobHp.mobScale;
     }
 
     @Override
     public int getBgColor() {
-        return ChromaColour.specialToChromaRGB(JefConfig.feature.diana.mobBgColor);
+        return ChromaColour.specialToChromaRGB(JefConfig.feature.diana.dianaMobHp.mobBgColor);
     }
 
     @Override
     public int getCornerRadius() {
-        return JefConfig.feature.diana.mobCornerRadius;
+        return JefConfig.feature.diana.dianaMobHp.mobCornerRadius;
     }
 
     @Override
     protected boolean isEnabled() {
-        return JefConfig.feature.diana.enabled && JefConfig.feature.diana.showDianaMobHealthOverlay;
+        return JefConfig.feature.diana.enabled && JefConfig.feature.diana.dianaMobHp.showDianaMobHealthOverlay;
     }
 
     @Override

@@ -24,10 +24,12 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 
+import com.jef.justenoughfakepixel.core.config.gui.GuiTextures;
+
 @RegisterEvents
 public class InvButtonRenderer {
 
-    private static final ResourceLocation EDITOR_TEX = new ResourceLocation("justenoughfakepixel", "invbuttons/editor.png");
+    private static final ResourceLocation EDITOR_TEX = GuiTextures.INV_EDITOR_TEX;
 
     private static Method drawHoveringTextMethod = null;
 
@@ -44,7 +46,7 @@ public class InvButtonRenderer {
     private long hoveredSince = 0L;
 
     private static boolean isEnabled() {
-        return JefConfig.feature != null && JefConfig.feature.misc.enableInvButtons;
+        return JefConfig.feature != null && JefConfig.feature.misc.invButtons.enableInvButtons;
     }
 
     private static boolean isGuiEditor() {
@@ -117,7 +119,7 @@ public class InvButtonRenderer {
         HighlightUtils.renderButtonHighlight(bx, by);
         GlStateManager.popMatrix();
 
-        int delay = JefConfig.feature != null ? JefConfig.feature.misc.invButtonTooltipDelay : 600;
+        int delay = JefConfig.feature != null ? JefConfig.feature.misc.invButtons.invButtonTooltipDelay : 600;
         if (now - hoveredSince >= delay && drawHoveringTextMethod != null) {
             String cmd = hovered.command.trim();
             if (!cmd.startsWith("/")) cmd = "/" + cmd;
@@ -151,7 +153,7 @@ public class InvButtonRenderer {
             return;
         }
 
-        int clickType = JefConfig.feature != null ? JefConfig.feature.misc.invButtonClickType : 0;
+        int clickType = JefConfig.feature != null ? JefConfig.feature.misc.invButtons.invButtonClickType : 0;
         boolean fire = (clickType == 0) == Mouse.getEventButtonState();
         if (fire) {
             String cmd = btn.command.trim();

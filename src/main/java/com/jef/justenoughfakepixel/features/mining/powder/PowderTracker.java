@@ -27,11 +27,11 @@ public class PowderTracker {
     private static final Pattern ASCENSION_ROPE = Pattern.compile("Ascension Rope x([\\d,]+)");
     private static final Pattern WISHING_COMPASS = Pattern.compile("Wishing Compass x([\\d,]+)");
     private static final Pattern JUNGLE_HEART = Pattern.compile("Jungle Heart x([\\d,]+)");
-    private static final Pattern GOBLIN_EGG = Pattern.compile("Goblin Egg x([\\d,]+)$");
-    private static final Pattern GREEN_GOBLIN_EGG = Pattern.compile("Green Goblin Egg x([\\d,]+)");
-    private static final Pattern RED_GOBLIN_EGG = Pattern.compile("Red Goblin Egg x([\\d,]+)");
-    private static final Pattern YELLOW_GOBLIN_EGG = Pattern.compile("Yellow Goblin Egg x([\\d,]+)");
-    private static final Pattern BLUE_GOBLIN_EGG = Pattern.compile("Blue Goblin Egg x([\\d,]+)");
+    private static final Pattern GOBLIN_EGG = Pattern.compile("§9Goblin Egg §r§8x([\\d,]+)");
+    private static final Pattern GREEN_GOBLIN_EGG = Pattern.compile("§aGreen Goblin Egg §r§8x([\\d,]+)");
+    private static final Pattern RED_GOBLIN_EGG = Pattern.compile("§cRed Goblin Egg §r§8x([\\d,]+)");
+    private static final Pattern YELLOW_GOBLIN_EGG = Pattern.compile("§eYellow Goblin Egg §r§8x([\\d,]+)");
+    private static final Pattern BLUE_GOBLIN_EGG = Pattern.compile("§3Blue Goblin Egg §r§8x([\\d,]+)");
 
     private static final long SYNC_WINDOW_MS = 2000;
 
@@ -62,7 +62,7 @@ public class PowderTracker {
         long now = System.currentTimeMillis();
 
         if (now - lastGemstoneChatTime <= SYNC_WINDOW_MS) {
-            if (!isActive()) return;
+            if (isActive()) return;
             PowderStats stats = PowderStats.getInstance();
             stats.getData().gemstonePowder += delta;
             stats.save();
@@ -74,7 +74,7 @@ public class PowderTracker {
     }
 
     private static void onItemChange(String displayName, int delta) {
-        if (!isActive()) return;
+        if (isActive()) return;
         if (!displayName.contains("§aEnchanted Hard Stone")) return;
         if (delta <= 0) return;
 
@@ -93,11 +93,11 @@ public class PowderTracker {
     }
 
     public static boolean isEnabled() {
-        return JefConfig.feature != null && JefConfig.feature.mining.powderTracker && PowderStats.getInstance().isTrackingEnabled();
+        return JefConfig.feature != null && JefConfig.feature.mining.powderTrackerConfig.powderTracker && PowderStats.getInstance().isTrackingEnabled();
     }
 
     private static boolean isActive() {
-        return isEnabled() && SkyblockData.getCurrentLocation() == SkyblockData.Location.CRYSTAL_HOLLOWS;
+        return !isEnabled() || SkyblockData.getCurrentLocation() != SkyblockData.Location.CRYSTAL_HOLLOWS;
     }
 
     private static long parseLong(String s) {
@@ -111,7 +111,7 @@ public class PowderTracker {
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
-        if (!isActive()) return;
+        if (isActive()) return;
 
         ensureListenerRegistered();
 
@@ -123,9 +123,13 @@ public class PowderTracker {
     @SubscribeEvent
     public void onChat(ClientChatReceivedEvent event) {
         if (ChatUtils.isFromServer(event)) return;
-        if (!isActive()) return;
+        if (isActive()) return;
 
         String msg = ChatUtils.clean(event);
+
+        if (ChatUtils.isPartyMessage(msg) || ChatUtils.isPlayerMessage(msg) ||
+            ChatUtils.isMsgReceived(msg) || ChatUtils.isMsgSent(msg)) return;
+
         PowderStats stats = PowderStats.getInstance();
         PowderData data = stats.getData();
 
@@ -159,7 +163,7 @@ public class PowderTracker {
         }
 
         m = GEMSTONE_DROP.matcher(msg);
-        if (m.find()) {
+        if (m.find() && !msg.contains("PRISTINE")) {
             String key = PowderStats.gemKey(m.group(1), m.group(2));
             data.gemstones.put(key, data.gemstones.getOrDefault(key, 0L) + parseLong(m.group(3)));
             stats.save();

@@ -14,12 +14,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jef.justenoughfakepixel.core.config.gui.GuiTextures;
+
 public class CapeSelectorGUI extends GuiScreen {
 
     public List<CapeDisplay> capes = new ArrayList<>();
 
-    private static final ResourceLocation CONTAINER_BG =
-            new ResourceLocation("justenoughfakepixel", "textures/gui/capesUI.png");
+    private static final ResourceLocation CONTAINER_BG = GuiTextures.CAPES_UI;
 
     private float scrollOffset = 0f;
     private float scrollVelocity = 0f;

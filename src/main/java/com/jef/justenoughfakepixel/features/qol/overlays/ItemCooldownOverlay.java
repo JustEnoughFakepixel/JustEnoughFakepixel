@@ -24,27 +24,27 @@ public class ItemCooldownOverlay extends TimerOverlay {
 
     @Override
     public Position getPosition() {
-        return JefConfig.feature.qol.itemCooldownPos;
+        return JefConfig.feature.qol.itemCooldown.itemCooldownPos;
     }
 
     @Override
     public float getScale() {
-        return JefConfig.feature.qol.itemCooldownScale;
+        return JefConfig.feature.qol.itemCooldown.itemCooldownScale;
     }
 
     @Override
     public int getBgColor() {
-        return ChromaColour.specialToChromaRGB(JefConfig.feature.qol.itemCooldownBgColor);
+        return ChromaColour.specialToChromaRGB(JefConfig.feature.qol.itemCooldown.itemCooldownBgColor);
     }
 
     @Override
     public int getCornerRadius() {
-        return JefConfig.feature.qol.itemCooldownCornerRadius;
+        return JefConfig.feature.qol.itemCooldown.itemCooldownCornerRadius;
     }
 
     @Override
     protected boolean isEnabled() {
-        return JefConfig.feature != null && JefConfig.feature.qol.itemCooldownOverlay;
+        return JefConfig.feature != null && JefConfig.feature.qol.itemCooldown.itemCooldownOverlay;
     }
 
     @Override
@@ -69,7 +69,7 @@ public class ItemCooldownOverlay extends TimerOverlay {
 
     @Override
     protected boolean shouldShowWhenEmpty() {
-        return JefConfig.feature != null && JefConfig.feature.qol.itemCooldownShowWhenEmpty;
+        return JefConfig.feature != null && JefConfig.feature.qol.itemCooldown.itemCooldownShowWhenEmpty;
     }
 
     @Override

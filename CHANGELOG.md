@@ -1,20 +1,33 @@
 
-# JEF 1.2.5 - 1.2.6 Changelog
+# JEF 1.2.6 - 1.2.7 Changelog
 
 
-- Added Storage Overlay
-- Added Mode-Wide capes (/Capes)
-- Added Player tags
-- Added Professor and Scarf splits
-- Added Carpentry to Skill Xp Display
+- Added Profile Parser(SkyAtlas)
+- Added Main JEF menu for /JEF (jef config to open config)
+- Added JEFProtect (/jefprotect while holding an item)
+- Added SignCalculator
+- Added Advanced Expressions in all calculators
+- Added DVD Screensaver
+- Added BPS (Blocks broken per second) Overlay
+- Added Hoppity NEW RABBIT Highlight
+- Added Commission Highlight
+- Added Pristine Tracker
+- Added Chat State Restore (Let me speak port)
+- Added Just Enough Fakepixel button in pause menu
+
 --------------
-- Changed Hardstone in Powder tracker to Enchanted
-- Improved Dungeon Overlay to have less dupe timers (toggleable)
-- Added more Custom Scoreboard lines
--------------
-- Fixed background and null texture in CS2 case animation
-- Fixed player messages getting tracked by Diana Trackers
+- SKillXpDisplay Carpentry now goes to level 60
+- Vanilla Scoreboard now shows when Custom is hidden
+- Tweaked Main Config search bar
+- GUI Overhaul
 
+-------------
+- Fixed PRISTINE messages getting tracked by Powder Tracker
+- Fixed Enchant Chroma
+- Fixed NPE in capes
+- Fixed Goblin Eggs not being tracked by Powder Tracker
+- Fixed Fetchur not being accurate by using Epoch days
+- Fixed Capes
 
 
 

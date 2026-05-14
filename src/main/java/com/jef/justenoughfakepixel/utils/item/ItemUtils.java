@@ -104,4 +104,11 @@ public class ItemUtils {
         item.setTagCompound(tag);
         return tag;
     }
+
+    @Nullable
+    public static String getItemUuid(@Nullable ItemStack item) {
+        if (item == null || !item.hasTagCompound()) return null;
+        NBTTagCompound extra = item.getTagCompound().getCompoundTag("ExtraAttributes");
+        return extra.hasKey("uuid") ? extra.getString("uuid") : null;
+    }
 }

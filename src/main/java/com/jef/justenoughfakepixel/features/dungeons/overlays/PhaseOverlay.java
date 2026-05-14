@@ -44,7 +44,7 @@ public class PhaseOverlay {
         boolean mm = f.isMasterMode();
         String floorCol = mm ? C_FLOOR_MM : C_FLOOR_NM;
         String floorName = f == DungeonFloor.NONE ? "?" : f.name();
-        boolean showAll = (JefConfig.feature != null && JefConfig.feature.dungeons.dungeonStatsShowAll) || ended || timers.isRunFailed();
+        boolean showAll = (JefConfig.feature != null && JefConfig.feature.dungeons.dungeonOverlay.dungeonStatsShowAll) || ended || timers.isRunFailed();
 
         List<String> out = new ArrayList<>();
 

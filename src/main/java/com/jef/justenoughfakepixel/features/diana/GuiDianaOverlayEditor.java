@@ -34,13 +34,13 @@ public class GuiDianaOverlayEditor extends GuiScreen {
         InquisitorOverlay inq = InquisitorOverlay.getInstance();
         DianaMobHealthOverlay mob = DianaMobHealthOverlay.getInstance();
 
-        overlays = new OverlayEntry[]{new OverlayEntry("Event", JefConfig.feature.diana.eventOverlayPos, event::getOverlayWidth, event::getOverlayHeight, () -> JefConfig.feature.diana.eventScale, () -> event.render(true)),
+        overlays = new OverlayEntry[]{new OverlayEntry("Event", JefConfig.feature.diana.eventOverlay.eventOverlayPos, event::getOverlayWidth, event::getOverlayHeight, () -> JefConfig.feature.diana.eventOverlay.eventScale, () -> event.render(true)),
 
-                new OverlayEntry("Loot", JefConfig.feature.diana.lootOverlayPos, loot::getOverlayWidth, loot::getOverlayHeight, () -> JefConfig.feature.diana.lootScale, () -> loot.render(true)),
+                new OverlayEntry("Loot", JefConfig.feature.diana.lootOverlay.lootOverlayPos, loot::getOverlayWidth, loot::getOverlayHeight, () -> JefConfig.feature.diana.lootOverlay.lootScale, () -> loot.render(true)),
 
-                new OverlayEntry(" ", JefConfig.feature.diana.inqHealthPos, inq::getOverlayWidth, inq::getOverlayHeight, () -> JefConfig.feature.diana.inqScale, () -> inq.render(true)),
+                new OverlayEntry(" ", JefConfig.feature.diana.inquisitorHp.inqHealthPos, inq::getOverlayWidth, inq::getOverlayHeight, () -> JefConfig.feature.diana.inquisitorHp.inqScale, () -> inq.render(true)),
 
-                new OverlayEntry(" ", JefConfig.feature.diana.dianaMobHealthPos, mob::getOverlayWidth, mob::getOverlayHeight, () -> JefConfig.feature.diana.mobScale, () -> mob.render(true)),};
+                new OverlayEntry(" ", JefConfig.feature.diana.dianaMobHp.dianaMobHealthPos, mob::getOverlayWidth, mob::getOverlayHeight, () -> JefConfig.feature.diana.dianaMobHp.mobScale, () -> mob.render(true)),};
     }
 
     @Override

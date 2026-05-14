@@ -144,6 +144,23 @@ public class CustomScoreboard extends Overlay {
         if (raw.isEmpty()) return new ArrayList<>();
         Collections.reverse(raw);
 
+        // Outside Skyblock — return vanilla lines as-is (custom overlay/position/bg still applies)
+        if (!preview && !SkyblockData.isOnSkyblock()) {
+            List<String> result = new ArrayList<>();
+            // Try getScoreboardTitle() first; fall back to the scoreboard objective display name
+            String vanillaTitle = SkyblockData.getScoreboardTitle();
+            if (vanillaTitle == null || vanillaTitle.isEmpty()) {
+                try {
+                    net.minecraft.scoreboard.ScoreObjective obj =
+                            Minecraft.getMinecraft().theWorld.getScoreboard().getObjectiveInDisplaySlot(1);
+                    if (obj != null) vanillaTitle = obj.getDisplayName();
+                } catch (Exception ignored) {}
+            }
+            if (vanillaTitle != null && !vanillaTitle.isEmpty()) result.add(vanillaTitle);
+            result.addAll(raw);
+            return result;
+        }
+
         boolean inDungeon = SkyblockData.isInDungeon();
 
         String serverRaw      = null;
@@ -336,7 +353,8 @@ public class CustomScoreboard extends Overlay {
                     break;
 
                 case LINE_EXTRA:
-                    for (String ul : unknownLines) { lines.add(ul); rawIndex.add(-1); }
+                    if (!inDungeon)
+                        for (String ul : unknownLines) { lines.add(ul); rawIndex.add(-1); }
                     break;
                 case LINE_NORTHSTARS:
                     if (northStarsRaw != null) { lines.add(northStarsRaw); rawIndex.add(-1); }
@@ -351,6 +369,11 @@ public class CustomScoreboard extends Overlay {
                     }
                     break;
             }
+        }
+
+        // In dungeons, always show unknown lines regardless of LINE_EXTRA config
+        if (inDungeon && !unknownLines.isEmpty()) {
+            for (String ul : unknownLines) { lines.add(ul); rawIndex.add(-1); }
         }
 
         if (websiteRaw != null) { lines.add(websiteRaw); rawIndex.add(-1); }
@@ -371,8 +394,8 @@ public class CustomScoreboard extends Overlay {
         List<String> lines = getLines(preview);
         if (lines.isEmpty()) return;
 
-        boolean down = Keyboard.isKeyDown(JefConfig.feature.debug.scoreboardDebugKey);
-        if (down && !wasDown && JefConfig.feature.debug.scoreboardDebug)
+        boolean down = Keyboard.isKeyDown(JefConfig.feature.debug.scoreboardDebugConfig.scoreboardDebugKey);
+        if (down && !wasDown && JefConfig.feature.debug.scoreboardDebugConfig.scoreboardDebug)
             ChatUtils.sendMessage(CustomScoreboardAPI.toJson());
         wasDown = down;
 
@@ -413,17 +436,29 @@ public class CustomScoreboard extends Overlay {
 
         GL11.glScalef(ss, ss, 1f);
 
-        // Line 0 (title) is always centered
-        String title = lines.get(0);
-        int titleX   = (boxW - mc.fontRendererObj.getStringWidth(title)) / 2;
-        mc.fontRendererObj.drawStringWithShadow(title, titleX, PAD_Y, -1);
-
-        int textY = PAD_Y + lh;
-        for (int i = 1; i < lines.size(); i++) {
-            String line = lines.get(i);
-            int lx = xFor(line, boxW, alignment);
-            mc.fontRendererObj.drawStringWithShadow(line, lx, textY, 0xFFFFFF);
+        int textY = PAD_Y;
+        if (SkyblockData.isOnSkyblock()) {
+            // Line 0 is the Skyblock title — always centered
+            String firstLine = lines.get(0);
+            int titleX = (boxW - mc.fontRendererObj.getStringWidth(firstLine)) / 2;
+            mc.fontRendererObj.drawStringWithShadow(firstLine, titleX, textY, -1);
             textY += lh;
+            for (int i = 1; i < lines.size(); i++) {
+                String line = lines.get(i);
+                mc.fontRendererObj.drawStringWithShadow(line, xFor(line, boxW, alignment), textY, 0xFFFFFF);
+                textY += lh;
+            }
+        } else {
+            // Outside Skyblock — first line always centered, rest use alignment
+            String firstLine = lines.get(0);
+            int titleX = (boxW - mc.fontRendererObj.getStringWidth(firstLine)) / 2;
+            mc.fontRendererObj.drawStringWithShadow(firstLine, titleX, textY, -1);
+            textY += lh;
+            for (int i = 1; i < lines.size(); i++) {
+                String line = lines.get(i);
+                mc.fontRendererObj.drawStringWithShadow(line, xFor(line, boxW, alignment), textY, 0xFFFFFF);
+                textY += lh;
+            }
         }
 
         GlStateManager.disableBlend();

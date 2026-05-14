@@ -68,27 +68,27 @@ public class ItemPickupLog extends Overlay {
 
     @Override
     public Position getPosition() {
-        return JefConfig.feature.misc.itemPickupLogPos;
+        return JefConfig.feature.misc.itemPickupLogConfig.itemPickupLogPos;
     }
 
     @Override
     public float getScale() {
-        return JefConfig.feature.misc.itemPickupLogScale;
+        return JefConfig.feature.misc.itemPickupLogConfig.itemPickupLogScale;
     }
 
     @Override
     public int getBgColor() {
-        return ChromaColour.specialToChromaRGB(JefConfig.feature.misc.itemPickupLogBgColor);
+        return ChromaColour.specialToChromaRGB(JefConfig.feature.misc.itemPickupLogConfig.itemPickupLogBgColor);
     }
 
     @Override
     public int getCornerRadius() {
-        return JefConfig.feature.misc.itemPickupLogCornerRadius;
+        return JefConfig.feature.misc.itemPickupLogConfig.itemPickupLogCornerRadius;
     }
 
     @Override
     protected boolean isEnabled() {
-        return JefConfig.feature.misc.itemPickupLog;
+        return JefConfig.feature.misc.itemPickupLogConfig.itemPickupLog;
     }
 
     @SubscribeEvent

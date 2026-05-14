@@ -24,27 +24,27 @@ public class ItemAbilityTimerOverlay extends TimerOverlay {
 
     @Override
     public Position getPosition() {
-        return JefConfig.feature.qol.itemAbilityTimerPos;
+        return JefConfig.feature.qol.abilityTimer.itemAbilityTimerPos;
     }
 
     @Override
     public float getScale() {
-        return JefConfig.feature.qol.itemAbilityTimerScale;
+        return JefConfig.feature.qol.abilityTimer.itemAbilityTimerScale;
     }
 
     @Override
     public int getBgColor() {
-        return ChromaColour.specialToChromaRGB(JefConfig.feature.qol.itemAbilityTimerBgColor);
+        return ChromaColour.specialToChromaRGB(JefConfig.feature.qol.abilityTimer.itemAbilityTimerBgColor);
     }
 
     @Override
     public int getCornerRadius() {
-        return JefConfig.feature.qol.itemAbilityTimerCornerRadius;
+        return JefConfig.feature.qol.abilityTimer.itemAbilityTimerCornerRadius;
     }
 
     @Override
     protected boolean isEnabled() {
-        return JefConfig.feature != null && JefConfig.feature.qol.itemAbilityTimerOverlay;
+        return JefConfig.feature != null && JefConfig.feature.qol.abilityTimer.itemAbilityTimerOverlay;
     }
 
     @Override
@@ -69,7 +69,7 @@ public class ItemAbilityTimerOverlay extends TimerOverlay {
 
     @Override
     protected boolean shouldShowWhenEmpty() {
-        return JefConfig.feature != null && JefConfig.feature.qol.itemAbilityTimerShowWhenEmpty;
+        return JefConfig.feature != null && JefConfig.feature.qol.abilityTimer.itemAbilityTimerShowWhenEmpty;
     }
 
     @Override

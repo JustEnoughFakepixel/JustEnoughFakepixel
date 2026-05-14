@@ -13,6 +13,7 @@ import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
+import com.jef.justenoughfakepixel.core.config.gui.GuiTextures;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -38,7 +39,7 @@ public class DungeonRoomDetector {
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.START) return;
-        if (JefConfig.feature == null || !JefConfig.feature.dungeons.dungeonRoomOverlay) {
+        if (JefConfig.feature == null || !JefConfig.feature.dungeons.dungeonRoomOverlayConfig.dungeonRoomOverlay) {
             DungeonRoomOverlay.currentRoomName = null;
             DungeonRoomOverlay.currentRoomCategory = null;
             DungeonRoomOverlay.currentRoomNotes = null;
@@ -147,7 +148,7 @@ public class DungeonRoomDetector {
 
     private void loadRoomsJson() {
         try {
-            ResourceLocation loc = new ResourceLocation("justenoughfakepixel", "dungeonrooms/dungeonrooms.json");
+            ResourceLocation loc = GuiTextures.DUNGEON_ROOMS_JSON;
             InputStream in = Minecraft.getMinecraft().getResourceManager().getResource(loc).getInputStream();
             roomsJson = new Gson().fromJson(new InputStreamReader(in), JsonObject.class);
         } catch (Exception e) {

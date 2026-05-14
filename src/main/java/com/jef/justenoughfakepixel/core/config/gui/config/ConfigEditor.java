@@ -12,6 +12,7 @@ import com.jef.justenoughfakepixel.core.config.utils.LerpUtils.LerpingInteger;
 import com.jef.justenoughfakepixel.core.config.utils.RenderUtils;
 import com.jef.justenoughfakepixel.core.config.utils.StringUtils;
 import com.jef.justenoughfakepixel.core.config.utils.TextRenderUtils;
+import com.jef.justenoughfakepixel.JefMod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
@@ -30,11 +31,11 @@ import java.util.List;
 
 import static com.jef.justenoughfakepixel.core.config.gui.GuiTextures.DISCORD;
 import static com.jef.justenoughfakepixel.core.config.gui.GuiTextures.GITHUB;
+import static com.jef.justenoughfakepixel.core.config.gui.GuiTextures.SEARCH_ICON;
 
 public class ConfigEditor extends GuiElement {
     private static final ResourceLocation[] socialsIco = new ResourceLocation[]{DISCORD, GITHUB};
     private static final String[] socialsLink = new String[]{"https://discord.gg/fMNsgPWWrv", "https://github.com/hamlook/JustEnoughFakepixel"};
-    private static final ResourceLocation SEARCH_ICON = new ResourceLocation("justenoughfakepixel:search.png");
     public static ConfigEditor editor = new ConfigEditor(JefConfig.feature);
     private final long openedMillis;
     private final LerpingInteger optionsScroll = new LerpingInteger(0, 150);
@@ -45,13 +46,27 @@ public class ConfigEditor extends GuiElement {
     private final LerpingInteger minimumSearchSize = new LerpingInteger(0, 150);
     private final GuiElementTextField searchField = new GuiElementTextField("", 0, 20, 0);
     private String selectedCategory = null;
+    private String selectedSubcategory = null;
+    private final Set<String> expandedCategories = new HashSet<>();
     private Set<ConfigProcessor.ProcessedCategory> searchedCategories = null;
+    private Map<ConfigProcessor.ProcessedCategory, Set<String>> searchedSubcategories = null;
     private Map<ConfigProcessor.ProcessedCategory, Set<Integer>> searchedAccordions = null;
     private Set<ConfigProcessor.ProcessedOption> searchedOptions = null;
+    private final HashMap<ConfigProcessor.ProcessedOption, String> optionSubcategoryKey = new HashMap<>();
     private float optionsBarStart;
     private float optionsBarend;
     private int lastMouseX = 0;
     private int keyboardScrollXCutoff = 0;
+
+    // Key-repeat tracking for backspace/delete in the search field.
+    // handleKeyboardPresses() is called every render frame (like the arrow-key scroll
+    // polling above it), so we can simulate OS-style repeat by checking isKeyDown()
+    // and firing deletions at a fixed rate after an initial delay.
+    private static final long SEARCH_REPEAT_DELAY_MS = 500; // ms before repeat begins
+    private static final long SEARCH_REPEAT_RATE_MS  =  50; // ms between repeat ticks (~20/s)
+    private int  searchRepeatKey   = 0;
+    private long searchRepeatStart = 0;
+    private long searchRepeatLast  = 0;
 
     public ConfigEditor(Object config) {
         this(config, null);
@@ -62,6 +77,15 @@ public class ConfigEditor extends GuiElement {
         this.processedConfig = ConfigProcessor.create(config);
 
         for (ConfigProcessor.ProcessedCategory category : processedConfig.values()) {
+            for (Map.Entry<String, ConfigProcessor.ProcessedSubcategory> subEntry : category.subcategories.entrySet()) {
+                for (ConfigProcessor.ProcessedOption option : subEntry.getValue().options.values()) {
+                    categoryForOption.put(option, category);
+                    optionSubcategoryKey.put(option, subEntry.getKey());
+                    String sc = category.name + " " + subEntry.getValue().name + " " + option.name + " " + option.desc;
+                    sc = sc.replaceAll("[^a-zA-Z_ ]", "").toLowerCase();
+                    for (String sw : sc.split("[ _]")) searchOptionMap.computeIfAbsent(sw, k -> new HashSet<>()).add(option);
+                }
+            }
             for (ConfigProcessor.ProcessedOption option : category.options.values()) {
                 categoryForOption.put(option, category);
 
@@ -108,7 +132,12 @@ public class ConfigEditor extends GuiElement {
     }
 
     private LinkedHashMap<String, ConfigProcessor.ProcessedOption> getOptionsInCategory(ConfigProcessor.ProcessedCategory cat) {
-        LinkedHashMap<String, ConfigProcessor.ProcessedOption> newMap = new LinkedHashMap<>(cat.options);
+        LinkedHashMap<String, ConfigProcessor.ProcessedOption> newMap;
+        if (selectedSubcategory != null && cat.subcategories.containsKey(selectedSubcategory)) {
+            newMap = new LinkedHashMap<>(cat.subcategories.get(selectedSubcategory).options);
+        } else {
+            newMap = new LinkedHashMap<>(cat.options);
+        }
 
         if (searchedOptions != null) {
             Set<ConfigProcessor.ProcessedOption> retain = new HashSet<>();
@@ -140,9 +169,40 @@ public class ConfigEditor extends GuiElement {
         return selectedCategory;
     }
 
+    private List<Map.Entry<String, ConfigProcessor.ProcessedSubcategory>> getVisibleSubcategories(ConfigProcessor.ProcessedCategory cat) {
+        List<Map.Entry<String, ConfigProcessor.ProcessedSubcategory>> visible = new ArrayList<>();
+        Set<String> matchedSubs = searchedSubcategories != null ? searchedSubcategories.get(cat) : null;
+        for (Map.Entry<String, ConfigProcessor.ProcessedSubcategory> subEntry : cat.subcategories.entrySet()) {
+            if (matchedSubs == null || matchedSubs.contains(subEntry.getKey())) {
+                visible.add(subEntry);
+            }
+        }
+        return visible;
+    }
+
     private void setSelectedCategory(String category) {
+        if (!java.util.Objects.equals(this.selectedCategory, category)) selectedSubcategory = null;
         selectedCategory = category;
         optionsScroll.setValue(0);
+        if (category != null) {
+            expandedCategories.add(category);
+            ConfigProcessor.ProcessedCategory cat = processedConfig.get(category);
+            if (cat != null && !cat.subcategories.isEmpty() && selectedSubcategory == null) {
+                boolean hasDirectMatches = searchedOptions == null
+                        || cat.options.values().stream().anyMatch(opt -> searchedOptions.contains(opt));
+                if (!hasDirectMatches) {
+                    List<Map.Entry<String, ConfigProcessor.ProcessedSubcategory>> visible = getVisibleSubcategories(cat);
+                    if (!visible.isEmpty()) selectedSubcategory = visible.get(0).getKey();
+                }
+            }
+        }
+    }
+
+    private void setSelectedSubcategory(String catKey, String subKey) {
+        selectedCategory = catKey;
+        selectedSubcategory = subKey;
+        optionsScroll.setValue(0);
+        expandedCategories.add(catKey);
     }
 
     public String getSelectedCategoryName() {
@@ -154,6 +214,7 @@ public class ConfigEditor extends GuiElement {
         searchedCategories = null;
         searchedOptions = null;
         searchedAccordions = null;
+        searchedSubcategories = null;
 
         if (!search.isEmpty()) {
             searchedCategories = new HashSet<>();
@@ -180,12 +241,18 @@ public class ConfigEditor extends GuiElement {
             if (searchedOptions == null) {
                 searchedOptions = new HashSet<>();
             } else {
+                searchedSubcategories = new HashMap<>();
                 for (ConfigProcessor.ProcessedOption option : searchedOptions) {
                     ConfigProcessor.ProcessedCategory cat = categoryForOption.get(option);
                     if (cat == null) continue;
 
                     searchedCategories.add(cat);
                     searchedAccordions.computeIfAbsent(cat, k -> new HashSet<>()).add(option.accordionId);
+
+                    String subKey = optionSubcategoryKey.get(option);
+                    if (subKey != null) {
+                        searchedSubcategories.computeIfAbsent(cat, k -> new HashSet<>()).add(subKey);
+                    }
                 }
             }
         }
@@ -210,7 +277,7 @@ public class ConfigEditor extends GuiElement {
         float opacityFactor = LerpUtils.sigmoidZeroOne(delta / 500f);
         RenderUtils.drawGradientRect(0, 0, 0, width, height, (int) (0x80 * opacityFactor) << 24 | 0x101010, (int) (0x90 * opacityFactor) << 24 | 0x101010);
 
-        int xSize = Math.min(scaledResolution.getScaledWidth() - 100 / scaledResolution.getScaleFactor(), 500);
+        int xSize = Math.min(scaledResolution.getScaledWidth() - 100 / scaledResolution.getScaleFactor(), 540);
         int ySize = Math.min(scaledResolution.getScaledHeight() - 100 / scaledResolution.getScaleFactor(), 400);
 
         int x = (scaledResolution.getScaledWidth() - xSize) / 2;
@@ -233,20 +300,18 @@ public class ConfigEditor extends GuiElement {
         RenderUtils.drawFloatingRectDark(x + 5, y + 5, xSize - 10, 20, false);
 
         FontRenderer fr = Minecraft.getMinecraft().fontRendererObj;
-        // CHANGED: Updated GUI title branding from NotEnoughFakepixel to JustEnoughFakepixel.
-        TextRenderUtils.drawStringCenteredScaledMaxWidth("JustEnoughFakepixel" + EnumChatFormatting.RESET + ", config by " + EnumChatFormatting.DARK_PURPLE + "Moulberry", fr, x + xSize / 2f, y + 15, false, 200, 0xa0a0a0);
-        RenderUtils.drawFloatingRectDark(x + 4, y + 49 - 20, 140, ySize - 54 + 20, false);
+        TextRenderUtils.drawStringCenteredScaledMaxWidth("JustEnoughFakepixel" + " " + JefMod.VERSION + " by " + EnumChatFormatting.RED + "h4mlock", fr, x + xSize / 2f, y + 15, false, 380, 0xa0a0a0);        RenderUtils.drawFloatingRectDark(x + 4, y + 49 - 20, 180, ySize - 54 + 20, false);
 
         int innerPadding = 20 / adjScaleFactor;
         int innerLeft = x + 4 + innerPadding;
-        int innerRight = x + 144 - innerPadding;
+        int innerRight = x + 184 - innerPadding;
         int innerTop = y + 49 + innerPadding;
         int innerBottom = y + ySize - 5 - innerPadding;
-        Gui.drawRect(innerLeft, innerTop, innerLeft + 1, innerBottom, 0xff08080E); //Left
-        Gui.drawRect(innerLeft + 1, innerTop, innerRight, innerTop + 1, 0xff08080E); //Top
-        Gui.drawRect(innerRight - 1, innerTop + 1, innerRight, innerBottom, 0xff28282E); //Right
-        Gui.drawRect(innerLeft + 1, innerBottom - 1, innerRight - 1, innerBottom, 0xff28282E); //Bottom
-        Gui.drawRect(innerLeft + 1, innerTop + 1, innerRight - 1, innerBottom - 1, 0x6008080E); //Middle
+        Gui.drawRect(innerLeft, innerTop, innerLeft + 1, innerBottom, 0xff080808); //Left
+        Gui.drawRect(innerLeft + 1, innerTop, innerRight, innerTop + 1, 0xff080808); //Top
+        Gui.drawRect(innerRight - 1, innerTop + 1, innerRight, innerBottom, 0xff282828); //Right
+        Gui.drawRect(innerLeft + 1, innerBottom - 1, innerRight - 1, innerBottom, 0xff282828); //Bottom
+        Gui.drawRect(innerLeft + 1, innerTop + 1, innerRight - 1, innerBottom - 1, 0x60080808); //Middle
 
         GlScissorStack.push(0, innerTop + 1, scaledResolution.getScaledWidth(), innerBottom - 1, scaledResolution);
 
@@ -259,14 +324,53 @@ public class ConfigEditor extends GuiElement {
             if (selectedCategory == null || !currentConfigEditing.containsKey(selectedCategory)) {
                 setSelectedCategory(entry.getKey());
             }
-            String catName = entry.getValue().name;
-            if (entry.getKey().equals(getSelectedCategory())) {
-                catName = EnumChatFormatting.DARK_AQUA.toString() + EnumChatFormatting.UNDERLINE + catName;
-            } else {
-                catName = EnumChatFormatting.GRAY + catName;
+            String catKey = entry.getKey();
+            ConfigProcessor.ProcessedCategory cat = entry.getValue();
+            boolean hasSubcats = !cat.subcategories.isEmpty();
+            boolean isExpanded = expandedCategories.contains(catKey);
+
+            // Unicode arrow, left-aligned just right of the scrollbar
+            if (hasSubcats) {
+                String arrow = isExpanded ? "\u25BC" : "\u25B6";
+                GlStateManager.pushMatrix();
+                GlStateManager.translate(innerLeft + 9, y + 70 + catY - 4, 0);
+                GlStateManager.scale(1.5f, 1.5f, 1f);
+                fr.drawString(arrow, 0, 0, 0xFFAAAAAA);
+                GlStateManager.popMatrix();
             }
-            TextRenderUtils.drawStringCenteredScaledMaxWidth(catName, fr, x + 75, y + 70 + catY, false, 100, -1);
+
+            // Draw category name centered, without arrow prefix
+            String catName;
+            if (catKey.equals(getSelectedCategory()) && selectedSubcategory == null) {
+                catName = EnumChatFormatting.DARK_AQUA + "" + EnumChatFormatting.UNDERLINE + cat.name;
+            } else if (catKey.equals(getSelectedCategory())) {
+                catName = EnumChatFormatting.AQUA + cat.name;
+            } else {
+                catName = EnumChatFormatting.GRAY + cat.name;
+            }
+            TextRenderUtils.drawStringCenteredScaledMaxWidth(catName, fr, x + 95, y + 70 + catY, false, 130, -1);
             catY += 15;
+
+            if (isExpanded && hasSubcats) {
+                List<Map.Entry<String, ConfigProcessor.ProcessedSubcategory>> visibleSubs = getVisibleSubcategories(cat);
+                int subCount = visibleSubs.size();
+                // Vertical line just right of the scrollbar, spanning exactly the subcategory rows
+                int lineX = innerLeft + 11;
+                int lineTopY    = y + 70 + catY - 6;
+                int lineBottomY = y + 70 + catY + (subCount - 1) * 13 + 6;
+                Gui.drawRect(lineX, lineTopY, lineX + 1, lineBottomY, 0xff007272);
+
+                for (Map.Entry<String, ConfigProcessor.ProcessedSubcategory> subEntry : visibleSubs) {
+                    boolean subSel = catKey.equals(getSelectedCategory()) && subEntry.getKey().equals(selectedSubcategory);
+                    // Selected: bright aqua underline. Unselected: dark gray (hard to miss but clearly inactive)
+                    String subName = subSel
+                            ? EnumChatFormatting.DARK_AQUA + "" + EnumChatFormatting.UNDERLINE + subEntry.getValue().name
+                            : EnumChatFormatting.DARK_GRAY + subEntry.getValue().name;
+                    TextRenderUtils.drawStringCenteredScaledMaxWidth(subName, fr, x + 95, y + 70 + catY, false, 120, -1);
+                    catY += 13;
+                }
+            }
+
             if (catY > 0) {
                 catBarSize = LerpUtils.clampZeroOne((float) (innerBottom - innerTop - 2) / (catY + 5 + categoryScroll.getValue()));
             }
@@ -285,16 +389,16 @@ public class ConfigEditor extends GuiElement {
             }
         }
         int catDist = innerBottom - innerTop - 12;
-        Gui.drawRect(innerLeft + 2, innerTop + 5, innerLeft + 7, innerBottom - 5, 0xff101010);
-        Gui.drawRect(innerLeft + 3, innerTop + 6 + (int) (catDist * catBarStart), innerLeft + 6, innerTop + 6 + (int) (catDist * catBarEnd), 0xff303030);
+        Gui.drawRect(innerLeft + 2, innerTop + 5, innerLeft + 7, innerBottom - 5, 0xff0d0d0d);
+        Gui.drawRect(innerLeft + 3, innerTop + 6 + (int) (catDist * catBarStart), innerLeft + 6, innerTop + 6 + (int) (catDist * catBarEnd), 0xff3a3a3a);
 
         GlScissorStack.pop(scaledResolution);
 
-        TextRenderUtils.drawStringCenteredScaledMaxWidth("Categories", fr, x + 75, y + 44, false, 120, 0xa368ef);
+        TextRenderUtils.drawStringCenteredScaledMaxWidth("Categories", fr, x + 95, y + 44, false, 120, 0x00b8b8);
 
-        RenderUtils.drawFloatingRectDark(x + 149, y + 29, xSize - 154, ySize - 34, false);
+        RenderUtils.drawFloatingRectDark(x + 189, y + 29, xSize - 194, ySize - 34, false);
 
-        innerLeft = x + 149 + innerPadding;
+        innerLeft = x + 189 + innerPadding;
         innerRight = x + xSize - 5 - innerPadding;
         innerBottom = y + ySize - 5 - innerPadding;
 
@@ -330,11 +434,11 @@ public class ConfigEditor extends GuiElement {
             TextRenderUtils.drawStringScaledMaxWidth(cat.desc, fr, innerLeft + 5, y + 40, true, innerRight - innerLeft - rightStuffLen - 10, 0xb0b0b0);
         }
 
-        Gui.drawRect(innerLeft, innerTop, innerLeft + 1, innerBottom, 0xff08080E); //Left
-        Gui.drawRect(innerLeft + 1, innerTop, innerRight, innerTop + 1, 0xff08080E); //Top
-        Gui.drawRect(innerRight - 1, innerTop + 1, innerRight, innerBottom, 0xff303036); //Right
-        Gui.drawRect(innerLeft + 1, innerBottom - 1, innerRight - 1, innerBottom, 0xff303036); //Bottom
-        Gui.drawRect(innerLeft + 1, innerTop + 1, innerRight - 1, innerBottom - 1, 0x6008080E); //Middle
+        Gui.drawRect(innerLeft, innerTop, innerLeft + 1, innerBottom, 0xff080808); //Left
+        Gui.drawRect(innerLeft + 1, innerTop, innerRight, innerTop + 1, 0xff080808); //Top
+        Gui.drawRect(innerRight - 1, innerTop + 1, innerRight, innerBottom, 0xff303030); //Right
+        Gui.drawRect(innerLeft + 1, innerBottom - 1, innerRight - 1, innerBottom, 0xff303030); //Bottom
+        Gui.drawRect(innerLeft + 1, innerTop + 1, innerRight - 1, innerBottom - 1, 0x60080808); //Middle
 
         GlScissorStack.push(innerLeft + 1, innerTop + 1, innerRight - 1, innerBottom - 1, scaledResolution);
         float barSize = 1;
@@ -439,8 +543,8 @@ public class ConfigEditor extends GuiElement {
             }
         }
         int dist = innerBottom - innerTop - 12;
-        Gui.drawRect(innerRight - 10, innerTop + 5, innerRight - 5, innerBottom - 5, 0xff101010);
-        Gui.drawRect(innerRight - 9, innerTop + 6 + (int) (dist * optionsBarStart), innerRight - 6, innerTop + 6 + (int) (dist * optionsBarend), 0xff303030);
+        Gui.drawRect(innerRight - 10, innerTop + 5, innerRight - 5, innerBottom - 5, 0xff0d0d0d);
+        Gui.drawRect(innerRight - 9, innerTop + 6 + (int) (dist * optionsBarStart), innerRight - 6, innerTop + 6 + (int) (dist * optionsBarend), 0xff3a3a3a);
 
         for (int socialIndex = 0; socialIndex < socialsIco.length; socialIndex++) {
             Minecraft.getMinecraft().getTextureManager().bindTexture(socialsIco[socialIndex]);
@@ -468,7 +572,7 @@ public class ConfigEditor extends GuiElement {
         int width = scaledResolution.getScaledWidth();
         int height = scaledResolution.getScaledHeight();
 
-        int xSize = Math.min(width - 100 / scaledResolution.getScaleFactor(), 500);
+        int xSize = Math.min(width - 100 / scaledResolution.getScaleFactor(), 540);
         int ySize = Math.min(height - 100 / scaledResolution.getScaleFactor(), 400);
 
         int x = (scaledResolution.getScaledWidth() - xSize) / 2;
@@ -479,7 +583,7 @@ public class ConfigEditor extends GuiElement {
         int innerPadding = 20 / adjScaleFactor;
         int innerTop = y + 49 + innerPadding;
         int innerBottom = y + ySize - 5 - innerPadding;
-        int innerLeft = x + 149 + innerPadding;
+        int innerLeft = x + 189 + innerPadding;
         int innerRight = x + xSize - 5 - innerPadding;
 
         int dist = innerBottom - innerTop - 12;
@@ -489,7 +593,11 @@ public class ConfigEditor extends GuiElement {
         int optionsBarEndX = innerRight - 3;
 
         int categoryY = -categoryScroll.getValue();
-        categoryY += 15 * getCurrentConfigEditing().size();
+        for (Map.Entry<String, ConfigProcessor.ProcessedCategory> _e : getCurrentConfigEditing().entrySet()) {
+            categoryY += 15;
+            if (expandedCategories.contains(_e.getKey()))
+                categoryY += getVisibleSubcategories(_e.getValue()).size() * 13;
+        }
         int catDist = innerBottom - innerTop - 12;
         float catBarStart = categoryScroll.getValue() / (float) (categoryY + categoryScroll.getValue());
         float categoryBarSize = LerpUtils.clampZeroOne((float) (innerBottom - innerTop - 2) / (categoryY + 5 + categoryScroll.getValue()));
@@ -549,6 +657,8 @@ public class ConfigEditor extends GuiElement {
                     }
 
                     catY += 15;
+                    if (expandedCategories.contains(entry.getKey()))
+                        catY += getVisibleSubcategories(entry.getValue()).size() * 13;
                     if (catY > 0) {
                         catBarSize = LerpUtils.clampZeroOne((float) (innerBottom - innerTop - 2) / (catY + 5 + newTarget));
                     }
@@ -616,10 +726,29 @@ public class ConfigEditor extends GuiElement {
                         setSelectedCategory(entry.getKey());
                     }
                     if (mouseX >= x + 5 && mouseX <= x + 145 && mouseY >= y + 70 + catY - 7 && mouseY <= y + 70 + catY + 7) {
-                        setSelectedCategory(entry.getKey());
+                        String ck = entry.getKey();
+                        if (ck.equals(selectedCategory) && selectedSubcategory != null) {
+                            // Inside a subcategory — clicking parent takes you to its own config (clears subcat)
+                            selectedSubcategory = null;
+                            optionsScroll.setValue(0);
+                        } else if (ck.equals(selectedCategory) && selectedSubcategory == null && expandedCategories.contains(ck) && !entry.getValue().subcategories.isEmpty()) {
+                            // Already on parent with no subcat selected — collapse it
+                            expandedCategories.remove(ck);
+                        } else {
+                            setSelectedCategory(ck);
+                        }
                         return true;
                     }
                     catY += 15;
+                    if (expandedCategories.contains(entry.getKey())) {
+                        for (Map.Entry<String, ConfigProcessor.ProcessedSubcategory> subEntry : getVisibleSubcategories(entry.getValue())) {
+                            if (mouseX >= x + 5 && mouseX <= x + 145 && mouseY >= y + 70 + catY - 6 && mouseY <= y + 70 + catY + 6) {
+                                setSelectedSubcategory(entry.getKey(), subEntry.getKey());
+                                return true;
+                            }
+                            catY += 13;
+                        }
+                    }
                 }
             }
 
@@ -717,12 +846,12 @@ public class ConfigEditor extends GuiElement {
         ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
         int width = scaledResolution.getScaledWidth();
 
-        int xSize = Math.min(width - 100 / scaledResolution.getScaleFactor(), 500);
+        int xSize = Math.min(width - 100 / scaledResolution.getScaleFactor(), 540);
 
         int adjScaleFactor = Math.max(2, scaledResolution.getScaleFactor());
 
         int innerPadding = 20 / adjScaleFactor;
-        int innerWidth = xSize - 154 - innerPadding * 2;
+        int innerWidth = xSize - 194 - innerPadding * 2;
 
         if (Keyboard.getEventKeyState()) {
             String old = searchField.getText();
@@ -778,7 +907,29 @@ public class ConfigEditor extends GuiElement {
                 target.setTarget(target.getTarget() - 5);
             }
         }
+
+        if (searchField.getFocus()) {
+            int heldKey = 0;
+            if      (Keyboard.isKeyDown(Keyboard.KEY_BACK))   heldKey = Keyboard.KEY_BACK;
+            else if (Keyboard.isKeyDown(Keyboard.KEY_DELETE))  heldKey = Keyboard.KEY_DELETE;
+
+            if (heldKey != 0) {
+                long now = System.currentTimeMillis();
+                if (searchRepeatKey != heldKey) {
+
+                    searchRepeatKey   = heldKey;
+                    searchRepeatStart = now;
+                    searchRepeatLast  = now;
+                } else if (now - searchRepeatStart >= SEARCH_REPEAT_DELAY_MS
+                        && now - searchRepeatLast  >= SEARCH_REPEAT_RATE_MS) {
+                    searchRepeatLast = now;
+                    String old = searchField.getText();
+                    searchField.keyTyped((char) 0, heldKey);
+                    if (!searchField.getText().equals(old)) search();
+                }
+            } else {
+                searchRepeatKey = 0;
+            }
+        }
     }
 }
-
-//duplicating elements on search

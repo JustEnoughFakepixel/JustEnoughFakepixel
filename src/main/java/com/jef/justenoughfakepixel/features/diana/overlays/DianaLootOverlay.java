@@ -30,27 +30,27 @@ public class DianaLootOverlay extends Overlay {
 
     @Override
     public Position getPosition() {
-        return JefConfig.feature.diana.lootOverlayPos;
+        return JefConfig.feature.diana.lootOverlay.lootOverlayPos;
     }
 
     @Override
     public float getScale() {
-        return JefConfig.feature.diana.lootScale;
+        return JefConfig.feature.diana.lootOverlay.lootScale;
     }
 
     @Override
     public int getBgColor() {
-        return ChromaColour.specialToChromaRGB(JefConfig.feature.diana.lootBgColor);
+        return ChromaColour.specialToChromaRGB(JefConfig.feature.diana.lootOverlay.lootBgColor);
     }
 
     @Override
     public int getCornerRadius() {
-        return JefConfig.feature.diana.lootCornerRadius;
+        return JefConfig.feature.diana.lootOverlay.lootCornerRadius;
     }
 
     @Override
     protected boolean isEnabled() {
-        return JefConfig.feature.diana.enabled && JefConfig.feature.diana.showLootOverlay;
+        return JefConfig.feature.diana.enabled && JefConfig.feature.diana.lootOverlay.showLootOverlay;
     }
 
     @Override

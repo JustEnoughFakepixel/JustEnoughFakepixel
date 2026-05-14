@@ -24,27 +24,27 @@ public class ItemInvincibilityOverlay extends TimerOverlay {
 
     @Override
     public Position getPosition() {
-        return JefConfig.feature.qol.itemInvincibilityPos;
+        return JefConfig.feature.qol.invincibility.itemInvincibilityPos;
     }
 
     @Override
     public float getScale() {
-        return JefConfig.feature.qol.itemInvincibilityScale;
+        return JefConfig.feature.qol.invincibility.itemInvincibilityScale;
     }
 
     @Override
     public int getBgColor() {
-        return ChromaColour.specialToChromaRGB(JefConfig.feature.qol.itemInvincibilityBgColor);
+        return ChromaColour.specialToChromaRGB(JefConfig.feature.qol.invincibility.itemInvincibilityBgColor);
     }
 
     @Override
     public int getCornerRadius() {
-        return JefConfig.feature.qol.itemInvincibilityCornerRadius;
+        return JefConfig.feature.qol.invincibility.itemInvincibilityCornerRadius;
     }
 
     @Override
     protected boolean isEnabled() {
-        return JefConfig.feature != null && JefConfig.feature.qol.itemInvincibilityOverlay;
+        return JefConfig.feature != null && JefConfig.feature.qol.invincibility.itemInvincibilityOverlay;
     }
 
     @Override
@@ -69,7 +69,7 @@ public class ItemInvincibilityOverlay extends TimerOverlay {
 
     @Override
     protected boolean shouldShowWhenEmpty() {
-        return JefConfig.feature != null && JefConfig.feature.qol.itemInvincibilityShowWhenEmpty;
+        return JefConfig.feature != null && JefConfig.feature.qol.invincibility.itemInvincibilityShowWhenEmpty;
     }
 
     @Override

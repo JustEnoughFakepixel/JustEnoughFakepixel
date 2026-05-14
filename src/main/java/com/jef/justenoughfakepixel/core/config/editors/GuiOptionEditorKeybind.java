@@ -11,11 +11,13 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
+import com.jef.justenoughfakepixel.core.config.gui.GuiTextures;
+
 import static com.jef.justenoughfakepixel.core.config.gui.GuiTextures.button_tex;
 
 public class GuiOptionEditorKeybind extends GuiOptionEditor {
 
-    private static final ResourceLocation RESET = new ResourceLocation("justenoughfakepixel:core/reset.png");
+    private static final ResourceLocation RESET = GuiTextures.RESET;
 
     private int keyCode;
     private final int defaultKeyCode;

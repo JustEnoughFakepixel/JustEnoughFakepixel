@@ -4,12 +4,9 @@ import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.ISound;
-import net.minecraft.client.audio.PositionedSound;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.projectile.EntityFishHook;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -20,7 +17,7 @@ public class FishingTimerOverlay {
     private boolean alertPlayed = false;
 
     private boolean isEnabled() {
-        return JefConfig.feature != null && JefConfig.feature.fishing.fishingTimer;
+        return JefConfig.feature != null && JefConfig.feature.fishing.fishingTimerConfig.fishingTimer;
     }
 
     @SubscribeEvent
@@ -38,7 +35,7 @@ public class FishingTimerOverlay {
         }
 
         float seconds = hook.ticksExisted / 20f;
-        int alertTime = JefConfig.feature.fishing.fishingTimerAlertTime;
+        int alertTime = JefConfig.feature.fishing.fishingTimerConfig.fishingTimerAlertTime;
 
         if (seconds >= alertTime && !alertPlayed) {
             alertPlayed = true;
@@ -49,17 +46,7 @@ public class FishingTimerOverlay {
     }
 
     private void playAlertSound() {
-        try {
-            ISound sound = new PositionedSound(new ResourceLocation("random.orb")) {{
-                volume = 1f;
-                pitch = 2f;
-                repeat = false;
-                repeatDelay = 0;
-                attenuationType = ISound.AttenuationType.NONE;
-            }};
-            Minecraft.getMinecraft().getSoundHandler().playSound(sound);
-        } catch (Exception ignored) {
-        }
+        com.jef.justenoughfakepixel.utils.SoundUtils.playSound("random.orb", 1f, 2f);
     }
 
     @SubscribeEvent
@@ -94,9 +81,9 @@ public class FishingTimerOverlay {
         if (mc.thePlayer == null || mc.thePlayer.fishEntity == null) return 0xFFFFFFFF;
 
         float seconds = mc.thePlayer.fishEntity.ticksExisted / 20f;
-        boolean alerted = seconds >= JefConfig.feature.fishing.fishingTimerAlertTime;
+        boolean alerted = seconds >= JefConfig.feature.fishing.fishingTimerConfig.fishingTimerAlertTime;
 
-        return ChromaColour.specialToChromaRGB(alerted ? JefConfig.feature.fishing.fishingTimerAlertColor : JefConfig.feature.fishing.fishingTimerNormalColor);
+        return ChromaColour.specialToChromaRGB(alerted ? JefConfig.feature.fishing.fishingTimerConfig.fishingTimerAlertColor : JefConfig.feature.fishing.fishingTimerConfig.fishingTimerNormalColor);
     }
 
     private void renderText(double x, double y, double z, String text, int color) {

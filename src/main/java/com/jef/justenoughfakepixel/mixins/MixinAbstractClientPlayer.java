@@ -1,10 +1,11 @@
 package com.jef.justenoughfakepixel.mixins;
 
-import com.jef.justenoughfakepixel.JefMod;
 import com.jef.justenoughfakepixel.features.capes.Cape;
 import com.jef.justenoughfakepixel.features.capes.CapeManager;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.network.NetworkPlayerInfo;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -23,22 +24,16 @@ public class MixinAbstractClientPlayer {
         if (this.playerInfo == null) return;
 
         String user = this.playerInfo.getGameProfile().getName();
-        if (user == null || user.isEmpty()) {  return; }
+        EntityPlayer player = Minecraft.getMinecraft().theWorld.getPlayerEntityByName(user);
+        if(player == null) return;
+        if(Minecraft.getMinecraft().thePlayer.getPosition().distanceSq(
+                player.getPosition()
+        ) > 65536) return;
 
-        if (user.startsWith(CapeManager.MOD_SECRET)) {
-            String[] parts = user.split("-", 2);
-            if (parts.length == 2) {
-                String capeID = parts[1];
-                Cape cape = CapeManager.getCape(capeID);
-                if (cape == null || !cape.isLoaded()) {  return; }
-                JefMod.logger.info("[Mixin] Returning preview cape: " + cape.resourceLocation);
-                cir.setReturnValue(cape.resourceLocation);
-            }
-            return;
+        if(CapeManager.doesntHaveCape(user)) {
+            CapeManager.fetchCapeAsync(user);
         }
-
-        CapeManager.fetchCapeAsync(user);
-        if (!CapeManager.hasCape(user)) {  return; }
+        if (CapeManager.doesntHaveCape(user)) {  return; }
 
         Cape cape = CapeManager.getCapeForPlayer(user);
         if (cape == null) {  return; }

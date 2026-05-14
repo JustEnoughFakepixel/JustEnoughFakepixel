@@ -39,7 +39,7 @@ public class ChestListener {
 
     @SubscribeEvent
     public void onGuiOpen(GuiOpenEvent event) {
-        if (JefConfig.feature == null || !JefConfig.feature.dungeons.caseOpeningAnimation) return;
+        if (JefConfig.feature == null || !JefConfig.feature.dungeons.caseOpening.caseOpeningAnimation) return;
         if (!(event.gui instanceof GuiChest)) return;
 
         originalGui = (GuiChest) event.gui;

@@ -2,7 +2,7 @@ package com.jef.justenoughfakepixel.features.qol.helpers;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
-import com.jef.justenoughfakepixel.mixins.FontRendererAccessor;
+import com.jef.justenoughfakepixel.mixins.accessors.FontRendererAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -21,7 +21,7 @@ public class EnchantChromaRenderer {
     public static void beginRenderString(String text, boolean shadow) {
         chromaOn = false;
         renderingShadow = shadow;
-        chromaActive = JefConfig.feature != null && JefConfig.feature.qol.enchantChroma && text != null && (text.contains("§z") || text.contains("§Z"));
+        chromaActive = JefConfig.feature != null && JefConfig.feature.qol.enchantParser.enchantChroma && text != null && (text.contains("§z") || text.contains("§Z"));
     }
 
     public static void onChromaCode() {
@@ -37,7 +37,7 @@ public class EnchantChromaRenderer {
 
         FontRenderer fr = Minecraft.getMinecraft().fontRendererObj;
         FontRendererAccessor accessor = (FontRendererAccessor) fr;
-        int base = ChromaColour.specialToChromaRGB(JefConfig.feature.qol.enchantPerfectColor);
+        int base = ChromaColour.specialToChromaRGB(JefConfig.feature.qol.enchantParser.enchantPerfectColor);
         int rgb = applyMode(base, accessor.jef$getPosX(), accessor.jef$getPosY());
         if (renderingShadow) {
             int a = (rgb >>> 24) & 255;
@@ -57,8 +57,8 @@ public class EnchantChromaRenderer {
     }
 
     private static int applyMode(int argb, float x, float y) {
-        if (JefConfig.feature.qol.enchantChromaMode == 0) return argb;
-        float size = Math.max(1F, JefConfig.feature.qol.enchantChromaSize);
+        if (JefConfig.feature.qol.enchantParser.enchantChromaMode == 0) return argb;
+        float size = Math.max(1F, JefConfig.feature.qol.enchantParser.enchantChromaSize);
         float shift = ((x + y) / size) % 1F;
         int a = (argb >>> 24) & 255;
         int r = (argb >>> 16) & 255;

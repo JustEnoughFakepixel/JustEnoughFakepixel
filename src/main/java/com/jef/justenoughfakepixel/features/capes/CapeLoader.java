@@ -99,7 +99,6 @@ public class CapeLoader {
 
     private static void loadTextureForCape(Cape cape) throws Exception {
         String textureUrl = RAW_BASE + "/capeTextures/" + cape.texture;
-        JefMod.logger.info("[CapeLoader] Fetching texture: " + textureUrl);
 
         BufferedImage image = fetchImage(textureUrl);
         if (image == null) throw new Exception("Failed to fetch texture: " + cape.texture);

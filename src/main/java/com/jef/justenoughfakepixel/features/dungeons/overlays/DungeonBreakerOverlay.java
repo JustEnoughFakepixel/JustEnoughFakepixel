@@ -65,27 +65,27 @@ public class DungeonBreakerOverlay extends Overlay {
 
     @Override
     public Position getPosition() {
-        return JefConfig.feature.dungeons.dungeonBreakerPos;
+        return JefConfig.feature.dungeons.dungeonBreaker.dungeonBreakerPos;
     }
 
     @Override
     public float getScale() {
-        return JefConfig.feature.dungeons.dungeonBreakerScale;
+        return JefConfig.feature.dungeons.dungeonBreaker.dungeonBreakerScale;
     }
 
     @Override
     public int getBgColor() {
-        return ChromaColour.specialToChromaRGB(JefConfig.feature.dungeons.dungeonBreakerBgColor);
+        return ChromaColour.specialToChromaRGB(JefConfig.feature.dungeons.dungeonBreaker.dungeonBreakerBgColor);
     }
 
     @Override
     public int getCornerRadius() {
-        return JefConfig.feature.dungeons.dungeonBreakerCornerRadius;
+        return JefConfig.feature.dungeons.dungeonBreaker.dungeonBreakerCornerRadius;
     }
 
     @Override
     protected boolean isEnabled() {
-        return JefConfig.feature.dungeons.dungeonBreakerOverlay;
+        return JefConfig.feature.dungeons.dungeonBreaker.dungeonBreakerOverlay;
     }
 
     @Override

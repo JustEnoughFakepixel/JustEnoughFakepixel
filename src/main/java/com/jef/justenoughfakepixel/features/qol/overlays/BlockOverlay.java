@@ -30,21 +30,21 @@ public class BlockOverlay {
 
     @SubscribeEvent
     public void onDrawBlockHighlight(DrawBlockHighlightEvent event) {
-        if (!JefConfig.feature.qol.blockSelectionOverlay) return;
+        if (!JefConfig.feature.qol.blockSelection.blockSelectionOverlay) return;
         if (event.target == null || event.target.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) return;
 
         event.setCanceled(true);
 
-        int argb = ChromaColour.specialToChromaRGB(JefConfig.feature.qol.blockSelectionColor);
+        int argb = ChromaColour.specialToChromaRGB(JefConfig.feature.qol.blockSelection.blockSelectionColor);
         Color color = new Color((argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF, (argb >> 24) & 0xFF);
 
         BlockPos pos = event.target.getBlockPos();
         AxisAlignedBB aabb = getSelectionAABB(pos);
 
-        if (JefConfig.feature.qol.blockSelectionMode == 0) {
+        if (JefConfig.feature.qol.blockSelection.blockSelectionMode == 0) {
             WorldRenderUtils.drawFilledBlock(aabb, color);
         } else {
-            WorldRenderUtils.drawSelectionBox(aabb, color, JefConfig.feature.qol.blockSelectionThickness);
+            WorldRenderUtils.drawSelectionBox(aabb, color, JefConfig.feature.qol.blockSelection.blockSelectionThickness);
         }
     }
 }

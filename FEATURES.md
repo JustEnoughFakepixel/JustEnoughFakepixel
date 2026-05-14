@@ -3,8 +3,8 @@
 
 ## QoL
 
-- **Block Selection Overlay** — Replaces the vanilla block selection with a custom filled or outline highlight.
-- **Enchant Parser** — Colors enchants by level, sorts ultimates to the top, and supports normal/compressed/expanded layout and chroma animation.
+- **Block Selection Overlay** — Replaces the vanilla block selection with a custom filled or outline highlight.00
+- **Enchant Parser** — Colors enchants by level, sorts ultimates to the top, supports normal/compressed/expanded layout and chroma(rainbow) animation.
 - **Gyro Wand Helper** — Shows the AoE ring when holding the Gyrokinetic Wand, plus a cooldown timer.
 - **Roman Numerals** — Converts Roman numerals to integers.
 - **Prevent Cursor Reset** — Stops the mouse cursor from resetting when opening GUIs.
@@ -13,6 +13,9 @@
 - **Brewing Helper** — Highlights brewing stands.
 - **Missing Enchants** — Hold Shift on an enchanted item to see missing enchants.
 - **Confirm Disconnect** — Makes you click twice to disconnect so you don't do it by accident.
+- **Chat State Restore** — Restores your chat text when server closes chat.
+- **Profile Parser (SkyAtlas)** — Parse your skyblock profiles for SkyAtlas. A web-based profile viewer.
+
 
 
 ## Misc
@@ -29,7 +32,11 @@
 - **No Swap Animation** — Removes the item lowering animation when switching hotbar slots.
 - **Show Own Nametag** — Shows your own nametag in third person.
 - **Disable Entity Fire** — Hides the fire overlay on burning entities.
-- **SkyBlock XP in Chat** — Sends SkyBlock XP gains from the action bar into chat. *(Needs server support; probably won't work on Hypixel.)*
+- **SkyBlock XP in Chat** — Sends SkyBlock XP gains from the action bar into chat. *(Needs server support)*
+- **DVD Screensaver** — Adds a bouncing DVD logo screensaver.
+- **Hoppity Rabbit Highlight** — Highlights NEW rabbits in Hoppity.
+- **JEFProtect** — Item protection system. Use `/jefprotect` while holding an item to protect it.
+- **Sign Calculator** — Advanced calculator with expression support in signs.
 
 
 ## Dungeons
@@ -45,8 +52,10 @@
 ## Mining
 
 - **Fetchur Overlay** — Shows today's Fetchur item.
-- **Gemstone Powder Tracker** — Tracks powder and chest drops in Crystal Hollows.
+- **Powder Tracker** — Tracks gemstone powder, chest drops, and goblin eggs in Crystal Hollows. Excludes PRISTINE drops.
+- **Pristine Tracker** — Dedicated tracker for PRISTINE gemstone drops with rates/hour.
 - **HOTM Powder Display** — Adds powder spent vs. max cost to HOTM perk tooltips; hold Shift to see the cost for the next 10 levels.
+- **Commission Highlight** — Highlights completed commissions in green inside the Commissions menu.
 
 
 ## Fishing
@@ -67,11 +76,18 @@
 ## Farming
 
 - **Lock Mouse** — Locks your yaw and pitch so you don't accidentally move the camera while farming.
+- **BPS Overlay** — Shows blocks broken per second while farming.
 
 
 ## Scoreboard
 
-- **Custom Scoreboard** — Replaces the vanilla sidebar with a custom one. Lines, order, colors, and scale are configurable.
+- **Custom Scoreboard** — Replaces the vanilla sidebar with a custom one.
+  - Configurable lines, order, colors, scale, and alignment
+  - Minimum width setting to prevent shrinking too small
+  - Hide when Tab is held
+  - Background color and corner radius customization
+  - Drag-to-reorder lines with bin to hide unrecognized lines
+
 
 ## Cosmetics
 
@@ -84,6 +100,7 @@
 - **Jump To Active** — Automatically center the active storage container in overlay.
 - **Multiple themes** — Storage overlay has themes "Default", "Dark", "Wooden", "Ender", "Parchment" to select from.
 
+
 ## Waypoints
 
 - **JEF Ordered Waypoints** — `/jw guide`
@@ -91,18 +108,21 @@
 - **Auto Advance** — Automatically moves to the next waypoint when you're close enough for long enough.
 
 
+
 ## Commands
 
-+ `/jef [category]` — Opens the JEF config, optionally jumping to a category.
++ `/jef` — Opens the main JEF menu.
++ `/jef config [category]` — Opens the JEF config, optionally jumping to a category.
 + `/jef reload` — Reloads repo data (timers and other remote config).
 + `/diana <reset|toggle>` — Resets or pauses Diana tracking.
 + `/pdt <reset|toggle>` (`/powdertracker`) — Resets or pauses the powder tracker.
++ `/prt <reset|toggle>` (`/pristinetracker`) — Resets or pauses the pristine tracker.
 + `/lockmouse` — Toggles mouse lock.
 + `/jw guide` — All the commands for JEF ordered waypoints.
 + `/waypoint` — Opens the waypoint group manager.
 + `/jefbuttons` — Opens the inventory button editor.
 + `/capes` — Opens the JEF capes manager.
-
++ `/jefprotect` — Protects the item you're holding from accidental drops/sales.
 
 
 ## Party Commands

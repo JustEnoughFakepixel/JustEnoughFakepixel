@@ -30,27 +30,27 @@ public class DungeonRoomOverlay extends Overlay {
 
     @Override
     public Position getPosition() {
-        return JefConfig.feature.dungeons.dungeonRoomOverlayPos;
+        return JefConfig.feature.dungeons.dungeonRoomOverlayConfig.dungeonRoomOverlayPos;
     }
 
     @Override
     public float getScale() {
-        return JefConfig.feature.dungeons.dungeonRoomOverlayScale;
+        return JefConfig.feature.dungeons.dungeonRoomOverlayConfig.dungeonRoomOverlayScale;
     }
 
     @Override
     public int getBgColor() {
-        return ChromaColour.specialToChromaRGB(JefConfig.feature.dungeons.dungeonRoomOverlayBgColor);
+        return ChromaColour.specialToChromaRGB(JefConfig.feature.dungeons.dungeonRoomOverlayConfig.dungeonRoomOverlayBgColor);
     }
 
     @Override
     public int getCornerRadius() {
-        return JefConfig.feature.dungeons.dungeonRoomOverlayCornerRadius;
+        return JefConfig.feature.dungeons.dungeonRoomOverlayConfig.dungeonRoomOverlayCornerRadius;
     }
 
     @Override
     protected boolean isEnabled() {
-        return JefConfig.feature.dungeons.dungeonRoomOverlay;
+        return JefConfig.feature.dungeons.dungeonRoomOverlayConfig.dungeonRoomOverlay;
     }
 
     @Override

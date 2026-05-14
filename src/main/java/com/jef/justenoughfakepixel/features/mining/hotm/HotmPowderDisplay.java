@@ -36,7 +36,7 @@ public class HotmPowderDisplay {
 
         String label = "§7" + perk.powderType.displayName + " spent: ";
 
-        switch (JefConfig.feature.mining.hotmPowderSpentDesign) {
+        switch (JefConfig.feature.mining.hotmPowder.hotmPowderSpentDesign) {
             case 1:
                 return isMax ? label + "§e" + fmt2(pct) + "% §7(§aMax level§7)" : label + "§e" + fmt2(pct) + "%§7 of max";
             case 2:
@@ -53,7 +53,7 @@ public class HotmPowderDisplay {
         if (rawLevel < 0) return;
         rawLevel = Math.min(rawLevel, CoreOfTheMountainData.MAX_LEVEL);
 
-        if (JefConfig.feature.mining.hotmPowderSpent) {
+        if (JefConfig.feature.mining.hotmPowder.hotmPowderSpent) {
             java.util.Map<HotmPerkData.PowderType, Long> spent = CoreOfTheMountainData.cumulativeCost(rawLevel);
             boolean isMax = rawLevel >= CoreOfTheMountainData.MAX_LEVEL;
             java.util.Map<HotmPerkData.PowderType, Long> max   = CoreOfTheMountainData.cumulativeCost(CoreOfTheMountainData.MAX_LEVEL);
@@ -74,7 +74,7 @@ public class HotmPowderDisplay {
             }
         }
 
-        if (JefConfig.feature.mining.hotmPowderFor10Levels && rawLevel < CoreOfTheMountainData.MAX_LEVEL) {
+        if (JefConfig.feature.mining.hotmPowder.hotmPowderFor10Levels && rawLevel < CoreOfTheMountainData.MAX_LEVEL) {
             int costIndex = indexOfCostLine(tip);
             if (!Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) && !Keyboard.isKeyDown(Keyboard.KEY_RSHIFT)) {
                 if (!tip.contains(SHIFT_HINT)) tip.add(SHIFT_HINT);
@@ -139,7 +139,7 @@ public class HotmPowderDisplay {
     @SubscribeEvent
     public void onTooltip(ItemTooltipEvent event) {
         if (JefConfig.feature == null) return;
-        if (!JefConfig.feature.mining.hotmPowderSpent && !JefConfig.feature.mining.hotmPowderFor10Levels) return;
+        if (!JefConfig.feature.mining.hotmPowder.hotmPowderSpent && !JefConfig.feature.mining.hotmPowder.hotmPowderFor10Levels) return;
         if (event.toolTip == null || event.itemStack == null) return;
         if (!HOTM_TITLE.equals(getContainerName())) return;
 
@@ -162,11 +162,11 @@ public class HotmPowderDisplay {
 
         List<String> tip = event.toolTip;
 
-        if (JefConfig.feature.mining.hotmPowderSpent) {
+        if (JefConfig.feature.mining.hotmPowder.hotmPowderSpent) {
             tip.add(2, buildSpentLine(perk, rawLevel));
         }
 
-        if (JefConfig.feature.mining.hotmPowderFor10Levels && rawLevel < perk.maxLevel) {
+        if (JefConfig.feature.mining.hotmPowder.hotmPowderFor10Levels && rawLevel < perk.maxLevel) {
             int costIndex = indexOfCostLine(tip);
 
             if (!Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) && !Keyboard.isKeyDown(Keyboard.KEY_RSHIFT)) {

@@ -3,7 +3,7 @@ import org.apache.commons.lang3.SystemUtils
 plugins {
     idea
     java
-    id("gg.essential.loom") version "0.10.0.+"
+    id("gg.essential.loom") version "0.10.0.5"
     kotlin("jvm") version "1.8.21"
     id("dev.architectury.architectury-pack200") version "0.1.3"
     id("com.github.johnrengelman.shadow") version "8.1.1"
@@ -63,6 +63,8 @@ sourceSets.main {
 repositories {
     mavenCentral()
     maven("https://repo.spongepowered.org/maven/")
+    maven("https://maven.minecraftforge.net/")
+    maven("https://files.minecraftforge.net/maven/")
     maven("https://repo.essential.gg/repository/maven-public/")
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
 }
@@ -80,7 +82,10 @@ dependencies {
         isTransitive = false
     }
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT")
-    implementation(kotlin("stdlib"))
+
+    // Kotlin standard library, must be shadowed into the JAR
+    shadowImpl(kotlin("stdlib"))
+
     compileOnly("org.projectlombok:lombok:1.18.30")
     annotationProcessor("org.projectlombok:lombok:1.18.30")
 
@@ -149,6 +154,7 @@ tasks.shadowJar {
     fun relocate(name: String) = relocate(name, "$baseGroup.deps.$name")
     relocate("org.reflections")
     relocate("org.javassist")
+    relocate("kotlin")
 }
 
 tasks.assemble.get().dependsOn(tasks.remapJar)

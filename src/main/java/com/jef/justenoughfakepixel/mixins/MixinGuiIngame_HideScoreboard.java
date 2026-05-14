@@ -14,6 +14,9 @@ public class MixinGuiIngame_HideScoreboard {
 
     @Inject(method = "renderScoreboard", at = @At("HEAD"), cancellable = true)
     public void renderScoreboard(ScoreObjective objective, ScaledResolution scaledRes, CallbackInfo ci) {
-        if (CustomScoreboard.isActive()) ci.cancel();
+        if (!CustomScoreboard.isActive()) return;
+        if (com.jef.justenoughfakepixel.core.JefConfig.feature.scoreboard.hideOnTab
+                && com.jef.justenoughfakepixel.utils.overlay.OverlayUtils.shouldHide()) return;
+        ci.cancel();
     }
 }

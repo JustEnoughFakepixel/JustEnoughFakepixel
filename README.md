@@ -44,3 +44,4 @@ This project wouldn't be where it is today without the help of these amazing peo
 [Hooman](https://github.com/mxhooman)
 
 > Full credits & project info: [justenoughfakepixel.github.io](https://justenoughfakepixel.github.io/index.html#credits)
+

@@ -10,6 +10,8 @@ import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
+import com.jef.justenoughfakepixel.core.config.gui.GuiTextures;
+
 public class CapeDisplay {
 
     public String capeID;
@@ -20,8 +22,7 @@ public class CapeDisplay {
 
     private final ModelRenderer capeModel;
 
-    private static final ResourceLocation SLOT_BG =
-            new ResourceLocation("justenoughfakepixel", "textures/gui/capesUI.png");
+    private static final ResourceLocation SLOT_BG = GuiTextures.CAPES_UI;
 
     public CapeDisplay(Cape cape) {
         this.capeID = cape.id;

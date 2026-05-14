@@ -94,14 +94,14 @@ public class TrophyFishTracker {
         int newCount = storage.incrementCount(fishName, rarity);
         storage.save();
 
-        boolean hideBronze = JefConfig.feature.fishing.trophyBronzeHider && rarity == TrophyRarity.BRONZE && newCount > 1;
-        boolean hideSilver = JefConfig.feature.fishing.trophySilverHider && rarity == TrophyRarity.SILVER && newCount > 1;
+        boolean hideBronze = JefConfig.feature.fishing.trophyFish.trophyBronzeHider && rarity == TrophyRarity.BRONZE && newCount > 1;
+        boolean hideSilver = JefConfig.feature.fishing.trophyFish.trophySilverHider && rarity == TrophyRarity.SILVER && newCount > 1;
         if (hideBronze || hideSilver) {
             event.setCanceled(true);
             return;
         }
 
-        if (!JefConfig.feature.fishing.trophyChatModify) return;
+        if (!JefConfig.feature.fishing.trophyFish.trophyChatModify) return;
 
         int total = storage.getTotal(fishName);
         String countPart = newCount == 1 ? "§c§lFIRST! §r" : "§7" + newCount + ordinal(newCount) + " §r";
@@ -169,7 +169,7 @@ public class TrophyFishTracker {
 
     @SubscribeEvent
     public void onTooltip(ItemTooltipEvent event) {
-        if (JefConfig.feature == null || !JefConfig.feature.fishing.trophyOdgerTotal) return;
+        if (JefConfig.feature == null || !JefConfig.feature.fishing.trophyFish.trophyOdgerTotal) return;
         if (!ODGER_TITLE.equals(getOpenContainerName())) return;
         if (event.toolTip == null || event.itemStack == null) return;
 

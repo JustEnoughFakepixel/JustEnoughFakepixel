@@ -16,10 +16,12 @@ import org.lwjgl.opengl.GL14;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.jef.justenoughfakepixel.core.config.gui.GuiTextures;
+
 public final class RenderUtils {
 
-    private static final ResourceLocation SEARCH_BAR_TEX = new ResourceLocation("justenoughfakepixel", "textures/gui/search_bar.png");
-    private static final ResourceLocation SEARCH_BAR_TEX_GOLD = new ResourceLocation("justenoughfakepixel", "textures/gui/search_bar_gold.png");
+    private static final ResourceLocation SEARCH_BAR_TEX      = GuiTextures.SEARCH_BAR_TEX;
+    private static final ResourceLocation SEARCH_BAR_TEX_GOLD = GuiTextures.SEARCH_BAR_TEX_GOLD;
     private static final Map<ResourceLocation, Boolean> RESOURCE_CACHE = new HashMap<>();
 
     private RenderUtils() {
@@ -166,9 +168,9 @@ public final class RenderUtils {
 
     public static void drawFloatingRectDark(int x, int y, int width, int height, boolean shadow) {
         int alpha = OpenGlHelper.isFramebufferEnabled() ? 0xf0000000 : 0xff000000;
-        int main = alpha | 0x202026;
-        int light = 0xff303036;
-        int dark = 0xff101016;
+        int main  = alpha | 0x202020;
+        int light = 0xff2e2e2e;
+        int dark  = 0xff101010;
         Gui.drawRect(x, y, x + 1, y + height, light);
         Gui.drawRect(x + 1, y, x + width, y + 1, light);
         Gui.drawRect(x + width - 1, y + 1, x + width, y + height, dark);
@@ -200,11 +202,11 @@ public final class RenderUtils {
     }
 
     public static void drawInnerBox(int left, int top, int width, int height) {
-        Gui.drawRect(left, top, left + width, top + height, 0x6008080E);
-        Gui.drawRect(left, top, left + 1, top + height, 0xff08080E);
-        Gui.drawRect(left, top, left + width, top + 1, 0xff08080E);
-        Gui.drawRect(left + width - 1, top, left + width, top + height, 0xff28282E);
-        Gui.drawRect(left, top + height - 1, left + width, top + height, 0xff28282E);
+        Gui.drawRect(left, top, left + width, top + height, 0x60080808);
+        Gui.drawRect(left, top, left + 1, top + height, 0xff080808);
+        Gui.drawRect(left, top, left + width, top + 1, 0xff080808);
+        Gui.drawRect(left + width - 1, top, left + width, top + height, 0xff282828);
+        Gui.drawRect(left, top + height - 1, left + width, top + height, 0xff282828);
     }
 
     public static void drawTexturedRect(float x, float y, float width, float height) {
