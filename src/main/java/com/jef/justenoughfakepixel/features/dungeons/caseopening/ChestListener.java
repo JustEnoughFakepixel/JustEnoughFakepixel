@@ -3,10 +3,10 @@ package com.jef.justenoughfakepixel.features.dungeons.caseopening;
 import com.jef.justenoughfakepixel.DebugLogger;
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.utils.StringUtils;
-import com.jef.justenoughfakepixel.features.dungeons.DungeonStats;
 import com.jef.justenoughfakepixel.features.dungeons.utils.DungeonFloor;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.RomanNumeralParser;
+import com.jef.justenoughfakepixel.utils.data.DungeonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.multiplayer.WorldClient;
@@ -129,10 +129,8 @@ public class ChestListener {
                 }
                 openedChestOb = true;
             }
-            DungeonStats stats = DungeonStats.getInstance();
-            DungeonFloor df = stats != null ? stats.getCurrentFloor() : DungeonFloor.NONE;
-            curFloor = DungeonDropData.Floor.fromDungeonFloor(df);
-            DebugLogger.log("[ChestListener] In-dungeon chest — DungeonStats floor: " + df + " → " + curFloor);
+            curFloor = DungeonDropData.Floor.fromDungeonFloor(DungeonUtils.getFloorFromScoreboard());
+            DebugLogger.log("[ChestListener] In-dungeon chest — scoreboard floor: " + curFloor);
         }
 
         if (curFloor == null) {

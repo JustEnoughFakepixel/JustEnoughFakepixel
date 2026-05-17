@@ -7,6 +7,7 @@ import com.jef.justenoughfakepixel.features.dungeons.overlays.PhaseOverlay;
 import com.jef.justenoughfakepixel.features.dungeons.utils.*;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.chat.ChatUtils;
+import com.jef.justenoughfakepixel.utils.data.DungeonUtils;
 import com.jef.justenoughfakepixel.utils.data.SkyblockData;
 import com.jef.justenoughfakepixel.utils.overlay.Overlay;
 import net.minecraft.client.Minecraft;
@@ -16,7 +17,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
@@ -27,7 +27,6 @@ public class DungeonStats extends Overlay {
     public static final int OVERLAY_HEIGHT = 160;
 
     private static final Minecraft mc = Minecraft.getMinecraft();
-    private static final Pattern FLOOR_PAT = Pattern.compile("\\(([EFM][\\d])\\)");
     private static final Pattern TIME_ELAPSED = Pattern.compile("Time Elapsed: (\\d+)");
     private static final int[][] BOSS_COORDS = {{29, 71, 80},  // F1/M1
             {32, 69, 11},  // F2/M2
@@ -177,13 +176,8 @@ public class DungeonStats extends Overlay {
     }
 
     private void updateFloorFromScoreboard() {
-        for (String line : SkyblockData.getScoreboardLines()) {
-            Matcher m = FLOOR_PAT.matcher(line);
-            if (m.find()) {
-                timers.setCurrentFloor(DungeonFloor.fromString(m.group(1)));
-                break;
-            }
-        }
+        DungeonFloor floor = DungeonUtils.getFloorFromScoreboard();
+        if (floor != DungeonFloor.NONE) timers.setCurrentFloor(floor);
     }
 
     private void updateClearProgress() {
